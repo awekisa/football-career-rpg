@@ -1,0 +1,10 @@
+{
+  "name": "FootballRpg.Editor",
+  "rootNamespace": "FootballRpg.Editor",
+  "references": [
+    "FootballRpg.Presentation"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

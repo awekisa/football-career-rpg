@@ -1,0 +1,9 @@
+{
+  "name": "FootballRpg.Presentation",
+  "rootNamespace": "FootballRpg.Presentation",
+  "references": [
+    "FootballRpg.Simulation",
+    "FootballRpg.Content"
+  ],
+  "noEngineReferences": false
+}

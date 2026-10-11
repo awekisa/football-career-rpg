@@ -1,0 +1,13 @@
+{
+  "name": "FootballRpg.EditModeTests",
+  "references": [
+    "FootballRpg.Presentation",
+    "FootballRpg.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}
