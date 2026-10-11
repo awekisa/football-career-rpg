@@ -2,7 +2,9 @@
   "name": "FootballRpg.EditModeTests",
   "references": [
     "FootballRpg.Presentation",
-    "FootballRpg.Editor"
+    "FootballRpg.Editor",
+    "FootballRpg.Simulation",
+    "FootballRpg.Content"
   ],
   "includePlatforms": [
     "Editor"

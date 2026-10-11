@@ -1,0 +1,2049 @@
+{
+  "schemaVersion": 1,
+  "userPlayerId": "harbour-player-08",
+  "footballAttributes": [
+    {
+      "id": "ball-control",
+      "name": "Ball Control",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "dribbling",
+      "name": "Dribbling",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "short-passing",
+      "name": "Short Passing",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "long-passing",
+      "name": "Long Passing",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "crossing",
+      "name": "Crossing",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "finishing",
+      "name": "Finishing",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "long-shots",
+      "name": "Long Shots",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "heading",
+      "name": "Heading",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "tackling",
+      "name": "Tackling",
+      "group": "technical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "positioning",
+      "name": "Positioning",
+      "group": "tactical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "marking",
+      "name": "Marking",
+      "group": "tactical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "anticipation",
+      "name": "Anticipation",
+      "group": "tactical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "vision",
+      "name": "Vision",
+      "group": "tactical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "off-ball-movement",
+      "name": "Off Ball Movement",
+      "group": "tactical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "decisions",
+      "name": "Decisions",
+      "group": "tactical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "acceleration",
+      "name": "Acceleration",
+      "group": "physical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "pace",
+      "name": "Pace",
+      "group": "physical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "agility",
+      "name": "Agility",
+      "group": "physical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "balance",
+      "name": "Balance",
+      "group": "physical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "strength",
+      "name": "Strength",
+      "group": "physical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "stamina",
+      "name": "Stamina",
+      "group": "physical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "jumping",
+      "name": "Jumping",
+      "group": "physical",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "penalties",
+      "name": "Penalties",
+      "group": "set-piece",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "free-kicks",
+      "name": "Free Kicks",
+      "group": "set-piece",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "corners",
+      "name": "Corners",
+      "group": "set-piece",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "reflexes",
+      "name": "Reflexes",
+      "group": "goalkeeping",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "handling",
+      "name": "Handling",
+      "group": "goalkeeping",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "diving",
+      "name": "Diving",
+      "group": "goalkeeping",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "one-on-ones",
+      "name": "One On Ones",
+      "group": "goalkeeping",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "aerial-command",
+      "name": "Aerial Command",
+      "group": "goalkeeping",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    },
+    {
+      "id": "distribution",
+      "name": "Distribution",
+      "group": "goalkeeping",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 30
+    }
+  ],
+  "personalityTraits": [
+    {
+      "id": "charisma",
+      "name": "Charisma",
+      "group": "personality",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 50
+    },
+    {
+      "id": "leadership",
+      "name": "Leadership",
+      "group": "personality",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 50
+    },
+    {
+      "id": "discipline",
+      "name": "Discipline",
+      "group": "personality",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 50
+    },
+    {
+      "id": "ambition",
+      "name": "Ambition",
+      "group": "personality",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 50
+    },
+    {
+      "id": "composure",
+      "name": "Composure",
+      "group": "personality",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 50
+    },
+    {
+      "id": "baseline-confidence",
+      "name": "Baseline Confidence",
+      "group": "personality",
+      "minimum": 1,
+      "maximum": 100,
+      "defaultValue": 50
+    }
+  ],
+  "positions": [
+    {
+      "id": "gk",
+      "name": "Goalkeeper",
+      "recommendedAttributeIds": [
+        "reflexes",
+        "handling",
+        "positioning",
+        "distribution"
+      ]
+    },
+    {
+      "id": "cb",
+      "name": "Centre-back",
+      "recommendedAttributeIds": [
+        "marking",
+        "tackling",
+        "heading",
+        "strength"
+      ]
+    },
+    {
+      "id": "lb",
+      "name": "Left full-back",
+      "recommendedAttributeIds": [
+        "tackling",
+        "stamina",
+        "crossing"
+      ]
+    },
+    {
+      "id": "rb",
+      "name": "Right full-back",
+      "recommendedAttributeIds": [
+        "tackling",
+        "stamina",
+        "crossing"
+      ]
+    },
+    {
+      "id": "lwb",
+      "name": "Left wing-back",
+      "recommendedAttributeIds": [
+        "pace",
+        "stamina",
+        "crossing"
+      ]
+    },
+    {
+      "id": "rwb",
+      "name": "Right wing-back",
+      "recommendedAttributeIds": [
+        "pace",
+        "stamina",
+        "crossing"
+      ]
+    },
+    {
+      "id": "dm",
+      "name": "Defensive midfielder",
+      "recommendedAttributeIds": [
+        "positioning",
+        "tackling",
+        "short-passing"
+      ]
+    },
+    {
+      "id": "cm",
+      "name": "Central midfielder",
+      "recommendedAttributeIds": [
+        "short-passing",
+        "vision",
+        "stamina"
+      ]
+    },
+    {
+      "id": "am",
+      "name": "Attacking midfielder",
+      "recommendedAttributeIds": [
+        "vision",
+        "ball-control",
+        "off-ball-movement"
+      ]
+    },
+    {
+      "id": "lm",
+      "name": "Left midfielder",
+      "recommendedAttributeIds": [
+        "crossing",
+        "short-passing",
+        "stamina"
+      ]
+    },
+    {
+      "id": "rm",
+      "name": "Right midfielder",
+      "recommendedAttributeIds": [
+        "crossing",
+        "short-passing",
+        "stamina"
+      ]
+    },
+    {
+      "id": "lw",
+      "name": "Left winger",
+      "recommendedAttributeIds": [
+        "dribbling",
+        "pace",
+        "crossing"
+      ]
+    },
+    {
+      "id": "rw",
+      "name": "Right winger",
+      "recommendedAttributeIds": [
+        "dribbling",
+        "pace",
+        "crossing"
+      ]
+    },
+    {
+      "id": "st",
+      "name": "Striker",
+      "recommendedAttributeIds": [
+        "finishing",
+        "off-ball-movement",
+        "heading"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "pass-to-feet",
+      "name": "Pass To Feet",
+      "successMeaning": "Pass reaches the intended teammate.",
+      "attributeIds": [
+        "short-passing",
+        "ball-control",
+        "vision"
+      ]
+    },
+    {
+      "id": "through-ball",
+      "name": "Through Ball",
+      "successMeaning": "Pass reaches the intended teammate in the targeted space.",
+      "attributeIds": [
+        "long-passing",
+        "vision",
+        "decisions"
+      ]
+    },
+    {
+      "id": "dribble",
+      "name": "Dribble",
+      "successMeaning": "Player retains possession while beating the immediate defender.",
+      "attributeIds": [
+        "dribbling",
+        "agility",
+        "balance"
+      ]
+    },
+    {
+      "id": "shoot",
+      "name": "Shoot",
+      "successMeaning": "Shot scores a goal.",
+      "attributeIds": [
+        "finishing",
+        "long-shots",
+        "balance"
+      ]
+    },
+    {
+      "id": "cross",
+      "name": "Cross",
+      "successMeaning": "Delivery reaches the intended teammate.",
+      "attributeIds": [
+        "crossing",
+        "vision"
+      ]
+    },
+    {
+      "id": "header",
+      "name": "Header",
+      "successMeaning": "Header reaches its declared target.",
+      "attributeIds": [
+        "heading",
+        "jumping",
+        "strength"
+      ]
+    },
+    {
+      "id": "control",
+      "name": "Control",
+      "successMeaning": "Player brings the ball under control.",
+      "attributeIds": [
+        "ball-control",
+        "balance"
+      ]
+    },
+    {
+      "id": "tackle",
+      "name": "Tackle",
+      "successMeaning": "Player legally wins possession.",
+      "attributeIds": [
+        "tackling",
+        "anticipation"
+      ]
+    },
+    {
+      "id": "contain",
+      "name": "Contain",
+      "successMeaning": "Player prevents the opponent advancing past the defensive line for this action.",
+      "attributeIds": [
+        "positioning",
+        "agility"
+      ]
+    },
+    {
+      "id": "save",
+      "name": "Save",
+      "successMeaning": "Goalkeeper prevents the shot becoming a goal.",
+      "attributeIds": [
+        "reflexes",
+        "diving",
+        "one-on-ones"
+      ]
+    },
+    {
+      "id": "claim",
+      "name": "Claim",
+      "successMeaning": "Goalkeeper secures possession of the incoming ball.",
+      "attributeIds": [
+        "handling",
+        "aerial-command",
+        "jumping"
+      ]
+    },
+    {
+      "id": "distribute",
+      "name": "Distribute",
+      "successMeaning": "Goalkeeper delivery reaches the intended teammate.",
+      "attributeIds": [
+        "distribution",
+        "vision"
+      ]
+    },
+    {
+      "id": "penalty",
+      "name": "Penalty",
+      "successMeaning": "Penalty kick scores.",
+      "attributeIds": [
+        "penalties",
+        "finishing"
+      ]
+    },
+    {
+      "id": "free-kick",
+      "name": "Free Kick",
+      "successMeaning": "Direct free kick scores.",
+      "attributeIds": [
+        "free-kicks",
+        "long-shots"
+      ]
+    },
+    {
+      "id": "corner",
+      "name": "Corner",
+      "successMeaning": "Corner delivery reaches the intended teammate.",
+      "attributeIds": [
+        "corners",
+        "crossing"
+      ]
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "successMeaning": "Ball leaves the immediate danger area.",
+      "attributeIds": [
+        "long-passing",
+        "strength"
+      ]
+    }
+  ],
+  "players": [
+    {
+      "id": "harbour-player-01",
+      "name": "Evan Vale",
+      "age": 19,
+      "heightCm": 190,
+      "weightKg": 83,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-1",
+      "positionId": "gk",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "reflexes",
+          "value": 42
+        },
+        {
+          "id": "handling",
+          "value": 42
+        },
+        {
+          "id": "positioning",
+          "value": 42
+        },
+        {
+          "id": "distribution",
+          "value": 42
+        },
+        {
+          "id": "diving",
+          "value": 44
+        },
+        {
+          "id": "one-on-ones",
+          "value": 44
+        },
+        {
+          "id": "aerial-command",
+          "value": 44
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 55
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-02",
+      "name": "Milo Rowan",
+      "age": 20,
+      "heightCm": 173,
+      "weightKg": 66,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-2",
+      "positionId": "lb",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "tackling",
+          "value": 43
+        },
+        {
+          "id": "stamina",
+          "value": 43
+        },
+        {
+          "id": "crossing",
+          "value": 43
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 56
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-03",
+      "name": "Jonas Marlow",
+      "age": 21,
+      "heightCm": 174,
+      "weightKg": 67,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-3",
+      "positionId": "cb",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "marking",
+          "value": 44
+        },
+        {
+          "id": "tackling",
+          "value": 44
+        },
+        {
+          "id": "heading",
+          "value": 44
+        },
+        {
+          "id": "strength",
+          "value": 44
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 57
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-04",
+      "name": "Ravi Ashford",
+      "age": 22,
+      "heightCm": 175,
+      "weightKg": 68,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "cb",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "marking",
+          "value": 45
+        },
+        {
+          "id": "tackling",
+          "value": 45
+        },
+        {
+          "id": "heading",
+          "value": 45
+        },
+        {
+          "id": "strength",
+          "value": 45
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 58
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-05",
+      "name": "Theo Briar",
+      "age": 23,
+      "heightCm": 176,
+      "weightKg": 69,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-1",
+      "positionId": "rb",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "tackling",
+          "value": 46
+        },
+        {
+          "id": "stamina",
+          "value": 46
+        },
+        {
+          "id": "crossing",
+          "value": 46
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 59
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-06",
+      "name": "Luka Hale",
+      "age": 24,
+      "heightCm": 177,
+      "weightKg": 70,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "dm",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "positioning",
+          "value": 47
+        },
+        {
+          "id": "tackling",
+          "value": 47
+        },
+        {
+          "id": "short-passing",
+          "value": 47
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 60
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-07",
+      "name": "Noah Keene",
+      "age": 25,
+      "heightCm": 178,
+      "weightKg": 71,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-3",
+      "positionId": "cm",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "short-passing",
+          "value": 48
+        },
+        {
+          "id": "vision",
+          "value": 48
+        },
+        {
+          "id": "stamina",
+          "value": 48
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 61
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-08",
+      "name": "Arin Larkin",
+      "age": 17,
+      "heightCm": 179,
+      "weightKg": 72,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "am",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "vision",
+          "value": 42
+        },
+        {
+          "id": "ball-control",
+          "value": 42
+        },
+        {
+          "id": "off-ball-movement",
+          "value": 42
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 62
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-09",
+      "name": "Elias Moss",
+      "age": 27,
+      "heightCm": 180,
+      "weightKg": 73,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-1",
+      "positionId": "lw",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "dribbling",
+          "value": 43
+        },
+        {
+          "id": "pace",
+          "value": 43
+        },
+        {
+          "id": "crossing",
+          "value": 43
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 63
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-10",
+      "name": "Owen North",
+      "age": 28,
+      "heightCm": 181,
+      "weightKg": 74,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "rw",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "dribbling",
+          "value": 44
+        },
+        {
+          "id": "pace",
+          "value": 44
+        },
+        {
+          "id": "crossing",
+          "value": 44
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 64
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-11",
+      "name": "Felix Pike",
+      "age": 29,
+      "heightCm": 182,
+      "weightKg": 75,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-3",
+      "positionId": "st",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "finishing",
+          "value": 45
+        },
+        {
+          "id": "off-ball-movement",
+          "value": 45
+        },
+        {
+          "id": "heading",
+          "value": 45
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 65
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-12",
+      "name": "Hugo Reed",
+      "age": 30,
+      "heightCm": 190,
+      "weightKg": 83,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "gk",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "reflexes",
+          "value": 46
+        },
+        {
+          "id": "handling",
+          "value": 46
+        },
+        {
+          "id": "positioning",
+          "value": 46
+        },
+        {
+          "id": "distribution",
+          "value": 46
+        },
+        {
+          "id": "diving",
+          "value": 44
+        },
+        {
+          "id": "one-on-ones",
+          "value": 44
+        },
+        {
+          "id": "aerial-command",
+          "value": 44
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 66
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-13",
+      "name": "Ivo Shaw",
+      "age": 31,
+      "heightCm": 184,
+      "weightKg": 77,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-1",
+      "positionId": "lwb",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "pace",
+          "value": 47
+        },
+        {
+          "id": "stamina",
+          "value": 47
+        },
+        {
+          "id": "crossing",
+          "value": 47
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 67
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-14",
+      "name": "Leon Stone",
+      "age": 19,
+      "heightCm": 185,
+      "weightKg": 78,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "rwb",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "pace",
+          "value": 48
+        },
+        {
+          "id": "stamina",
+          "value": 48
+        },
+        {
+          "id": "crossing",
+          "value": 48
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 68
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-15",
+      "name": "Nico Thorne",
+      "age": 20,
+      "heightCm": 186,
+      "weightKg": 79,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-3",
+      "positionId": "lm",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "crossing",
+          "value": 42
+        },
+        {
+          "id": "short-passing",
+          "value": 42
+        },
+        {
+          "id": "stamina",
+          "value": 42
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 69
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-16",
+      "name": "Remy Ward",
+      "age": 21,
+      "heightCm": 187,
+      "weightKg": 80,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "rm",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "crossing",
+          "value": 43
+        },
+        {
+          "id": "short-passing",
+          "value": 43
+        },
+        {
+          "id": "stamina",
+          "value": 43
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 55
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-17",
+      "name": "Samir Wren",
+      "age": 22,
+      "heightCm": 188,
+      "weightKg": 81,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-1",
+      "positionId": "cm",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "short-passing",
+          "value": 44
+        },
+        {
+          "id": "vision",
+          "value": 44
+        },
+        {
+          "id": "stamina",
+          "value": 44
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 56
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "harbour-player-18",
+      "name": "Tomas Yarrow",
+      "age": 23,
+      "heightCm": 189,
+      "weightKg": 65,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "st",
+      "clubId": "harbour",
+      "attributes": [
+        {
+          "id": "finishing",
+          "value": 45
+        },
+        {
+          "id": "off-ball-movement",
+          "value": 45
+        },
+        {
+          "id": "heading",
+          "value": 45
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 57
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-01",
+      "name": "Arin Reed",
+      "age": 19,
+      "heightCm": 190,
+      "weightKg": 83,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-1",
+      "positionId": "gk",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "reflexes",
+          "value": 45
+        },
+        {
+          "id": "handling",
+          "value": 45
+        },
+        {
+          "id": "positioning",
+          "value": 45
+        },
+        {
+          "id": "distribution",
+          "value": 45
+        },
+        {
+          "id": "diving",
+          "value": 44
+        },
+        {
+          "id": "one-on-ones",
+          "value": 44
+        },
+        {
+          "id": "aerial-command",
+          "value": 44
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 55
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-02",
+      "name": "Elias Shaw",
+      "age": 20,
+      "heightCm": 173,
+      "weightKg": 66,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-2",
+      "positionId": "lb",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "tackling",
+          "value": 46
+        },
+        {
+          "id": "stamina",
+          "value": 46
+        },
+        {
+          "id": "crossing",
+          "value": 46
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 56
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-03",
+      "name": "Owen Stone",
+      "age": 21,
+      "heightCm": 174,
+      "weightKg": 67,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-3",
+      "positionId": "cb",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "marking",
+          "value": 47
+        },
+        {
+          "id": "tackling",
+          "value": 47
+        },
+        {
+          "id": "heading",
+          "value": 47
+        },
+        {
+          "id": "strength",
+          "value": 47
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 57
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-04",
+      "name": "Felix Thorne",
+      "age": 22,
+      "heightCm": 175,
+      "weightKg": 68,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "cb",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "marking",
+          "value": 48
+        },
+        {
+          "id": "tackling",
+          "value": 48
+        },
+        {
+          "id": "heading",
+          "value": 48
+        },
+        {
+          "id": "strength",
+          "value": 48
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 58
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-05",
+      "name": "Hugo Ward",
+      "age": 23,
+      "heightCm": 176,
+      "weightKg": 69,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-1",
+      "positionId": "rb",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "tackling",
+          "value": 49
+        },
+        {
+          "id": "stamina",
+          "value": 49
+        },
+        {
+          "id": "crossing",
+          "value": 49
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 59
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-06",
+      "name": "Ivo Wren",
+      "age": 24,
+      "heightCm": 177,
+      "weightKg": 70,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "dm",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "positioning",
+          "value": 50
+        },
+        {
+          "id": "tackling",
+          "value": 50
+        },
+        {
+          "id": "short-passing",
+          "value": 50
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 60
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-07",
+      "name": "Leon Yarrow",
+      "age": 25,
+      "heightCm": 178,
+      "weightKg": 71,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-3",
+      "positionId": "cm",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "short-passing",
+          "value": 51
+        },
+        {
+          "id": "vision",
+          "value": 51
+        },
+        {
+          "id": "stamina",
+          "value": 51
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 61
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-08",
+      "name": "Nico Vale",
+      "age": 26,
+      "heightCm": 179,
+      "weightKg": 72,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "am",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "vision",
+          "value": 45
+        },
+        {
+          "id": "ball-control",
+          "value": 45
+        },
+        {
+          "id": "off-ball-movement",
+          "value": 45
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 62
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-09",
+      "name": "Remy Rowan",
+      "age": 27,
+      "heightCm": 180,
+      "weightKg": 73,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-1",
+      "positionId": "lw",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "dribbling",
+          "value": 46
+        },
+        {
+          "id": "pace",
+          "value": 46
+        },
+        {
+          "id": "crossing",
+          "value": 46
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 63
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-10",
+      "name": "Samir Marlow",
+      "age": 28,
+      "heightCm": 181,
+      "weightKg": 74,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "rw",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "dribbling",
+          "value": 47
+        },
+        {
+          "id": "pace",
+          "value": 47
+        },
+        {
+          "id": "crossing",
+          "value": 47
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 64
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-11",
+      "name": "Tomas Ashford",
+      "age": 29,
+      "heightCm": 182,
+      "weightKg": 75,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-3",
+      "positionId": "st",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "finishing",
+          "value": 48
+        },
+        {
+          "id": "off-ball-movement",
+          "value": 48
+        },
+        {
+          "id": "heading",
+          "value": 48
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 65
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-12",
+      "name": "Evan Briar",
+      "age": 30,
+      "heightCm": 190,
+      "weightKg": 83,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "gk",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "reflexes",
+          "value": 49
+        },
+        {
+          "id": "handling",
+          "value": 49
+        },
+        {
+          "id": "positioning",
+          "value": 49
+        },
+        {
+          "id": "distribution",
+          "value": 49
+        },
+        {
+          "id": "diving",
+          "value": 44
+        },
+        {
+          "id": "one-on-ones",
+          "value": 44
+        },
+        {
+          "id": "aerial-command",
+          "value": 44
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 66
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-13",
+      "name": "Milo Hale",
+      "age": 31,
+      "heightCm": 184,
+      "weightKg": 77,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-1",
+      "positionId": "lwb",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "pace",
+          "value": 50
+        },
+        {
+          "id": "stamina",
+          "value": 50
+        },
+        {
+          "id": "crossing",
+          "value": 50
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 67
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-14",
+      "name": "Jonas Keene",
+      "age": 19,
+      "heightCm": 185,
+      "weightKg": 78,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "rwb",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "pace",
+          "value": 51
+        },
+        {
+          "id": "stamina",
+          "value": 51
+        },
+        {
+          "id": "crossing",
+          "value": 51
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 68
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-15",
+      "name": "Ravi Larkin",
+      "age": 20,
+      "heightCm": 186,
+      "weightKg": 79,
+      "preferredFoot": "left",
+      "appearanceId": "placeholder-3",
+      "positionId": "lm",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "crossing",
+          "value": 45
+        },
+        {
+          "id": "short-passing",
+          "value": 45
+        },
+        {
+          "id": "stamina",
+          "value": 45
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 69
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-16",
+      "name": "Theo Moss",
+      "age": 21,
+      "heightCm": 187,
+      "weightKg": 80,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-4",
+      "positionId": "rm",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "crossing",
+          "value": 46
+        },
+        {
+          "id": "short-passing",
+          "value": 46
+        },
+        {
+          "id": "stamina",
+          "value": 46
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 55
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-17",
+      "name": "Luka North",
+      "age": 22,
+      "heightCm": 188,
+      "weightKg": 81,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-1",
+      "positionId": "cm",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "short-passing",
+          "value": 47
+        },
+        {
+          "id": "vision",
+          "value": 47
+        },
+        {
+          "id": "stamina",
+          "value": 47
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 56
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    },
+    {
+      "id": "meadow-player-18",
+      "name": "Noah Pike",
+      "age": 23,
+      "heightCm": 189,
+      "weightKg": 65,
+      "preferredFoot": "right",
+      "appearanceId": "placeholder-2",
+      "positionId": "st",
+      "clubId": "meadow",
+      "attributes": [
+        {
+          "id": "finishing",
+          "value": 48
+        },
+        {
+          "id": "off-ball-movement",
+          "value": 48
+        },
+        {
+          "id": "heading",
+          "value": 48
+        }
+      ],
+      "traits": [
+        {
+          "id": "discipline",
+          "value": 57
+        }
+      ],
+      "confidence": 0.65,
+      "morale": 0.7,
+      "fatigue": 0.1,
+      "balanceMinor": 25000,
+      "weeklyWageMinor": 15000
+    }
+  ],
+  "coaches": [
+    {
+      "id": "harbour-coach",
+      "name": "Mara Fenwick",
+      "preferredFormation": "4-3-3",
+      "coachingQuality": 0.4,
+      "disciplinePreference": 0.8,
+      "creativityPreference": 0.35
+    },
+    {
+      "id": "meadow-coach",
+      "name": "Dorian Beck",
+      "preferredFormation": "4-2-3-1",
+      "coachingQuality": 0.5,
+      "disciplinePreference": 0.45,
+      "creativityPreference": 0.75
+    }
+  ],
+  "clubs": [
+    {
+      "id": "harbour",
+      "name": "Harbour Vale FC",
+      "coachId": "harbour-coach",
+      "currencyCode": "EUR",
+      "staffQuality": 0.35,
+      "facilityQuality": 0.3,
+      "squadPlayerIds": [
+        "harbour-player-01",
+        "harbour-player-02",
+        "harbour-player-03",
+        "harbour-player-04",
+        "harbour-player-05",
+        "harbour-player-06",
+        "harbour-player-07",
+        "harbour-player-08",
+        "harbour-player-09",
+        "harbour-player-10",
+        "harbour-player-11",
+        "harbour-player-12",
+        "harbour-player-13",
+        "harbour-player-14",
+        "harbour-player-15",
+        "harbour-player-16",
+        "harbour-player-17",
+        "harbour-player-18"
+      ]
+    },
+    {
+      "id": "meadow",
+      "name": "Meadowbridge Athletic",
+      "coachId": "meadow-coach",
+      "currencyCode": "EUR",
+      "staffQuality": 0.45,
+      "facilityQuality": 0.4,
+      "squadPlayerIds": [
+        "meadow-player-01",
+        "meadow-player-02",
+        "meadow-player-03",
+        "meadow-player-04",
+        "meadow-player-05",
+        "meadow-player-06",
+        "meadow-player-07",
+        "meadow-player-08",
+        "meadow-player-09",
+        "meadow-player-10",
+        "meadow-player-11",
+        "meadow-player-12",
+        "meadow-player-13",
+        "meadow-player-14",
+        "meadow-player-15",
+        "meadow-player-16",
+        "meadow-player-17",
+        "meadow-player-18"
+      ]
+    }
+  ],
+  "fixture": {
+    "id": "intro-week-match",
+    "homeClubId": "harbour",
+    "awayClubId": "meadow",
+    "playersPerTeam": 11,
+    "benchSize": 7,
+    "substitutionLimit": 5
+  }
+}

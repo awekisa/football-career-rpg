@@ -4,8 +4,8 @@
 
 ## Assemblies
 
-- **Simulation**: pure C# game rules and state. `noEngineReferences` prevents accidental Unity dependencies. SME-108 and SME-109 introduce actual data and simulation types; this issue only establishes the boundary.
-- **Content**: Unity content definitions and adapters, allowed to reference Simulation. Stable content IDs and validation belong in SME-108.
+- **Simulation**: pure C# game rules and state. `noEngineReferences` prevents accidental Unity dependencies. Owns definition DTOs, validation, career state and event contracts. SME-109 adds simulation time and randomness.
+- **Content**: Unity content definitions and adapters, allowed to reference Simulation. Loads editable prototype JSON and validates it through Simulation.
 - **Presentation**: scenes, UI, camera, animation and input; may reference Content and Simulation. Presentation must not own outcome randomness or apply skill XP.
 - **Editor**: asset setup and reproducible build entry points, excluded from players.
 - **EditModeTests**: scene and build-configuration checks, excluded from players.
@@ -16,8 +16,8 @@ Dependency direction is Presentation → Content → Simulation, with Presentati
 
 Launch.unity is a committed, editable scene with a camera and a foundation screen. Its chapter button shows the first playable scope; it does not start a playable career. The pitch diagram is placeholder presentation, not a match simulation.
 
-`--smoke-test` runs the built scene for two frames, checks its camera/controller, logs a result and exits. This verifies lifecycle, not visuals or gameplay. The scene generator is explicit and only runs if the scene is absent; normal imports/builds never regenerate authored scenes.
+`--smoke-test` runs the built scene for two frames, loads and validates the fixture, checks its camera/controller, logs a result and exits. This verifies lifecycle, not visuals or gameplay. The scene generator is explicit and only runs if the scene is absent; normal imports/builds never regenerate authored scenes.
 
 ## Next components
 
-SME-108 defines shared data/events. SME-109 introduces deterministic time and randomness. SME-110 through SME-113 implement the first visible pass loop. Later issues connect football outcomes to career consequences. Follow explicit Linear dependencies rather than treating every milestone as a serial gate.
+SME-108 provides shared data/events and a validated 36-player fixture (see [data ownership](game-data.md)). SME-109 introduces deterministic time and randomness. SME-110 through SME-113 implement the first visible pass loop. Later issues connect football outcomes to career consequences. Follow explicit Linear dependencies rather than treating every milestone as a serial gate.
