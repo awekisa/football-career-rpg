@@ -30,7 +30,7 @@ namespace FootballRpg.Simulation
                     ? players.Where(p => p.Player.ClubId == c.Keeper.ClubId && p.Player.Id != c.Keeper.Id).Select(Snapshot).ToArray()
                     : new PassActor[] { null };
                 foreach (var recipient in recipients)
-                    if (GoalkeeperResolver.IsAvailable(c, kind, recipient)) options.Add(GoalkeeperResolver.Preview(c, kind, recipient));
+                    if ((kind != KeeperAction.HandleIllegally || Rules != null) && GoalkeeperResolver.IsAvailable(c, kind, recipient)) options.Add(GoalkeeperResolver.Preview(c, kind, recipient));
             }
             return options.AsReadOnly();
         }
@@ -47,7 +47,7 @@ namespace FootballRpg.Simulation
             // AI uses the same previews and outcome application. Prefer security under pressure.
             var choice = options.FirstOrDefault(p => (p.Kind == KeeperAction.HoldSave || p.Kind == KeeperAction.Claim) && p.Chance >= .45f)
                 ?? options.FirstOrDefault(p => p.Kind == KeeperAction.RushOut && (context.Situation == KeeperSituation.LooseBall || context.Keeper.Position.Distance(context.Ball) < 4))
-                ?? options.OrderByDescending(p => p.Chance).First();
+                ?? options.Where(p => p.Kind != KeeperAction.HandleIllegally).OrderByDescending(p => p.Chance).First();
             var result = GoalkeeperResolver.Commit(session, "open-play-" + (++actionSequence), choice, true);
             ApplyKeeperAction(result); return true;
         }
@@ -60,7 +60,7 @@ namespace FootballRpg.Simulation
         private bool TryKeeperThreat(FootballerMotion owner)
         {
             if (HoldingKeeperId != null || (BallState != BallPhase.Owned && BallState != BallPhase.Loose)) return false;
-            foreach (var keeper in players.Where(p => p.Player.PrimaryPositionId == "gk"))
+            foreach (var keeper in players.Where(p => p.IsGoalkeeper))
             {
                 if (owner != null && owner.IsHome == keeper.IsHome) continue;
                 if (directRestart.HasValue && keeper.Player.Id == Handling.LastPlayerId) continue;
@@ -79,7 +79,7 @@ namespace FootballRpg.Simulation
             bool shot = threat.Outcome == FootballOutcome.ShotOnTarget;
             if (!shot && threat.Outcome != FootballOutcome.DeliveryArrives) return false;
             var attacker = players.Single(p => p.Player.Id == threat.PlayerId);
-            var keeper = players.Where(p => p.IsHome != attacker.IsHome && p.Player.PrimaryPositionId == "gk")
+            var keeper = players.Where(p => p.IsHome != attacker.IsHome && p.IsGoalkeeper)
                 .OrderBy(p => p.Position.Distance(BallPosition)).FirstOrDefault();
             if (keeper == null) return false;
             // The flight's target is a shot destination or cross reception point, never a rerolled trajectory.
@@ -121,6 +121,23 @@ namespace FootballRpg.Simulation
             LastKeeperAction = result;
             var preview = result.Preview; var keeper = players.Single(p => p.Player.Id == result.PlayerId);
             var threat = keeperThreat; keeperThreat = null;
+            if (preview.Kind == KeeperAction.HandleIllegally)
+            {
+                var kind = HandlingRules.InOwnArea(BallPosition, keeper.Direction) ? FoulKind.KeeperHandling : FoulKind.Handball;
+                HandleFoul(new FoulIncident(result.EventId + ":handling", keeper.Player.Id, null, BallPosition, keeper.Direction, kind, attemptToPlayBall: false));
+                KeeperCommitted?.Invoke(result); return;
+            }
+            if (!result.Action.Succeeded && preview.Kind == KeeperAction.RushOut && preview.Context.Situation == KeeperSituation.OneOnOne && OwnerId != null)
+            {
+                var attacker = players.Single(p => p.Player.Id == OwnerId);
+                double miss = (result.Action.Roll - preview.Chance) / (1 - preview.Chance);
+                if (miss > .7 && keeper.Position.Distance(attacker.Position) < 4)
+                {
+                    HandleFoul(new FoulIncident(result.EventId + ":rush", keeper.Player.Id, attacker.Player.Id, attacker.Position, keeper.Direction,
+                        FoulKind.Challenge, miss > .95 ? ContactSeverity.Reckless : ContactSeverity.Careless, true, true));
+                    KeeperCommitted?.Invoke(result); return;
+                }
+            }
             keeperCooldowns[keeper.Player.Id] = session.Tick + Ticks(3);
             if (GoalkeeperResolver.IsDistribution(preview.Kind)) BeginKeeperDistribution(result, keeper);
             else if (result.Outcome == KeeperOutcome.FeetControl)

@@ -32,7 +32,7 @@ namespace FootballRpg.Simulation
         private bool TryOpenDefense(FootballerMotion owner)
         {
             var defender = Controlled;
-            if (defender == null || (defender.Player.PrimaryPositionId == "gk" && HandlingRules.InOwnArea(BallPosition, defender.Direction)) || owner == null || owner.Player.Id == HoldingKeeperId || owner.IsHome == defender.IsHome || BallState != BallPhase.Owned || session.Tick < defenseCooldownTick) return false;
+            if (defender == null || (defender.IsGoalkeeper && HandlingRules.InOwnArea(BallPosition, defender.Direction)) || owner == null || owner.Player.Id == HoldingKeeperId || owner.IsHome == defender.IsHome || BallState != BallPhase.Owned || session.Tick < defenseCooldownTick) return false;
             var actor = Snapshot(defender); var threat = Snapshot(owner);
             var options = ((DefensiveAction[])Enum.GetValues(typeof(DefensiveAction)))
                 .Where(k => DefenseResolver.IsAvailable(actor, threat, defender.Direction, k))
@@ -66,6 +66,7 @@ namespace FootballRpg.Simulation
             challengeSeconds = 1.2;
             // Finish the defensive fact before opening any new possession choice.
             session.CompleteResolution(result.EventId);
+            if (JudgeChallenge(result, defender, attacker)) { DefenseCommitted?.Invoke(result); return result; }
             if (!result.Action.Succeeded) beatenUntilTick = session.Tick + Ticks(1.5);
             else if (kind == DefensiveAction.Tackle)
             { defender.Position = preview.Target; GiveBall(defender); }

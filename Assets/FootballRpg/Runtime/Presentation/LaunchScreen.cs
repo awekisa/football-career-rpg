@@ -53,7 +53,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); VerifyReferee(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -241,7 +241,7 @@ namespace FootballRpg.Presentation
             view.GetComponent<MatchDriver>().enabled = false; view.World.StartFixture(new CompetitionRules(600));
             for (int i = 0; i < 24000 && view.World.LastOffside == null; i++)
             {
-                if (view.World.FixturePhase == FixturePhase.HalfTime || view.World.HasPendingDecision || view.UserRestart) view.CommitChosenPass();
+                if (view.World.RefereeNoticePending || view.World.FixturePhase == FixturePhase.HalfTime || view.World.HasPendingDecision || view.UserRestart) view.CommitChosenPass();
                 var intent = view.World.CanSetIntent(OffBallIntent.ForwardRun) ? OffBallIntent.ForwardRun : OffBallIntent.Counterattack;
                 if (view.World.CanSetIntent(intent) && view.World.ActiveIntent?.Kind != intent) view.ChooseIntent(intent);
                 view.Match.Advance(TimeSpan.FromMilliseconds(50));
@@ -252,6 +252,23 @@ namespace FootballRpg.Presentation
             if (string.IsNullOrWhiteSpace(view.World.LastOffside.Explanation)) throw new InvalidOperationException("Missing offside explanation.");
             view.CommitChosenPass(); if (view.World.OffsideNoticePending) throw new InvalidOperationException("Notice did not acknowledge.");
             view.Close(); Debug.Log("FOOTBALL_RPG_OFFSIDE_PASSED");
+        }
+
+        private void VerifyReferee()
+        {
+            var root = new GameObject("Referee Smoke");
+            var view = root.AddComponent<PitchPreview>(); view.Initialize(Career, interactive: false);
+            view.GetComponent<MatchDriver>().enabled = false; view.World.StartFixture(new CompetitionRules(180));
+            for (int i = 0; i < 20000 && view.World.FixturePhase != FixturePhase.FullTime; i++)
+            {
+                if (view.World.FixturePhase == FixturePhase.HalfTime) view.World.ContinueSecondHalf();
+                view.Match.Advance(TimeSpan.FromMilliseconds(50));
+            }
+            view.SyncWorldView();
+            if (view.World.LastFoul == null || view.World.FixturePhase != FixturePhase.FullTime ||
+                !view.World.FixtureEvents.Any(e => e.Kind == "AdvantageRecalled" || e.Restart == RestartKind.Penalty || e.Restart == RestartKind.DirectFreeKick))
+                throw new InvalidOperationException("Seeded fixture did not exercise fouls and referee restarts through full time.");
+            view.Close(); Debug.Log("FOOTBALL_RPG_REFEREE_PASSED");
         }
 
         private bool shortFixture;

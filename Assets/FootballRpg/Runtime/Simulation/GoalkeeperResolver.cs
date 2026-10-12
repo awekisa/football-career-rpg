@@ -6,7 +6,7 @@ using System.Linq;
 namespace FootballRpg.Simulation
 {
     public enum KeeperSituation { Shot, Cross, OneOnOne, LooseBall, Distribution }
-    public enum KeeperAction { SetPosition, RushOut, HoldSave, Parry, Claim, Punch, Gather, Roll, Throw, ShortKick, LongKick, ReleaseToFeet }
+    public enum KeeperAction { SetPosition, RushOut, HoldSave, Parry, Claim, Punch, Gather, Roll, Throw, ShortKick, LongKick, ReleaseToFeet, HandleIllegally }
     public enum KeeperOutcome { Positioned, Held, Deflected, TeammateControls, Missed, Fumbled, FeetControl }
     public enum BallTouchKind { Other, DeliberateKick, Header, ThrowIn, KeeperRelease }
 
@@ -119,6 +119,7 @@ namespace FootballRpg.Simulation
             switch (kind)
             {
                 case KeeperAction.ReleaseToFeet: return c.Situation == KeeperSituation.Distribution && c.Holding;
+                case KeeperAction.HandleIllegally: return !c.CanHandle && !c.Holding && c.Situation == KeeperSituation.Distribution && distance <= 1.5;
                 case KeeperAction.Gather: return c.Situation == KeeperSituation.Distribution && !c.Holding && c.CanHandle && distance <= 1.5;
                 case KeeperAction.HoldSave:
                 case KeeperAction.Parry: return c.Situation == KeeperSituation.Shot && c.CanHandle && reachable;
@@ -143,6 +144,7 @@ namespace FootballRpg.Simulation
                 case KeeperAction.Claim: skill = "aerial-command"; basis = .72; success = KeeperOutcome.Held; break;
                 case KeeperAction.Punch: skill = "aerial-command"; basis = .85; success = KeeperOutcome.Deflected; break;
                 case KeeperAction.ReleaseToFeet: skill = "ball-control"; basis = .98; success = KeeperOutcome.FeetControl; break;
+                case KeeperAction.HandleIllegally: skill = "handling"; basis = .98; success = KeeperOutcome.Held; break;
                 case KeeperAction.Gather: skill = "handling"; basis = .96; success = KeeperOutcome.Held; break;
                 default: skill = "distribution"; basis = kind == KeeperAction.Roll ? .96 : kind == KeeperAction.Throw ? .91 : kind == KeeperAction.ShortKick ? .89 : .78;
                     success = KeeperOutcome.TeammateControls; target = receiver.Position; break;

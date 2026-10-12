@@ -44,6 +44,7 @@ namespace FootballRpg.Presentation
         {
             switch (kind)
             {
+                case KeeperAction.HandleIllegally: return "Handle (FOUL)";
                 case KeeperAction.ReleaseToFeet: return "Drop to feet";
                 case KeeperAction.SetPosition: return "Set position";
                 case KeeperAction.RushOut: return "Rush out";
@@ -60,7 +61,7 @@ namespace FootballRpg.Presentation
             if (World.PendingDecision != null && Button(new Rect(24, 796, 260, 30), showKeeperFeet ? "KEEPER ACTIONS [F]" : "FEET ACTIONS [F]")) ToggleKeeperFeet();
             if (chosen == null) return;
             Panel(new Rect(0, 106, left, 142), Ink);
-            string caption = "GOALKEEPER  /  " + KeeperLabel(chosen.Kind) + "  " + chosen.Percent + "%";
+            string caption = "GOALKEEPER  /  " + KeeperLabel(chosen.Kind) + "  " + (chosen.Kind == KeeperAction.HandleIllegally ? "FOUL — guaranteed sanction" : chosen.Percent + "%");
             if (chosen.Receiver != null) caption += " → " + Career.Players[chosen.Receiver.Id].Name;
             Text(new Rect(24, 112, left - 220, 31), caption, label, Lime);
             if (chosen.Receiver != null && Button(new Rect(left - 192, 114, 168, 29), "NEXT TEAMMATE [R]")) CycleKeeperTarget();

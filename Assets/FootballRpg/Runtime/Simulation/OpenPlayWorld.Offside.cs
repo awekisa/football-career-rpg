@@ -22,6 +22,7 @@ namespace FootballRpg.Simulation
         private bool PenalizeOffside(OffsideOffence offence)
         {
             if (Rules == null || offence == null) return false;
+            if (Advantage != null) { RecallAdvantage(); return true; }
             LastOffside = offence;
             bool offendingHome = players.Single(p => p.Player.Id == offence.PlayerId).IsHome;
             var awarded = players.First(p => p.IsHome != offendingHome);
@@ -56,7 +57,7 @@ namespace FootballRpg.Simulation
                     if (PenalizeOffside(Offside.Evaluate(candidate.Player.Id, candidate.Position, session.Tick, OffsideInvolvement.ChallengingOpponent, opponent.Player.Id, true))) return true;
                 }
                 if (!shot) continue;
-                var keeper = players.First(p => p.IsHome != candidate.IsHome && p.Player.PrimaryPositionId == "gk");
+                var keeper = players.First(p => p.IsHome != candidate.IsHome && p.IsGoalkeeper);
                 // A capsule intersects the keeper-to-ball sightline at playable height in the immediate goalmouth.
                 if (keeper.Position.Distance(candidate.Position) > 8 || keeper.Position.Distance(BallPosition) > 30) continue;
                 double dx = BallPosition.X - keeper.Position.X, dz = BallPosition.Z - keeper.Position.Z;
