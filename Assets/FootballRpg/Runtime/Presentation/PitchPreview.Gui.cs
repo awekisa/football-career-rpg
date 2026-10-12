@@ -65,7 +65,13 @@ namespace FootballRpg.Presentation
             if (Button(new Rect(left + 184, 724, 150, 37), "AWAY TEAM")) SelectPlayer(players.First(p => !p.IsHome).PlayerId);
             if (Button(new Rect(left + 24, 774, 150, 37), "PREVIOUS")) Browse(-1);
             if (Button(new Rect(left + 184, 774, 150, 37), "NEXT")) Browse(1);
-            Text(new Rect(left + 24, 836, 312, 55), "AI open play  ·  " + World.BallState + "\nLime area: expected position.", muted, new Color(.63f, .73f, .73f));
+            string passInfo = "AI open play  ·  " + World.BallState + "\nLime area: expected position.";
+            if (World.OwnerId != null && World.OwnerId != SelectedPlayer.Id &&
+                Career.Players[World.OwnerId].ClubId == SelectedPlayer.ClubId &&
+                World.Players.First(p => p.Player.Id == World.OwnerId).Position.Distance(World.Players.First(p => p.Player.Id == SelectedPlayer.Id).Position) >= .1)
+                passInfo = "From ball carrier to selected player\nFeet " + World.PreviewPass(SelectedPlayer.Id, Simulation.PassKind.ToFeet).Percent +
+                    "%  ·  Through " + World.PreviewPass(SelectedPlayer.Id, Simulation.PassKind.ThroughBall).Percent + "%";
+            Text(new Rect(left + 24, 836, 312, 55), passInfo, muted, new Color(.63f, .73f, .73f));
 
             Text(new Rect(28, 847, left - 400, 43), "Click / Tab to inspect  ·  Scroll to zoom\nWASD / right-drag to pan  ·  Q / E to rotate", muted, new Color(.7f, .78f, .76f));
             if (Button(new Rect(left - 342, 848, 80, 32), "−")) AdjustCamera(0, 0, 0, 5);

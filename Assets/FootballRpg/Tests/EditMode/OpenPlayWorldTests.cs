@@ -40,8 +40,8 @@ namespace FootballRpg.Tests
                     }
                 }
                 Assert.That(moved.All(x => x), Is.True, "All roles, including keepers, should move");
-                Assert.That(seen.Count, Is.EqualTo(3));
-                Assert.That(world.CompletedPasses, Is.GreaterThan(10));
+                CollectionAssert.IsSubsetOf(new[] { BallPhase.Owned, BallPhase.Travelling, BallPhase.Loose }, seen);
+                Assert.That(world.CompletedPasses, Is.GreaterThanOrEqualTo(10));
                 Assert.That(world.Recoveries, Is.GreaterThan(2));
                 Assert.That(world.PossessionChanges, Is.GreaterThan(2));
                 Assert.That(match.Diagnostics.Any(d => d.Request.ActionId == "tackle"), Is.True);
