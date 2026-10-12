@@ -4,7 +4,7 @@ using System.Linq;
 namespace FootballRpg.Simulation
 {
     // Facts emitted after a subsystem commits a change. Events do not mutate state themselves.
-    // Event IDs will come from the deterministic session sequence in SME-109, never Guid/time here.
+    // Action event IDs come from MatchSession's deterministic sequence, never Guid/time here.
     public abstract class GameEvent
     {
         public string EventId { get; }

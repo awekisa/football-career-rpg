@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using FootballRpg.Content;
 using FootballRpg.Simulation;
 using UnityEngine;
@@ -24,6 +25,7 @@ namespace FootballRpg.Presentation
             {
                 Career = PrototypeContent.CreateCareer();
                 Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
+                if (smokeTest) VerifyMatchFoundation();
             }
             catch (Exception error)
             {
@@ -46,6 +48,24 @@ namespace FootballRpg.Presentation
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
             Application.Quit(0);
+        }
+
+        private void VerifyMatchFoundation()
+        {
+            var match = new MatchSession("startup-check", 42);
+            match.Advance(TimeSpan.FromMilliseconds(100));
+            match.Pause();
+            match.Advance(TimeSpan.FromHours(1));
+            var request = new ActionRequest("startup-choice", Career.UserPlayerId, "pass-to-feet",
+                "harbour-player-07", .9f, "completed-pass", "interception",
+                new Dictionary<string, string> { ["mode"] = "synthetic-startup-check" });
+            var diagnostic = match.BeginResolution(request);
+            match.BeginResolution(request);
+            match.CompleteResolution(diagnostic.Result.EventId);
+            if (match.Tick != 2 || match.DrawCount != 1 || match.Diagnostics.Count != 1)
+                throw new InvalidOperationException("Match clock/action smoke check failed.");
+            Debug.Log("FOOTBALL_RPG_ACTION " + diagnostic.ToJsonLine());
+            Debug.Log("FOOTBALL_RPG_MATCH_FOUNDATION_PASSED");
         }
 
         private void OnGUI()

@@ -2,11 +2,12 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** shared game data (SME-108). The launch screen loads a validated career fixture with two fictional 18-player squads. Matches and career gameplay are not implemented yet.
+**Current milestone:** match clock and deterministic action foundation (SME-109). The launch screen loads a validated career fixture with two fictional 18-player squads. Matches and career gameplay are not implemented yet.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
 - [Data schema and ownership](docs/game-data.md)
+- [Match timing and replay contract](docs/match-simulation.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 
