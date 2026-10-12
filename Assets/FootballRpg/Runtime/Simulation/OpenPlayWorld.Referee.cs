@@ -129,7 +129,7 @@ namespace FootballRpg.Simulation
             RecordFixture(card.ToString(), player.IsHome);
             string message = player.Player.Name + ": " + (card == CardKind.SecondYellow ? "second yellow, sent off." : card == CardKind.Red ? "red card, sent off." : "yellow card.");
             if (card == CardKind.Yellow) return message;
-            players.Remove(player); // The active roster has no reinsertion/substitution route; the ledger persists across halves.
+            players.Remove(player); // A dismissal cannot be filled by a substitute; the ledger persists across halves.
             if (id == controlledPlayerId) { ActiveIntent = null; IntentStatus = "Sent off — watching the remainder"; PendingDecision = null; PendingDefense = null; PendingKeeper = null; }
             if (players.Count(p => p.IsHome == player.IsHome) < 7)
             {

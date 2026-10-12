@@ -53,3 +53,6 @@ Enter acknowledges a paused referee notice. Advantage continues play. A penalty 
 ## Set-piece controls
 
 Before a teammate/opponent takes a restart, choose follow zone [1], mark [2], attack space [3] or await counter [4], then confirm with Enter. R cycles the opponent to mark. Takers use 1 pass, 2 low delivery, 3 lofted delivery, and 4 shot/variant; R cycles recipients and Enter releases. See [set pieces](set-pieces.md).
+
+
+SME-121 adds **B / Start on bench** on the launch screen. The coach can bring the reserve central midfielder on at halftime. The match view shows participation, substitutions and availability; removed players remain inspectable but cannot act. See [fatigue and substitutions](injuries-and-substitutions.md).

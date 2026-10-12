@@ -48,6 +48,8 @@ namespace FootballRpg.Presentation
             DrawKeeperPanel(left);
             DrawDefenseAndIntent(left);
             DrawFixture(left);
+            Text(new Rect(24, 735, left - 48, 26), "Your status: " + World.UserParticipation + " · Subs " + World.SubstitutionsUsed(true) + " / " + World.SubstitutionsUsed(false), small, Lime);
+            Text(new Rect(24, 764, left - 48, 28), World.ParticipationMessage ?? "Coach selects substitutions at stoppages", small, Color.white);
 
             Text(new Rect(left + 24, 26, 310, 25), "PLAYER INSPECTION", small, Lime);
             var selectedMarker = players.First(p => p.PlayerId == SelectedPlayer.Id);
@@ -66,7 +68,7 @@ namespace FootballRpg.Presentation
                 Bar(left + 24, 352 + i * 48, attributes[id].name, (SelectedPlayer.FootballAttributes[id] - attributes[id].minimum) / (float)(attributes[id].maximum - attributes[id].minimum),
                     SelectedPlayer.FootballAttributes[id].ToString(), teamColor);
             }
-            Text(new Rect(left + 24, 565, 312, 25), (World.Discipline.IsDismissed(SelectedPlayer.Id) ? "SENT OFF" : World.Discipline.Yellows(SelectedPlayer.Id) > 0 ? "YELLOW CARD" : "MATCH READINESS"), small, new Color(.63f, .73f, .73f));
+            Text(new Rect(left + 24, 565, 312, 25), (World.Participation(SelectedPlayer.Id).ToString().ToUpperInvariant() + (World.Discipline.Yellows(SelectedPlayer.Id) > 0 && World.CanParticipate(SelectedPlayer.Id) ? " · YELLOW CARD" : "") + (SelectedPlayer.InjuryDaysRemaining > 0 ? " · " + SelectedPlayer.InjuryDaysRemaining + " DAYS OUT" : "")), small, new Color(.63f, .73f, .73f));
             Bar(left + 24, 604, "Confidence", SelectedPlayer.Confidence, Mathf.RoundToInt(SelectedPlayer.Confidence * 100) + "%", Lime);
             Bar(left + 24, 651, "Fatigue", SelectedPlayer.Fatigue, Mathf.RoundToInt(SelectedPlayer.Fatigue * 100) + "%", Coral);
             if (Button(new Rect(left + 24, 724, 150, 37), "HOME TEAM")) SelectPlayer(players.First(p => p.IsHome).PlayerId);

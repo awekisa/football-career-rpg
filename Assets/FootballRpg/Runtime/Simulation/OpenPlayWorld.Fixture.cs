@@ -25,10 +25,11 @@ namespace FootballRpg.Simulation
         private RestartKind? directRestart;
         private bool directRestartHome;
 
-        public void StartFixture(CompetitionRules rules = null)
+        public void StartFixture(CompetitionRules rules = null, MatchFitnessRules fitnessRules = null)
         {
             if (Rules != null || session.Tick != 0 || session.DrawCount != 0) throw new InvalidOperationException("Start a fixture once, before advancing the practice clock.");
             Rules = rules ?? new CompetitionRules();
+            FitnessRules = fitnessRules ?? new MatchFitnessRules();
             ClearPlay(); DecisionCount = 0; session.Resume();
             FixturePhase = FixturePhase.FirstHalf;
             AddedSeconds = Rules.MinimumAddedSeconds;
@@ -59,6 +60,7 @@ namespace FootballRpg.Simulation
             if (periodStarted)
             {
                 HalfElapsedSeconds += dt;
+                if (Restart == null) StepFitness(dt);
                 if (Restart != null) AddedSeconds += dt;
             }
             if (HalfElapsedSeconds >= Rules.HalfSeconds)
@@ -70,7 +72,9 @@ namespace FootballRpg.Simulation
                 if (Abandoned) return true;
                 ClearPlay(); Restart = null;
                 FixturePhase = FixturePhase == FixturePhase.FirstHalf ? FixturePhase.HalfTime : FixturePhase.FullTime;
-                RecordFixture(FixturePhase.ToString()); session.Pause(); return true;
+                RecordFixture(FixturePhase.ToString());
+                if (FixturePhase == FixturePhase.HalfTime) { stoppage++; ProcessRoster(true); }
+                session.Pause(); return true;
             }
             if (Restart == null) return false;
             setupElapsed += dt;
@@ -107,6 +111,8 @@ namespace FootballRpg.Simulation
             SettleDeferredCards();
             if (Abandoned) return;
             ClearPlay(); directRestart = null;
+            if (!rebuildingRoster) { stoppage++; ProcessRoster(true); }
+            if (Abandoned) return;
             var team = players.Where(p => p.IsHome == home);
             var taker = AssignedTaker(kind, home) ?? (kind == RestartKind.GoalKick ? team.First(p => p.IsGoalkeeper)
                 : kind == RestartKind.Penalty ? team.Where(p => !p.IsGoalkeeper).OrderByDescending(p => p.Player.FootballAttributes["finishing"]).First()

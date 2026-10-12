@@ -40,7 +40,8 @@ namespace FootballRpg.Presentation
         public Camera ViewCamera { get; private set; }
         public CareerState Career { get; private set; }
         public MatchSession Match { get; private set; }
-        public IReadOnlyList<PitchPlayer> Players => players.AsReadOnly();
+        public IReadOnlyList<PitchPlayer> Players => players.Where(p => p.gameObject.activeSelf).ToArray();
+        public IReadOnlyList<PitchPlayer> SquadViews => players.AsReadOnly();
         public PlayerState SelectedPlayer { get; private set; }
         public float Zoom => zoom;
         public float Yaw => yaw;
@@ -107,14 +108,14 @@ namespace FootballRpg.Presentation
             foreach (bool home in new[] { true, false })
             {
                 string clubId = home ? Career.Fixture.HomeClubId : Career.Fixture.AwayClubId;
-                var squad = Career.Clubs[clubId].SquadPlayerIds.Take(11).ToArray();
+                var squad = Career.Clubs[clubId].SquadPlayerIds.Take(11 + Career.Fixture.BenchSize).ToArray();
                 for (int i = 0; i < squad.Length; i++)
                 {
                     var state = Career.Players[squad[i]];
                     var root = new GameObject(state.Name).transform;
                     root.SetParent(transform, false);
-                    var motion = World.Players.First(p => p.Player.Id == state.Id);
-                    root.localPosition = ToVector(motion.Position);
+                    var motion = World.Players.FirstOrDefault(p => p.Player.Id == state.Id);
+                    root.localPosition = ToVector(motion?.Position ?? new PitchPoint(0, 0));
                     var kit = state.PrimaryPositionId == "gk" ? keeperKit : home ? homeKit : awayKit;
                     geometry.Shape("Shirt", PrimitiveType.Capsule, new Vector3(0, 1.2f, 0), new Vector3(1.05f, .65f, 1.05f), kit, root);
                     geometry.Shape("Shorts", PrimitiveType.Cube, new Vector3(0, .4f, 0), new Vector3(.8f, .65f, .65f), shorts, root);

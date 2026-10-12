@@ -24,13 +24,14 @@ namespace FootballRpg.Simulation
         public PlayerState Player { get; }
         public bool IsHome { get; }
         public bool IsGoalkeeper { get; internal set; }
+        public string PositionRoleId { get; internal set; }
         public int Direction { get; internal set; }
         public PitchPoint Anchor { get; internal set; }
         public PitchPoint Position { get; internal set; }
         public PitchPoint Target { get; internal set; }
         public PitchPoint Facing { get; internal set; }
         internal FootballerMotion(PlayerState player, bool home, PitchPoint anchor)
-        { Player = player; IsGoalkeeper = player.PrimaryPositionId == "gk"; IsHome = home; Direction = home ? 1 : -1; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
+        { Player = player; PositionRoleId = player.PrimaryPositionId; IsGoalkeeper = player.PrimaryPositionId == "gk"; IsHome = home; Direction = home ? 1 : -1; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
     }
 
     public enum BallPhase { Owned, Travelling, Loose, OutOfPlay, Incoming, KeeperIntervention }
@@ -90,11 +91,13 @@ namespace FootballRpg.Simulation
                         new PitchPoint(anchor.X * direction, (anchor.Z + spread) * direction).Bounded()));
                 }
             }
+            InitializeParticipation(career);
             Players = players.AsReadOnly();
-            if (controlledPlayerId != null && !players.Any(p => p.Player.Id == controlledPlayerId))
-                throw new ArgumentException("Controlled player must be in the starting lineup.");
+            if (controlledPlayerId != null && !namedPlayers.ContainsKey(controlledPlayerId))
+                throw new ArgumentException("Controlled player must be in the named squad.");
             if (startWithControlledPlayer && controlledPlayerId == null)
                 throw new ArgumentException("An opening controlled possession requires a controlled player.");
+            startWithControlledPlayer = startWithControlledPlayer && CanParticipate(controlledPlayerId);
             if (openingArrivalHeight.HasValue && (!startWithControlledPlayer || double.IsNaN(openingArrivalHeight.Value) || double.IsInfinity(openingArrivalHeight.Value) || openingArrivalHeight.Value < 0 || openingArrivalHeight.Value > 3))
                 throw new ArgumentException("Opening reception requires a controlled player and a reachable height.");
             if (openingArrivalHeight.HasValue && openingArrivalHeight.Value > players.Single(p => p.Player.Id == controlledPlayerId).Player.HeightCm / 100 + .9)
@@ -271,7 +274,7 @@ namespace FootballRpg.Simulation
                 players.Where(p => p.IsHome != owner.IsHome).Select(Snapshot));
         }
 
-        private static PassActor Snapshot(FootballerMotion player) => new PassActor(player.Player, player.Position, player.Facing, player.IsGoalkeeper ? "gk" : null);
+        private static PassActor Snapshot(FootballerMotion player) => new PassActor(player.Player, player.Position, player.Facing, player.IsGoalkeeper ? "gk" : player.PositionRoleId);
 
         private void Pass(FootballerMotion owner)
         {
