@@ -73,6 +73,7 @@ namespace FootballRpg.Simulation
             { containedPlayerId = attacker.Player.Id; containedUntilTick = session.Tick + Ticks(2); }
             else
             {
+                RecordOffsideTouch(defender, OffsideTouch.Deflection);
                 BallPosition = new PitchPoint(attacker.Position.X, attacker.Position.Z + (attacker.Position.Z >= 0 ? 4 : -4)).Bounded();
                 Handling.RecordTouch(defender.Player.Id, defender.Player.ClubId, BallTouchKind.Other);
                 MakeLoose();

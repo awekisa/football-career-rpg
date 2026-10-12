@@ -37,10 +37,12 @@ namespace FootballRpg.Simulation
 
         private void BeginArrival(FootballerMotion player, double height, double speed)
         {
+            if (CheckOffsideTouch(player)) return;
             BallState = BallPhase.Incoming;
             OwnerId = null;
             IncomingPlayerId = player.Player.Id;
             BallPosition = player.Position;
+            RecordOffsideTouch(player);
             BallHeight = height;
             incomingSpeed = speed;
             PossessionClubId = player.Player.ClubId;
@@ -119,6 +121,7 @@ namespace FootballRpg.Simulation
 
         private void BeginFootballFlight(FootballerMotion actor, FootballActionResolved result)
         {
+            RecordOffsideTouch(actor);
             LastFootballAction = activeFootballAction = result;
             HoldingKeeperId = null;
             if (actor.Player.PrimaryPositionId != "gk" || (result.Preview.Kind != FootballActionKind.Control && result.Preview.Kind != FootballActionKind.Dribble))

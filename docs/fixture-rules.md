@@ -24,7 +24,7 @@ Players are arranged legally before release. Kickoffs put everyone except the ta
 
 The controlled taker receives a paused recipient choice with the exact probability of the teammate receiving the delivery. Select a teammate or press R, then Enter to release. Opponent inspection preserves the target. AI takers use the same previews and resolver after preparation. For this foundational rules ticket, deliveries use the existing passing model; authored set-piece routines and specialist delivery choices remain separate work.
 
-The release creates one frozen flight and one random draw. The kick moves on release; a throw enters the pitch before normal flight advances. The taker cannot recover their own untouched restart. Direct throw-in goals are disallowed, and direct own goals from these restarts award a corner. Throw touch provenance also prevents a keeper handling a direct teammate throw. Illegal restart forms are not selectable; infringement sanctions, delay countdowns, offside exemptions and authored restart animations belong to subsequent rules/presentation work.
+The release creates one frozen flight and one random draw. The kick moves on release; a throw enters the pitch before normal flight advances. The taker cannot recover their own untouched restart. Direct throw-in goals are disallowed, and direct own goals from these restarts award a corner. Throw touch provenance also prevents a keeper handling a direct teammate throw. SME-118 adds offside exemptions and indirect free kicks; see [offside rules](offside.md). Illegal restart forms are not selectable; infringement sanctions, delay countdowns and authored restart animations belong to subsequent rules/presentation work.
 
 ## Verification
 
@@ -33,3 +33,5 @@ The release creates one frozen flight and one random draw. The kick moves on rel
 The packaged `--pitch-smoke-test` includes a short two-half fixture through the presentation layer and requires `FOOTBALL_RPG_FIXTURE_PASSED`. Existing action, defense and keeper smoke checks remain in place. Mac builds are verified; Windows remains unverified.
 
 Rules consulted on 2026-10-12: [IFAB Law 7](https://www.theifab.com/laws/latest/the-duration-of-the-match/), [Law 8](https://www.theifab.com/laws/latest/the-start-and-restart-of-play/), [Law 9](https://www.theifab.com/laws/latest/the-ball-in-and-out-of-play/), [Law 15](https://www.theifab.com/laws/latest/the-throw-in/), [Law 16](https://www.theifab.com/laws/latest/the-goal-kick/) and [Law 17](https://www.theifab.com/laws/latest/the-corner-kick/). This ticket implements the core geometry, ownership and lifecycle described above, not all offences or competition protocols in those laws.
+
+SME-118 adds `IndirectFreeKick`, prevents direct goals from it and preserves distance legality near boundaries. Its offside notice must be acknowledged before preparation resumes or a user taker can release. Existing restart snapshots also supply the offside exemption context.

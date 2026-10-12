@@ -42,6 +42,7 @@ namespace FootballRpg.Simulation
         }
         private void ClearPlay()
         {
+            Offside.EndPhase();
             PendingDecision = null; PendingDefense = null; PendingKeeper = null;
             activeFootballAction = null; keeperThreat = null; keeperFlight = null;
             OwnerId = IncomingPlayerId = HoldingKeeperId = PossessionClubId = null;
@@ -106,15 +107,22 @@ namespace FootballRpg.Simulation
                     pos = new PitchPoint(-Math.Max(1, Math.Abs(pos.X)) * p.Direction, pos.Z);
                 if (p.IsHome != home)
                 {
-                    if (kind == RestartKind.GoalKick && HandlingRules.InOwnArea(pos, taker.Direction))
+                    if ((kind == RestartKind.GoalKick || kind == RestartKind.IndirectFreeKick && HandlingRules.InOwnArea(spot, taker.Direction)) && HandlingRules.InOwnArea(pos, taker.Direction))
                         pos = new PitchPoint(-35 * taker.Direction, pos.Z);
-                    double distance = kind == RestartKind.Corner ? 10.2 : kind == RestartKind.Kickoff ? 9.15 : kind == RestartKind.ThrowIn ? 2 : 0;
+                    double distance = kind == RestartKind.Corner ? 10.2 : (kind == RestartKind.Kickoff || kind == RestartKind.IndirectFreeKick) ? 9.15 : kind == RestartKind.ThrowIn ? 2 : 0;
                     if (pos.Distance(spot) < distance)
                     {
                         double dx = pos.X - spot.X, dz = pos.Z - spot.Z;
                         if (Math.Abs(dx) + Math.Abs(dz) < .001) { dx = -p.Direction; dz = 0; }
                         double length = Math.Sqrt(dx * dx + dz * dz);
                         pos = new PitchPoint(spot.X + dx / length * distance, spot.Z + dz / length * distance).Bounded();
+                        if (pos.Distance(spot) < distance - 1e-8)
+                        {
+                            // Near a touchline, clamping an outward projection can undo the required distance.
+                            var inward = new PitchPoint(0, 0); if (spot.Distance(inward) < .01) inward = new PitchPoint(-p.Direction, 0);
+                            double inwardDistance = spot.Distance(inward);
+                            pos = new PitchPoint(spot.X + (inward.X - spot.X) / inwardDistance * distance, spot.Z + (inward.Z - spot.Z) / inwardDistance * distance).Bounded();
+                        }
                     }
                 }
                 p.Position = p.Target = pos;
@@ -148,7 +156,7 @@ namespace FootballRpg.Simulation
             // Resolve once at release. The taker cannot touch again before the committed recipient/other player.
             session.Resume();
             var result = PassResolver.Commit(session, id, preview, true);
-            periodStarted = true; Restart = null; PossessionClubId = taker.Player.ClubId; BeginFlight(result, taker);
+            periodStarted = true; Restart = null; PossessionClubId = taker.Player.ClubId; BeginPassFlight(result, taker, restart.Kind);
             directRestart = restart.Kind; directRestartHome = restart.IsHome;
             if (restart.Kind == RestartKind.ThrowIn)
                 Handling.RecordTouch(taker.Player.Id, taker.Player.ClubId, BallTouchKind.ThrowIn, receiverId);
@@ -176,7 +184,7 @@ namespace FootballRpg.Simulation
                 AwardRestart(RestartKind.ThrowIn, !lastHome, new PitchPoint(Math.Max(-52.5, Math.Min(52.5, point.X)), Math.Sign(point.Z) * 34));
             else if (crossing.IsGoal && directRestart.HasValue && directRestartHome == defending.IsHome)
                 AwardRestart(RestartKind.Corner, !defending.IsHome, new PitchPoint(Math.Sign(point.X) * 52, (point.Z >= 0 ? 1 : -1) * 33.5));
-            else if (crossing.IsGoal && directRestart == RestartKind.ThrowIn)
+            else if (crossing.IsGoal && (directRestart == RestartKind.ThrowIn || directRestart == RestartKind.IndirectFreeKick))
                 AwardRestart(RestartKind.GoalKick, defending.IsHome, new PitchPoint(Math.Sign(point.X) * 49, 5));
             else if (crossing.IsGoal)
             {
