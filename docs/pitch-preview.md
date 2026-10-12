@@ -41,3 +41,7 @@ Use **Play as goalkeeper [G]** on the launch screen for the keeper. Numbered opt
 ## Fixture controls (SME-117)
 
 The launch starts a full fixture. L switches between 90-minute and four-minute matches before entry. A user restart pauses for teammate selection (click or R) and release (Enter). Halftime waits for Enter/Space and switches ends. Full time stops play; Escape returns to the launch. The header shows the half, score and added time. See [fixture rules](fixture-rules.md).
+
+## Offside explanation (SME-118)
+
+A fixture pauses when offside is called. The panel names the offender, explains the active involvement and identifies IFAB 2026/27. Player inspection remains available. Enter/Continue acknowledges the notice; the awarded taker then uses the normal restart recipient controls. Space cannot skip the explanation.

@@ -53,7 +53,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -231,6 +231,27 @@ namespace FootballRpg.Presentation
             if (view.World.FixturePhase != FixturePhase.FullTime || view.World.FixtureEvents.Count(e => e.Kind == "RestartReleased") < 2)
                 throw new InvalidOperationException("Fixture did not complete both halves and kickoffs.");
             view.Close(); Debug.Log("FOOTBALL_RPG_FIXTURE_PASSED");
+        }
+
+        private void VerifyOffside()
+        {
+            var root = new GameObject("Offside Smoke");
+            var definitions = PrototypeContent.Load(); definitions.userPlayerId = "harbour-player-11";
+            var view = root.AddComponent<PitchPreview>(); view.Initialize(CareerState.Create(definitions));
+            view.GetComponent<MatchDriver>().enabled = false; view.World.StartFixture(new CompetitionRules(600));
+            for (int i = 0; i < 24000 && view.World.LastOffside == null; i++)
+            {
+                if (view.World.FixturePhase == FixturePhase.HalfTime || view.World.HasPendingDecision || view.UserRestart) view.CommitChosenPass();
+                var intent = view.World.CanSetIntent(OffBallIntent.ForwardRun) ? OffBallIntent.ForwardRun : OffBallIntent.Counterattack;
+                if (view.World.CanSetIntent(intent) && view.World.ActiveIntent?.Kind != intent) view.ChooseIntent(intent);
+                view.Match.Advance(TimeSpan.FromMilliseconds(50));
+            }
+            view.SyncWorldView();
+            if (view.World.LastOffside == null || view.World.Restart?.Kind != RestartKind.IndirectFreeKick || !view.World.OffsideNoticePending)
+                throw new InvalidOperationException("No offside restart reached in the seeded forward-run fixture.");
+            if (string.IsNullOrWhiteSpace(view.World.LastOffside.Explanation)) throw new InvalidOperationException("Missing offside explanation.");
+            view.CommitChosenPass(); if (view.World.OffsideNoticePending) throw new InvalidOperationException("Notice did not acknowledge.");
+            view.Close(); Debug.Log("FOOTBALL_RPG_OFFSIDE_PASSED");
         }
 
         private bool shortFixture;

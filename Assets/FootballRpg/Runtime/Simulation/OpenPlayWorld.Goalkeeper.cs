@@ -133,10 +133,11 @@ namespace FootballRpg.Simulation
             {
                 keeper.Position = preview.Target;
                 Handling.RecordTouch(keeper.Player.Id, keeper.Player.ClubId, BallTouchKind.Other);
-                HoldingKeeperId = keeper.Player.Id; GiveBall(keeper);
+                HoldingKeeperId = keeper.Player.Id; ReceiveBall(keeper, preview.Context.Situation != KeeperSituation.Shot);
             }
             else if (result.Outcome == KeeperOutcome.Deflected)
             {
+                RecordOffsideTouch(keeper, preview.Context.Situation == KeeperSituation.Shot ? OffsideTouch.Save : OffsideTouch.Deflection);
                 Handling.RecordTouch(keeper.Player.Id, keeper.Player.ClubId, BallTouchKind.Other);
                 BallPosition = new PitchPoint(BallPosition.X + 5 * keeper.Direction, BallPosition.Z >= 0 ? 8 : -8).Bounded();
                 MakeLoose();
@@ -167,6 +168,7 @@ namespace FootballRpg.Simulation
         }
         private void BeginKeeperDistribution(KeeperResolved result, FootballerMotion keeper)
         {
+            RecordOffsideTouch(keeper);
             keeperFlight = result; activeFootballAction = null;
             receiver = result.Action.Succeeded ? players.Single(p => p.Player.Id == result.Preview.Receiver.Id) : null;
             destination = result.Action.Succeeded ? result.Preview.Target : keeper.Position.MoveTowards(result.Preview.Target, 6).Bounded();
@@ -181,9 +183,10 @@ namespace FootballRpg.Simulation
             flightSeconds += dt; double t = Math.Min(1, flightSeconds / flightDuration);
             BallPosition = flightOrigin.MoveTowards(destination, flightOrigin.Distance(destination) * t);
             BallHeight = .3 + Math.Sin(Math.PI * t) * (keeperFlight.Preview.Kind == KeeperAction.Roll ? 0 : keeperFlight.Preview.Kind == KeeperAction.LongKick ? 5 : 1.5);
+            if (CheckOffsideInterference()) return;
             if (flightSeconds < flightDuration) return;
             var fact = keeperFlight; keeperFlight = null;
-            if (fact.Action.Succeeded) { CompletedPasses++; GiveBall(receiver); }
+            if (fact.Action.Succeeded) { if (GiveBall(receiver)) CompletedPasses++; }
             else MakeLoose();
         }
     }

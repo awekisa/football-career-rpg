@@ -22,10 +22,20 @@ namespace FootballRpg.Presentation
         }
         private void DrawFixture(float left)
         {
+            if (World.OffsideNoticePending)
+            {
+                Panel(new Rect(0, 106, left, 185), Ink);
+                Text(new Rect(24, 114, left - 48, 28), "OFFSIDE  /  " + Career.Players[World.LastOffside.PlayerId].Name, label, Coral);
+                var explanation = new GUIStyle(muted) { wordWrap = true };
+                Text(new Rect(24, 150, left - 48, 60), World.LastOffside.Explanation, explanation, Color.white);
+                Text(new Rect(24, 218, left - 260, 45), "Indirect free kick · " + OffsideOffence.LawsEdition, small, Lime);
+                if (Button(new Rect(left - 228, 236, 204, 36), "CONTINUE [ENTER]")) World.AcknowledgeOffside();
+                return;
+            }
             if (World.Rules == null || (World.Restart == null && World.FixturePhase != FixturePhase.HalfTime && World.FixturePhase != FixturePhase.FullTime)) return;
             string phase = FixturePhaseLabel;
             if (World.AnnouncedAddedSeconds > 0) phase += "  +" + World.AnnouncedAddedSeconds.ToString("0.#") + "s added";
-            if (World.Restart != null) phase += "  /  " + World.Restart.Kind + " · " + Career.Players[World.Restart.TakerId].Name;
+            if (World.Restart != null) phase += "  /  " + (World.Restart.Kind == RestartKind.IndirectFreeKick ? "Indirect free kick" : World.Restart.Kind.ToString()) + " · " + Career.Players[World.Restart.TakerId].Name;
             Panel(new Rect(0, 106, left, UserRestart ? 139 : 38), Ink);
             Text(new Rect(24, 112, left - 48, 28), phase, small, Lime);
             if (UserRestart)
