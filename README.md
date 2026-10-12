@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** AI open play (SME-111). All 22 players move, pass, press and recover loose balls. Inspect either team and view your expected tactical position while running or paused. Match rules, human decisions and career gameplay come later.
+**Current milestone:** exact pass probabilities (SME-112). All 22 players move under AI control. Select a teammate of the ball carrier to compare passes to feet and through balls; the displayed whole percentage is the resolver’s exact success chance. Match rules, human decisions and career gameplay come later.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
@@ -10,6 +10,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 - [Match timing and replay contract](docs/match-simulation.md)
 - [Pitch preview and controls](docs/pitch-preview.md)
 - [Open-play simulation](docs/open-play.md)
+- [Pass probabilities and outcomes](docs/pass-resolution.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 

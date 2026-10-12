@@ -27,11 +27,12 @@ namespace FootballRpg.Simulation
         public PitchPoint Anchor { get; }
         public PitchPoint Position { get; internal set; }
         public PitchPoint Target { get; internal set; }
+        public PitchPoint Facing { get; internal set; }
         internal FootballerMotion(PlayerState player, bool home, PitchPoint anchor)
-        { Player = player; IsHome = home; Anchor = anchor; Position = anchor; Target = anchor; }
+        { Player = player; IsHome = home; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
     }
 
-    public enum BallPhase { Owned, Travelling, Loose }
+    public enum BallPhase { Owned, Travelling, Loose, OutOfPlay }
 
     /// <summary>Seeded open-play sandbox. Rules, shots and human decisions are later contracts.</summary>
     public sealed class OpenPlayWorld : IDisposable
@@ -40,7 +41,12 @@ namespace FootballRpg.Simulation
         private readonly List<FootballerMotion> players = new List<FootballerMotion>();
         private FootballerMotion receiver;
         private PitchPoint destination;
-        private bool passSucceeded;
+        private double flightDuration;
+        private PitchPoint flightOrigin;
+        private FootballerMotion restartPlayer;
+        private double restartSeconds;
+        public PassResolved LastPass { get; private set; }
+        public event Action<PassResolved> PassCommitted;
         private double heldSeconds;
         private double flightSeconds;
         private double challengeSeconds;
@@ -113,17 +119,39 @@ namespace FootballRpg.Simulation
             foreach (var player in players)
             {
                 double speed = 3.5 + player.Player.FootballAttributes["pace"] * .035;
+                var previous = player.Position;
                 player.Position = player.Position.MoveTowards(player.Target, speed * dt).Bounded();
+                if (previous.Distance(player.Position) > .001)
+                    player.Facing = new PitchPoint(player.Position.X - previous.X, player.Position.Z - previous.Z);
             }
             if (BallState == BallPhase.Travelling)
             {
                 flightSeconds += dt;
-                BallPosition = BallPosition.MoveTowards(destination, 19 * dt);
-                if (BallPosition.Distance(destination) < .01 || flightSeconds >= 6)
+                BallPosition = flightOrigin.MoveTowards(destination, flightOrigin.Distance(destination) * Math.Min(1, flightSeconds / flightDuration));
+                if (flightSeconds >= flightDuration)
                 {
-                    if (passSucceeded && receiver.Position.Distance(BallPosition) <= 2.5)
+                    if (LastPass.Outcome == PassOutcome.Received)
                     { CompletedPasses++; GiveBall(receiver); }
+                    else if (LastPass.Outcome == PassOutcome.Intercepted) GiveBall(receiver);
+                    else if (LastPass.Outcome == PassOutcome.OutOfPlay)
+                    {
+                        BallState = BallPhase.OutOfPlay;
+                        PossessionClubId = null;
+                        receiver = null;
+                        restartSeconds = 0;
+                    }
                     else MakeLoose();
+                }
+                return;
+            }
+            if (BallState == BallPhase.OutOfPlay)
+            {
+                // Sandbox reset only: formal throw-ins/corners are implemented with match laws later.
+                restartSeconds += dt;
+                if (restartSeconds >= 1)
+                {
+                    restartPlayer.Position = BallPosition.Bounded();
+                    GiveBall(restartPlayer);
                 }
                 return;
             }
@@ -183,24 +211,40 @@ namespace FootballRpg.Simulation
             return new PitchPoint(x, z).Bounded();
         }
 
+        public PassPreview PreviewPass(string receiverId, PassKind kind)
+        {
+            if (BallState != BallPhase.Owned) throw new InvalidOperationException("No player owns the ball.");
+            var owner = players.Single(p => p.Player.Id == OwnerId);
+            var targetPlayer = players.Single(p => p.Player.Id == receiverId);
+            var target = kind == PassKind.ToFeet ? targetPlayer.Position
+                : new PitchPoint(targetPlayer.Position.X + owner.Direction * 8, targetPlayer.Position.Z).Bounded();
+            if (target.Distance(owner.Position) < .1) target = targetPlayer.Position;
+            double side = owner.Facing.X * (target.Z - owner.Position.Z) - owner.Facing.Z * (target.X - owner.Position.X);
+            string foot = side >= 0 ? "right" : "left";
+            return PassResolver.Preview(Snapshot(owner), Snapshot(targetPlayer), kind, target, foot,
+                players.Where(p => p.IsHome != owner.IsHome).Select(Snapshot));
+        }
+
+        private static PassActor Snapshot(FootballerMotion player) => new PassActor(player.Player, player.Position, player.Facing);
+
         private void Pass(FootballerMotion owner)
         {
-            receiver = players.Where(p => p.IsHome == owner.IsHome && p != owner)
+            var teammate = players.Where(p => p.IsHome == owner.IsHome && p != owner && p.Position.Distance(owner.Position) >= .1)
                 .OrderByDescending(p => PassScore(owner, p)).First();
-            double distance = owner.Position.Distance(receiver.Position);
-            float chance = ClampChance(.92 + (owner.Player.FootballAttributes["short-passing"] - 50) * .003 - distance * .005);
-            passSucceeded = Resolve(owner, receiver, "pass-to-feet", chance);
-            destination = receiver.Position;
-            if (!passSucceeded)
-            {
-                // The shared draw determines both failure and a repeatable under-hit destination.
-                double roll = session.Diagnostics[session.Diagnostics.Count - 1].Result.Roll;
-                destination = new PitchPoint((owner.Position.X + destination.X) * .5,
-                    (owner.Position.Z + destination.Z) * .5 + (roll - .5) * 10).Bounded();
-            }
+            var kind = (teammate.Position.X - owner.Position.X) * owner.Direction > 8 ? PassKind.ThroughBall : PassKind.ToFeet;
+            var preview = PreviewPass(teammate.Player.Id, kind);
+            LastPass = PassResolver.Commit(session, "open-play-" + (++actionSequence), preview, true);
+            destination = LastPass.Destination;
+            receiver = LastPass.ReceivingPlayerId == null ? null : players.Single(p => p.Player.Id == LastPass.ReceivingPlayerId);
+            flightOrigin = BallPosition;
+            flightDuration = Math.Max(session.FixedStep.TotalSeconds, flightOrigin.Distance(destination) / 19);
+            if (receiver != null)
+                flightDuration = Math.Max(flightDuration, receiver.Position.Distance(destination) / (3.5 + receiver.Player.FootballAttributes["pace"] * .035) + session.FixedStep.TotalSeconds);
+            restartPlayer = players.Where(p => p.IsHome != owner.IsHome).OrderBy(p => p.Position.Distance(destination)).First();
             OwnerId = null;
             BallState = BallPhase.Travelling;
             flightSeconds = 0;
+            PassCommitted?.Invoke(LastPass);
         }
 
         private double PassScore(FootballerMotion owner, FootballerMotion candidate)

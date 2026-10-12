@@ -16,7 +16,7 @@ Open Launch.unity and press Play, then choose Explore the pitch or press Enter. 
 | Pause/resume clock | Space or clock button |
 | Return to menu | Escape or Back to menu |
 
-Blue shirts identify the home team, coral shirts the visitors, and yellow shirts the goalkeepers. Number labels distinguish individual players and retain their team colour. A permanent lime ring and YOU label identify the user; a separate white ring follows inspection selection. The sidebar shows club, role, biographical details, four role-relevant football attributes, confidence and fatigue, from canonical CareerState data. Attribute bars use configured definition ranges.
+Blue shirts identify the home team, coral shirts the visitors, and yellow shirts the goalkeepers. Number labels distinguish individual players and retain their team colour. A permanent lime ring and YOU label identify the user; a separate white ring follows inspection selection. The sidebar shows club, role, biographical details, four role-relevant football attributes, confidence and fatigue, from canonical CareerState data. When selecting a different teammate of the current ball carrier, its footer compares exact whole-percent pass-to-feet and through-ball estimates. These are inspection estimates; user commit buttons arrive in SME-113. Attribute bars use configured definition ranges.
 
 ## Ownership and limits
 
