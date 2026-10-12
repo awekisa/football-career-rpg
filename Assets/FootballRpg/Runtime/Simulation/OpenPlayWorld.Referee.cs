@@ -34,6 +34,7 @@ namespace FootballRpg.Simulation
         private bool JudgeChallenge(DefenseResolved result, FootballerMotion defender, FootballerMotion attacker)
         {
             if (Rules == null) return false;
+            Progress(result.Action, result.SkillAttribution, defender.Position.X * defender.Direction < -25 ? 1.5 : 1);
             var severity = FoulRules.ChallengeSeverity(result);
             if (severity == ContactSeverity.Fair) return false;
             double distance = attacker.Position.Distance(new PitchPoint(52.5 * attacker.Direction, 0));

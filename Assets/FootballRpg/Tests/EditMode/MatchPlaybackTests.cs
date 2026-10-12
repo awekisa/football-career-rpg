@@ -62,6 +62,11 @@ namespace FootballRpg.Tests
             result.AddRange(w.SetPieceRecords.Select(e => e.RestartId + e.PlayerId + e.Kind + e.Choice + e.Succeeded + e.Tick));
             result.AddRange(w.Players.OrderBy(p => p.Player.Id).Select(p => p.Player.Id + ":" + p.Position.X.ToString("R", CultureInfo.InvariantCulture) + ":" + p.Position.Z.ToString("R", CultureInfo.InvariantCulture)));
             result.AddRange(c.Players.Values.Select(p => p.Id + ":" + p.Fatigue.ToString("R", CultureInfo.InvariantCulture) + ":" + p.InjuryDaysRemaining));
+            Assert.That(c.Progression.Changes.Count, Is.GreaterThan(0));
+            Assert.That(c.Progression.Changes.Count, Is.EqualTo(m.Diagnostics.Count), "Every committed football action is attributed once.");
+            Assert.That(c.Progression.Changes.Select(e => e.EventId).Distinct().Count(), Is.EqualTo(c.Progression.Changes.Count));
+            result.AddRange(c.Players.Values.SelectMany(p => c.Progression.ForPlayer(p.Id).Select(skill => p.Id + ":" + skill.Key + ":" + skill.Value.Level + ":" + skill.Value.TotalXp.ToString("R", CultureInfo.InvariantCulture))));
+            result.AddRange(c.Progression.Changes.SelectMany(e => e.Deltas.Select(d => e.EventId + ":" + e.PlayerId + ":" + d.Key + ":" + d.Value.ToString("R", CultureInfo.InvariantCulture))));
             return result.ToArray();
         }
         internal static void Choose(OpenPlayWorld w, string user)

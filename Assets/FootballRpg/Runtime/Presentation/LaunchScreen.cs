@@ -356,12 +356,17 @@ namespace FootballRpg.Presentation
                     var facts = view.Match.Diagnostics.Select(d => d.ToJsonLine()).Concat(view.World.FixtureEvents.Select(e => e.Id + e.Kind + e.Tick)).Concat(new[] {
                         view.Match.Tick + ":" + view.Match.RandomState + ":" + view.World.HomeGoals + ":" + view.World.AwayGoals,
                         string.Join("|", view.Career.Players.Values.Select(p => p.Id + ":" + p.Fatigue.ToString("R") + ":" + p.InjuryDaysRemaining)) }).ToArray();
+                    if (view.Career.Progression.Changes.Count == 0 || view.Career.Progression.Changes.Count != view.Match.Diagnostics.Count)
+                        throw new InvalidOperationException("Progression did not account for match actions.");
+                    facts = facts.Concat(view.Career.Players.Values.SelectMany(p => view.Career.Progression.ForPlayer(p.Id).Select(skill =>
+                        p.Id + ":" + skill.Key + ":" + skill.Value.Level + ":" + skill.Value.TotalXp.ToString("R")))).ToArray();
                     if (expected == null) expected = facts;
                     else if (!expected.SequenceEqual(facts)) throw new InvalidOperationException("Viewing changed the seeded match for " + user);
                     view.Close();
                 }
             }
             Debug.Log("FOOTBALL_RPG_VIEWING_PASSED");
+            Debug.Log("FOOTBALL_RPG_PROGRESSION_PASSED");
         }
 
         private bool shortFixture;

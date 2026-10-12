@@ -66,9 +66,14 @@ namespace FootballRpg.Presentation
             for (int i = 0; i < relevant.Length && i < 4; i++)
             {
                 string id = relevant[i];
-                Bar(left + 24, 352 + i * 48, attributes[id].name, (SelectedPlayer.FootballAttributes[id] - attributes[id].minimum) / (float)(attributes[id].maximum - attributes[id].minimum),
+                Bar(left + 24, 336 + i * 50, attributes[id].name, (SelectedPlayer.FootballAttributes[id] - attributes[id].minimum) / (float)(attributes[id].maximum - attributes[id].minimum),
                     SelectedPlayer.FootballAttributes[id].ToString(), teamColor);
+                var xp = Career.Progression.ForPlayer(SelectedPlayer.Id)[id];
+                Text(new Rect(left + 24, 370 + i * 50, 300, 22), xp.NextLevelXp == 0 ? "Maximum level" : $"XP {xp.WithinLevelXp:0.0} / {xp.NextLevelXp:0}", small, new Color(.63f, .73f, .73f));
             }
+            var development = Career.Progression.Changes.LastOrDefault(c => c.PlayerId == SelectedPlayer.Id);
+            if (development != null)
+                Text(new Rect(left + 24, 544, 312, 20), $"Last action: {development.Deltas.Values.Sum():+0.0;-0.0;0} skill XP", small, Lime);
             Text(new Rect(left + 24, 565, 312, 25), (World.Participation(SelectedPlayer.Id).ToString().ToUpperInvariant() + (World.Discipline.Yellows(SelectedPlayer.Id) > 0 && World.CanParticipate(SelectedPlayer.Id) ? " · YELLOW CARD" : "") + (SelectedPlayer.InjuryDaysRemaining > 0 ? " · " + SelectedPlayer.InjuryDaysRemaining + " DAYS OUT" : "")), small, new Color(.63f, .73f, .73f));
             Bar(left + 24, 604, "Confidence", SelectedPlayer.Confidence, Mathf.RoundToInt(SelectedPlayer.Confidence * 100) + "%", Lime);
             Bar(left + 24, 651, "Fatigue", SelectedPlayer.Fatigue, Mathf.RoundToInt(SelectedPlayer.Fatigue * 100) + "%", Coral);
