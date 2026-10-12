@@ -52,7 +52,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -79,7 +79,7 @@ namespace FootballRpg.Presentation
 
         private void VerifyPitchPreview()
         {
-            OpenPitch();
+            OpenPitch(false);
             preview.GetComponent<MatchDriver>().enabled = false;
             Physics.SyncTransforms();
             if (preview.Players.Count != 22) throw new InvalidOperationException("Expected 22 player views.");
@@ -109,11 +109,41 @@ namespace FootballRpg.Presentation
             Debug.Log("FOOTBALL_RPG_PITCH_PREVIEW_PASSED");
         }
 
-        public void OpenPitch()
+        private void VerifyDecisionLoop()
+        {
+            var decisionRoot = new GameObject("Decision Smoke");
+            var view = decisionRoot.AddComponent<PitchPreview>();
+            view.Initialize(Career);
+            view.GetComponent<MatchDriver>().enabled = false;
+            var choice = view.ChosenPass;
+            if (choice == null || view.World.PendingDecision.Options.Count != 20)
+                throw new InvalidOperationException("Missing player decision options.");
+            view.SelectPlayer(choice.Receiver.Id);
+            view.ChoosePassKind(PassKind.ThroughBall);
+            choice = view.ChosenPass;
+            if (!view.CommitChosenPass() || view.CommitChosenPass() || view.Match.DrawCount != 1 ||
+                view.World.LastPass.Action.SuccessProbability != choice.Chance)
+                throw new InvalidOperationException("Decision was not committed exactly once.");
+            view.Match.Advance(TimeSpan.FromMilliseconds(100));
+            view.TogglePause();
+            var ball = view.World.BallPosition;
+            view.Match.Advance(TimeSpan.FromSeconds(10));
+            if (view.World.BallPosition.Distance(ball) > .001)
+                throw new InvalidOperationException("Manual pause failed during pass flight.");
+            view.TogglePause();
+            for (int i = 0; i < 500 && view.World.BallState == BallPhase.Travelling; i++)
+                view.Match.Advance(TimeSpan.FromMilliseconds(50));
+            if (view.World.BallState == BallPhase.Travelling || view.Match.DrawCount != 1)
+                throw new InvalidOperationException("Committed pass flight stalled or rerolled.");
+            view.Close();
+            Debug.Log("FOOTBALL_RPG_DECISION_LOOP_PASSED");
+        }
+
+        public void OpenPitch(bool interactive = true)
         {
             if (preview != null || Career == null) return;
             preview = new GameObject("Pitch Preview").AddComponent<PitchPreview>();
-            preview.Initialize(Career, () => preview = null);
+            preview.Initialize(Career, () => preview = null, interactive);
         }
 
         private void Update()

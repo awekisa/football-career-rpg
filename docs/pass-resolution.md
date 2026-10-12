@@ -2,9 +2,9 @@
 
 ## Success and targets
 
-A pass succeeds when the selected teammate controls the ball at the frozen target. A pass to feet targets the teammate’s position at commit time. A through ball targets selected space; the current AI selects a point eight metres ahead of its receiver, bounded to the sandbox pitch. The pure resolver accepts an explicit valid target, ready for the decision UI in SME-113. Select a teammate of the ball carrier in the inspector to compare both estimates. This ticket does not add human decision prompts or pass buttons.
+A pass succeeds when the selected teammate controls the ball at the frozen target. A pass to feet targets the teammate’s position at commit time. A through ball targets selected space; the current AI selects a point eight metres ahead of its receiver, bounded to the sandbox pitch. The pure resolver accepts an explicit valid target, used by the decision UI in SME-113. Select a teammate of the ball carrier in the inspector to compare both estimates. SME-113 now supplies [decision prompts and pass buttons](player-decisions.md).
 
-PassActor snapshots copy skills, condition, position and facing. PassPreview is immutable: it contains the target, chance, modifier breakdown, failure context and weighted skill attribution. Commit uses that same chance and immutable context through MatchSession. Future decision callers must freeze the world while choosing and use the same preview when committing; passing a refreshed preview represents a new choice. Preview alone consumes no randomness.
+PassActor snapshots copy skills, condition, position and facing. PassPreview is immutable: it contains the target, chance, modifier breakdown, failure context and weighted skill attribution. Commit uses that same chance and immutable context through MatchSession. Decision callers freeze the world while choosing and use the same preview when committing; passing a refreshed preview represents a new choice. Preview alone consumes no randomness.
 
 ## Formula v1
 

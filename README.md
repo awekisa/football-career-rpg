@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** exact pass probabilities (SME-112). All 22 players move under AI control. Select a teammate of the ball carrier to compare passes to feet and through balls; the displayed whole percentage is the resolver’s exact success chance. Match rules, human decisions and career gameplay come later.
+**Current milestone:** first playable pass loop (SME-113). Your player starts on the ball. Choose a teammate, compare pass-to-feet and through-ball chances, and commit a pass. Play pauses again when you gain possession. All 22 players move automatically between decisions; full match rules and career gameplay come later.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
@@ -11,6 +11,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 - [Pitch preview and controls](docs/pitch-preview.md)
 - [Open-play simulation](docs/open-play.md)
 - [Pass probabilities and outcomes](docs/pass-resolution.md)
+- [Player decisions](docs/player-decisions.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 
@@ -19,7 +20,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 1. Install Unity **6000.3.23f1** through Unity Hub and activate a suitable Unity license.
 2. Clone this repository and add its root directory as a project in Unity Hub. Initial import resolves pinned packages and creates local caches.
 3. Open `Assets/FootballRpg/Scenes/Launch.unity` and press Play.
-4. Choose **Explore the pitch** or press Enter. Click a player to inspect them; Tab cycles players. Use WASD to pan, Q/E to rotate, the mouse wheel to zoom, Home to reset, Space to pause/resume, and Escape to return.
+4. Choose **Explore the pitch** or press Enter. Click a teammate or press R to select your pass target; choose **To feet** / **Through ball** (1 / 2), then **Play pass** (Enter). Tab inspects any player. Use WASD to pan, Q/E to rotate, the mouse wheel to zoom, Home to reset, Space to pause/resume between decisions, and Escape to return.
 
 The project uses the built-in renderer and placeholder UI, with no paid assets or external services. Keep the editor version and `Packages/packages-lock.json` committed for consistent imports.
 
@@ -51,7 +52,7 @@ Run the generated macOS app by opening it, or perform a lifecycle smoke check:
 
 Expect exit code 0 and `FOOTBALL_RPG_SMOKE_PASSED` in the log. Open the app normally as well to inspect the UI; headless checks do not verify appearance.
 
-Use `--pitch-smoke-test` instead of `--smoke-test` to also verify the packaged pitch, all 22 player selection rays, camera isolation, pause/resume and 30 seconds of AI movement/passing. Expect `FOOTBALL_RPG_PITCH_PREVIEW_PASSED`. Use `--pitch-preview` to open the interactive pitch directly.
+Use `--pitch-smoke-test` instead of `--smoke-test` to also verify the packaged pitch, all 22 player selection rays, camera isolation, pause/resume, 30 seconds of AI movement/passing, and committing a player decision through the presentation controls. Expect `FOOTBALL_RPG_PITCH_PREVIEW_PASSED`. Use `--pitch-preview` to open the interactive pitch directly.
 
 Equivalent direct editor commands (substitute executable and project paths):
 

@@ -20,7 +20,7 @@ namespace FootballRpg.Tests
             career = PrototypeContent.CreateCareer();
             root = new GameObject("Preview Test");
             preview = root.AddComponent<PitchPreview>();
-            preview.Initialize(career);
+            preview.Initialize(career, interactive: false);
             Physics.SyncTransforms();
         }
 
