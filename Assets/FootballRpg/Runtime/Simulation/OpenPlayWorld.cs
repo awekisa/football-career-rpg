@@ -34,7 +34,7 @@ namespace FootballRpg.Simulation
 
     public enum BallPhase { Owned, Travelling, Loose, OutOfPlay, Incoming }
 
-    /// <summary>Seeded open-play sandbox. Rules, shots and human decisions are later contracts.</summary>
+    /// <summary>Seeded open-play sandbox with frozen user decisions and temporary movement intentions.</summary>
     public sealed partial class OpenPlayWorld : IDisposable
     {
         private readonly MatchSession session;
@@ -129,16 +129,20 @@ namespace FootballRpg.Simulation
         private void Step(long tick)
         {
             // Defend against direct clock resume: a pending user choice may never be delegated to AI.
-            if (PendingDecision != null) { session.Pause(); return; }
+            if (HasPendingDecision) { session.Pause(); return; }
+            RefreshIntent();
             if (BallState == BallPhase.Incoming) { ChooseAiReception(); return; }
             double dt = session.FixedStep.TotalSeconds;
             challengeSeconds = Math.Max(0, challengeSeconds - dt);
             var owner = players.FirstOrDefault(p => p.Player.Id == OwnerId);
+            if (TryOpenDefense(owner)) return;
             // Calculate every target from the same snapshot before integrating anyone's movement.
-            foreach (var player in players) player.Target = TacticalTarget(player, owner);
+            foreach (var player in players) player.Target = IntendedTarget(player, owner);
             foreach (var player in players)
             {
                 double speed = 3.5 + player.Player.FootballAttributes["pace"] * .035;
+                if (session.Tick < beatenUntilTick && player.Player.Id == controlledPlayerId) speed *= .25;
+                if (session.Tick < containedUntilTick && player.Player.Id == containedPlayerId) speed *= .25;
                 var previous = player.Position;
                 player.Position = player.Position.MoveTowards(player.Target, speed * dt).Bounded();
                 if (previous.Distance(player.Position) > .001)
@@ -165,6 +169,7 @@ namespace FootballRpg.Simulation
                         PossessionClubId = null;
                         receiver = null;
                         restartSeconds = 0;
+                        RefreshIntent();
                     }
                     else MakeLoose();
                 }
@@ -190,12 +195,14 @@ namespace FootballRpg.Simulation
             BallPosition = owner.Position;
             heldSeconds += dt;
             var challenger = players.Where(p => p.IsHome != owner.IsHome).OrderBy(p => p.Position.Distance(BallPosition)).First();
-            if (challenger.Position.Distance(BallPosition) < 2 && challengeSeconds <= 0)
+            if (challenger.Player.Id != controlledPlayerId && challenger.Position.Distance(BallPosition) < 2 && challengeSeconds <= 0)
             {
                 challengeSeconds = 1.2;
-                float chance = ClampChance(.45 + (challenger.Player.FootballAttributes["tackling"] - owner.Player.FootballAttributes["dribbling"]) * .004);
-                if (Resolve(challenger, owner, "tackle", chance)) { MakeLoose(); return; }
+                var preview = DefenseResolver.Preview(Snapshot(challenger), Snapshot(owner), challenger.Direction, DefensiveAction.Tackle);
+                var result = DefenseResolver.Commit(session, "open-play-" + (++actionSequence), preview, true);
+                if (result.Action.Succeeded) { GiveBall(challenger); return; }
             }
+            if (session.Tick < containedUntilTick && owner.Player.Id == containedPlayerId) return;
             if (heldSeconds >= 2.5 && !ChooseAiAction(owner)) Pass(owner);
         }
 
@@ -288,14 +295,6 @@ namespace FootballRpg.Simulation
             return Math.Min(12, openness) * 1.5 + progress * .25 - owner.Position.Distance(candidate.Position) * .2;
         }
 
-        private bool Resolve(FootballerMotion actor, FootballerMotion target, string action, float chance)
-        {
-            var result = session.ResolveAutomatic(new ActionRequest("open-play-" + (++actionSequence), actor.Player.Id,
-                action, target.Player.Id, chance, "success", "failure",
-                new Dictionary<string, string> { ["mode"] = "open-play-provisional", ["phase"] = BallState.ToString() }));
-            return result.Result.OutcomeId == "success";
-        }
-        private static float ClampChance(double chance) => (float)Math.Max(.15, Math.Min(.95, chance));
         private void GiveBall(FootballerMotion player)
         {
             if (lastClub != null && lastClub != player.Player.ClubId) PossessionChanges++;
@@ -308,6 +307,7 @@ namespace FootballRpg.Simulation
             BallState = BallPhase.Owned;
             heldSeconds = 0;
             possessionSequence++;
+            RefreshIntent();
             if (player.Player.Id == controlledPlayerId) OpenDecision();
         }
 
@@ -352,7 +352,7 @@ namespace FootballRpg.Simulation
 
         public void TogglePause()
         {
-            if (PendingDecision != null) return;
+            if (HasPendingDecision) return;
             if (session.State == MatchRunState.Paused) session.Resume();
             else session.Pause();
         }
@@ -364,6 +364,7 @@ namespace FootballRpg.Simulation
             receiver = null;
             PossessionClubId = null;
             BallState = BallPhase.Loose;
+            RefreshIntent();
         }
         public void Dispose() => session.TickAdvanced -= Step;
     }

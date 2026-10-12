@@ -126,7 +126,13 @@ namespace FootballRpg.Tests
                 var first = world.PendingDecision;
                 var choice = first.Options.OrderByDescending(p => p.Chance).First();
                 world.CommitDecision(first.Id, choice.Receiver.Id, choice.Kind);
-                for (int i = 0; i < 24000 && world.PendingDecision == null; i++) session.Advance(TimeSpan.FromMilliseconds(50));
+                int defensiveChoices = 0;
+                for (int i = 0; i < 24000 && world.PendingDecision == null; i++)
+                {
+                    if (world.PendingDefense != null)
+                    { world.CommitDefense(world.PendingDefense.Id, world.PendingDefense.Options[0].Kind); defensiveChoices++; }
+                    session.Advance(TimeSpan.FromMilliseconds(50));
+                }
                 Assert.That(world.PendingDecision, Is.Not.Null, "User should receive or recover the ball again.");
                 var next = world.PendingDecision;
                 var ball = world.BallPosition;
@@ -134,7 +140,7 @@ namespace FootballRpg.Tests
                 Assert.That(next.Id, Is.Not.EqualTo(first.Id));
                 Assert.That(world.OwnerId, Is.EqualTo(career.UserPlayerId));
                 Assert.That(session.State, Is.EqualTo(MatchRunState.Paused));
-                Assert.That(world.DecisionCount, Is.EqualTo(2));
+                Assert.That(world.DecisionCount, Is.EqualTo(2 + defensiveChoices));
                 world.CommitDecision(first.Id, choice.Receiver.Id, choice.Kind);
                 session.Advance(TimeSpan.FromHours(1));
                 Assert.That(world.PendingDecision, Is.SameAs(next));

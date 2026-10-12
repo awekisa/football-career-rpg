@@ -45,6 +45,7 @@ namespace FootballRpg.Simulation
             incomingSpeed = speed;
             PossessionClubId = player.Player.ClubId;
             possessionSequence++;
+            RefreshIntent();
             if (player.Player.Id == controlledPlayerId)
             {
                 session.Pause();
@@ -154,6 +155,7 @@ namespace FootballRpg.Simulation
                     BallState = BallPhase.OutOfPlay; PossessionClubId = null; restartSeconds = 0; receiver = null; break;
                 default: MakeLoose(); break;
             }
+            RefreshIntent();
         }
     }
 }

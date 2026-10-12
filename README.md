@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** attacking and receiving actions (SME-114). Choose passes, dribbles, crosses, shots or clearances in possession. Incoming deliveries offer control, first-time passes and feasible headers. All choices use displayed probabilities and the shared seeded resolver. Full match laws, goalkeeper decisions and career gameplay come later.
+**Current milestone:** defensive choices and off-ball instructions (SME-115). Pass, dribble, cross, shoot and receive; pause for tackle, contain or block decisions; redirect your player's movement with eight persistent instructions. Choices use displayed probabilities and the shared seeded resolver. Full match laws, goalkeeper decisions and career gameplay come later.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
@@ -13,6 +13,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 - [Pass probabilities and outcomes](docs/pass-resolution.md)
 - [Player decisions](docs/player-decisions.md)
 - [Football actions and receiving](docs/football-actions.md)
+- [Defense and off-ball instructions](docs/defense-and-intentions.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 
@@ -21,7 +22,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 1. Install Unity **6000.3.23f1** through Unity Hub and activate a suitable Unity license.
 2. Clone this repository and add its root directory as a project in Unity Hub. Initial import resolves pinned packages and creates local caches.
 3. Open `Assets/FootballRpg/Scenes/Launch.unity` and press Play.
-4. Choose **Explore the pitch** or press Enter. Click a teammate or press R to select your pass target; choose **To feet** / **Through ball** (1 / 2), then **Play action** (Enter). The lower action row offers contextual choices (3–7); pressing an action again cycles its variants. Tab inspects any player. Use WASD to pan, Q/E to rotate, the mouse wheel to zoom, Home to reset, Space to pause/resume between decisions, and Escape to return.
+4. Choose **Explore the pitch** or press Enter. Click a teammate or press R to select your pass target; choose **To feet** / **Through ball** (1 / 2), then **Play action** (Enter). The lower action row offers contextual choices (3–7); pressing an action again cycles its variants. When defending, 1–3 select tackle, contain or block; Enter commits. Off the ball, I opens persistent movement instructions; select an opponent before marking or tracking. Tab inspects any player. Use WASD to pan, Q/E to rotate, the mouse wheel to zoom, Home to reset, Space to pause/resume between decisions, and Escape to return.
 
 The project uses the built-in renderer and placeholder UI, with no paid assets or external services. Keep the editor version and `Packages/packages-lock.json` committed for consistent imports.
 
@@ -53,7 +54,7 @@ Run the generated macOS app by opening it, or perform a lifecycle smoke check:
 
 Expect exit code 0 and `FOOTBALL_RPG_SMOKE_PASSED` in the log. Open the app normally as well to inspect the UI; headless checks do not verify appearance.
 
-Use `--pitch-smoke-test` instead of `--smoke-test` to also verify the packaged pitch, all 22 player selection rays, camera isolation, pause/resume, 30 seconds of AI movement/passing, and committing pass, dribble and aerial decisions through the presentation controls. Expect `FOOTBALL_RPG_PITCH_PREVIEW_PASSED`. Use `--pitch-preview` to open the interactive pitch directly.
+Use `--pitch-smoke-test` instead of `--smoke-test` to also verify the packaged pitch, all 22 player selection rays, camera isolation, pause/resume, 30 seconds of AI movement/passing, and committing pass, dribble, aerial and defensive decisions through the presentation controls. Expect `FOOTBALL_RPG_PITCH_PREVIEW_PASSED`. Use `--pitch-preview` to open the interactive pitch directly.
 
 Equivalent direct editor commands (substitute executable and project paths):
 
