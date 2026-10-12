@@ -11,7 +11,7 @@ namespace FootballRpg.Presentation
     public sealed class LaunchScreen : MonoBehaviour
     {
         public CareerState Career { get; private set; }
-        private bool showScope;
+        private PitchPreview preview;
         private GUIStyle title;
         private GUIStyle eyebrow;
         private GUIStyle body;
@@ -20,7 +20,8 @@ namespace FootballRpg.Presentation
 
         private IEnumerator Start()
         {
-            bool smokeTest = Array.IndexOf(Environment.GetCommandLineArgs(), "--smoke-test") >= 0;
+            bool pitchSmoke = Array.IndexOf(Environment.GetCommandLineArgs(), "--pitch-smoke-test") >= 0;
+            bool smokeTest = pitchSmoke || Array.IndexOf(Environment.GetCommandLineArgs(), "--smoke-test") >= 0;
             try
             {
                 Career = PrototypeContent.CreateCareer();
@@ -35,7 +36,10 @@ namespace FootballRpg.Presentation
             }
             Debug.Log("FOOTBALL_RPG_LAUNCH_READY");
             if (!smokeTest)
+            {
+                if (Array.IndexOf(Environment.GetCommandLineArgs(), "--pitch-preview") >= 0) OpenPitch();
                 yield break;
+            }
 
             // Exercise the real launch scene and lifecycle in a built player before exiting.
             yield return null;
@@ -45,6 +49,11 @@ namespace FootballRpg.Presentation
                 Debug.LogError("FOOTBALL_RPG_SMOKE_FAILED");
                 Application.Quit(1);
                 yield break;
+            }
+            if (pitchSmoke)
+            {
+                try { VerifyPitchPreview(); }
+                catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
             Application.Quit(0);
@@ -68,8 +77,45 @@ namespace FootballRpg.Presentation
             Debug.Log("FOOTBALL_RPG_MATCH_FOUNDATION_PASSED");
         }
 
+        private void VerifyPitchPreview()
+        {
+            OpenPitch();
+            preview.GetComponent<MatchDriver>().enabled = false;
+            Physics.SyncTransforms();
+            if (preview.Players.Count != 22) throw new InvalidOperationException("Expected 22 player views.");
+            foreach (var player in preview.Players)
+            {
+                var point = preview.ViewCamera.WorldToScreenPoint(player.transform.position + Vector3.up * 1.1f);
+                if (!preview.SelectAtScreenPoint(point) || preview.SelectedPlayer.Id != player.PlayerId)
+                    throw new InvalidOperationException("Pitch picking failed: " + player.PlayerId);
+            }
+            preview.AdjustCamera(4, 4, 15, -5);
+            if (preview.Match.Tick != 0 || preview.Match.DrawCount != 0)
+                throw new InvalidOperationException("Inspection changed the match.");
+            preview.ResetCamera();
+            preview.TogglePause();
+            preview.Match.Advance(TimeSpan.FromMilliseconds(100));
+            preview.TogglePause();
+            preview.Match.Advance(TimeSpan.FromSeconds(5));
+            if (preview.Match.Tick != 2) throw new InvalidOperationException("Pitch pause failed.");
+            Debug.Log("FOOTBALL_RPG_PITCH_PREVIEW_PASSED");
+        }
+
+        public void OpenPitch()
+        {
+            if (preview != null || Career == null) return;
+            preview = new GameObject("Pitch Preview").AddComponent<PitchPreview>();
+            preview.Initialize(Career, () => preview = null);
+        }
+
+        private void Update()
+        {
+            if (preview == null && Input.GetKeyDown(KeyCode.Return)) OpenPitch();
+        }
+
         private void OnGUI()
         {
+            if (preview != null) return;
             EnsureStyles();
             var originalMatrix = GUI.matrix;
             var originalColor = GUI.color;
@@ -85,12 +131,10 @@ namespace FootballRpg.Presentation
             GUI.Label(new Rect(70, 398, 580, 110),
                 "Read the game. Choose your moment.\nEarn your place, on and off the pitch.", body);
             GUI.Label(new Rect(70, 543, 550, 96),
-                showScope
-                    ? "The first chapter: create your footballer, live a week at a small club, and play an 11-versus-11 match."
-                    : "An early foundation build. The playable career is still in development.", small);
+                "Explore the pitch and inspect both teams.\nThe playable career is still in development.", small);
 
-            if (GUI.Button(new Rect(70, 683, 260, 58), showScope ? "BACK" : "THE FIRST CHAPTER", button))
-                showScope = !showScope;
+            if (GUI.Button(new Rect(70, 683, 260, 58), "EXPLORE THE PITCH", button))
+                OpenPitch();
             if (GUI.Button(new Rect(346, 683, 125, 58), "QUIT", button))
                 Application.Quit();
 

@@ -2,12 +2,13 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** match clock and deterministic action foundation (SME-109). The launch screen loads a validated career fixture with two fictional 18-player squads. Matches and career gameplay are not implemented yet.
+**Current milestone:** overhead pitch and player inspection (SME-110). Explore a scaled 3D pitch with 22 player placeholders, inspect either team, and control the camera while the match clock is running or paused. Players are stationary; football movement and career gameplay come next.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
 - [Data schema and ownership](docs/game-data.md)
 - [Match timing and replay contract](docs/match-simulation.md)
+- [Pitch preview and controls](docs/pitch-preview.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 
@@ -16,7 +17,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 1. Install Unity **6000.3.23f1** through Unity Hub and activate a suitable Unity license.
 2. Clone this repository and add its root directory as a project in Unity Hub. Initial import resolves pinned packages and creates local caches.
 3. Open `Assets/FootballRpg/Scenes/Launch.unity` and press Play.
-4. Use the mouse to view the first chapter or quit the standalone player. There are no match controls yet.
+4. Choose **Explore the pitch** or press Enter. Click a player to inspect them; Tab cycles players. Use WASD to pan, Q/E to rotate, the mouse wheel to zoom, Home to reset, Space to pause/resume, and Escape to return.
 
 The project uses the built-in renderer and placeholder UI, with no paid assets or external services. Keep the editor version and `Packages/packages-lock.json` committed for consistent imports.
 
@@ -47,6 +48,8 @@ Run the generated macOS app by opening it, or perform a lifecycle smoke check:
 ```
 
 Expect exit code 0 and `FOOTBALL_RPG_SMOKE_PASSED` in the log. Open the app normally as well to inspect the UI; headless checks do not verify appearance.
+
+Use `--pitch-smoke-test` instead of `--smoke-test` to also verify the packaged pitch, all 22 player selection rays, camera isolation, and pause/resume. Expect `FOOTBALL_RPG_PITCH_PREVIEW_PASSED`. Use `--pitch-preview` to open the interactive pitch directly.
 
 Equivalent direct editor commands (substitute executable and project paths):
 
