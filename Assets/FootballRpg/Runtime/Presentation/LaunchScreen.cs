@@ -98,6 +98,14 @@ namespace FootballRpg.Presentation
             preview.TogglePause();
             preview.Match.Advance(TimeSpan.FromSeconds(5));
             if (preview.Match.Tick != 2) throw new InvalidOperationException("Pitch pause failed.");
+            var initial = preview.World.Players[7].Position;
+            preview.TogglePause();
+            for (int i = 0; i < 300; i++) preview.Match.Advance(TimeSpan.FromMilliseconds(100));
+            preview.TogglePause();
+            preview.SyncWorldView();
+            if (preview.World.Players[7].Position.Distance(initial) < .1 || preview.World.CompletedPasses == 0)
+                throw new InvalidOperationException("Open play did not advance.");
+            Debug.Log("FOOTBALL_RPG_OPEN_PLAY_PASSED");
             Debug.Log("FOOTBALL_RPG_PITCH_PREVIEW_PASSED");
         }
 

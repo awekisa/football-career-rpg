@@ -13,6 +13,8 @@ namespace FootballRpg.Presentation
         private readonly Dictionary<string, PositionDefinition> positions = new Dictionary<string, PositionDefinition>();
         private readonly Dictionary<string, ValueDefinition> attributes = new Dictionary<string, ValueDefinition>();
         private PitchGeometry geometry;
+        private Transform ballView, tacticalMarker;
+        public OpenPlayWorld World { get; private set; }
         private Camera launchCamera;
         private bool launchCameraEnabled;
         private Vector3 focus;
@@ -63,7 +65,12 @@ namespace FootballRpg.Presentation
             light.transform.rotation = Quaternion.Euler(55, -35, 0);
             geometry = new PitchGeometry(transform);
             geometry.BuildField();
+            World = new OpenPlayWorld(career, Match);
             BuildPlayers();
+            ballView = geometry.Root.Find("Ball");
+            tacticalMarker = geometry.Circle("Expected Tactical Position", 3,
+                new Vector3(0, .1f, 0), geometry.Material(new Color(.72f, .96f, .35f), true), .12f).transform;
+            SyncWorldView();
             SelectPlayer(Career.UserPlayerId);
             ResetCamera();
         }
@@ -77,9 +84,6 @@ namespace FootballRpg.Presentation
             var skin = geometry.Material(new Color(.75f, .55f, .38f));
             var userColor = geometry.Material(new Color(.72f, .96f, .35f), true);
             var selectedColor = geometry.Material(Color.white, true);
-            var anchors = new[] { new Vector2(-49, 0), new Vector2(-33, -25), new Vector2(-36, -9),
-                new Vector2(-36, 9), new Vector2(-33, 25), new Vector2(-23, -14), new Vector2(-22, 0),
-                new Vector2(-20, 15), new Vector2(-8, -24), new Vector2(-8, 24), new Vector2(-6, 0) };
             foreach (bool home in new[] { true, false })
             {
                 string clubId = home ? Career.Fixture.HomeClubId : Career.Fixture.AwayClubId;
@@ -89,8 +93,8 @@ namespace FootballRpg.Presentation
                     var state = Career.Players[squad[i]];
                     var root = new GameObject(state.Name).transform;
                     root.SetParent(transform, false);
-                    int direction = home ? 1 : -1;
-                    root.localPosition = new Vector3(anchors[i].x * direction, 0, anchors[i].y * direction);
+                    var motion = World.Players.First(p => p.Player.Id == state.Id);
+                    root.localPosition = ToVector(motion.Position);
                     var kit = state.PrimaryPositionId == "gk" ? keeperKit : home ? homeKit : awayKit;
                     geometry.Shape("Shirt", PrimitiveType.Capsule, new Vector3(0, 1.2f, 0), new Vector3(1.05f, .65f, 1.05f), kit, root);
                     geometry.Shape("Shorts", PrimitiveType.Cube, new Vector3(0, .4f, 0), new Vector3(.8f, .65f, .65f), shorts, root);
@@ -108,6 +112,18 @@ namespace FootballRpg.Presentation
                 }
             }
         }
+
+        private static Vector3 ToVector(PitchPoint point) => new Vector3((float)point.X, 0, (float)point.Z);
+
+        public void SyncWorldView()
+        {
+            foreach (var marker in players)
+                marker.transform.localPosition = ToVector(World.Players.First(p => p.Player.Id == marker.PlayerId).Position);
+            ballView.localPosition = ToVector(World.BallPosition) + Vector3.up * .3f;
+            tacticalMarker.localPosition = ToVector(World.Players.First(p => p.Player.Id == Career.UserPlayerId).Target);
+        }
+
+        private void LateUpdate() { if (World != null) SyncWorldView(); }
 
         public bool SelectPlayer(string id)
         {
@@ -192,6 +208,7 @@ namespace FootballRpg.Presentation
         private void OnDestroy()
         {
             if (launchCamera != null) launchCamera.enabled = launchCameraEnabled;
+            World?.Dispose();
             geometry?.Dispose();
         }
     }

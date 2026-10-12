@@ -2,13 +2,14 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** overhead pitch and player inspection (SME-110). Explore a scaled 3D pitch with 22 player placeholders, inspect either team, and control the camera while the match clock is running or paused. Players are stationary; football movement and career gameplay come next.
+**Current milestone:** AI open play (SME-111). All 22 players move, pass, press and recover loose balls. Inspect either team and view your expected tactical position while running or paused. Match rules, human decisions and career gameplay come later.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
 - [Data schema and ownership](docs/game-data.md)
 - [Match timing and replay contract](docs/match-simulation.md)
 - [Pitch preview and controls](docs/pitch-preview.md)
+- [Open-play simulation](docs/open-play.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 
@@ -49,7 +50,7 @@ Run the generated macOS app by opening it, or perform a lifecycle smoke check:
 
 Expect exit code 0 and `FOOTBALL_RPG_SMOKE_PASSED` in the log. Open the app normally as well to inspect the UI; headless checks do not verify appearance.
 
-Use `--pitch-smoke-test` instead of `--smoke-test` to also verify the packaged pitch, all 22 player selection rays, camera isolation, and pause/resume. Expect `FOOTBALL_RPG_PITCH_PREVIEW_PASSED`. Use `--pitch-preview` to open the interactive pitch directly.
+Use `--pitch-smoke-test` instead of `--smoke-test` to also verify the packaged pitch, all 22 player selection rays, camera isolation, pause/resume and 30 seconds of AI movement/passing. Expect `FOOTBALL_RPG_PITCH_PREVIEW_PASSED`. Use `--pitch-preview` to open the interactive pitch directly.
 
 Equivalent direct editor commands (substitute executable and project paths):
 
