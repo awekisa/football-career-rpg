@@ -32,10 +32,10 @@ namespace FootballRpg.Simulation
         { Player = player; IsHome = home; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
     }
 
-    public enum BallPhase { Owned, Travelling, Loose, OutOfPlay }
+    public enum BallPhase { Owned, Travelling, Loose, OutOfPlay, Incoming }
 
     /// <summary>Seeded open-play sandbox. Rules, shots and human decisions are later contracts.</summary>
-    public sealed class OpenPlayWorld : IDisposable
+    public sealed partial class OpenPlayWorld : IDisposable
     {
         private readonly MatchSession session;
         private readonly string controlledPlayerId;
@@ -67,7 +67,7 @@ namespace FootballRpg.Simulation
         public int Recoveries { get; private set; }
         public int PossessionChanges { get; private set; }
 
-        public OpenPlayWorld(CareerState career, MatchSession match, string controlledPlayerId = null, bool startWithControlledPlayer = false)
+        public OpenPlayWorld(CareerState career, MatchSession match, string controlledPlayerId = null, bool startWithControlledPlayer = false, double? openingArrivalHeight = null)
         {
             if (career == null) throw new ArgumentNullException(nameof(career));
             session = match ?? throw new ArgumentNullException(nameof(match));
@@ -93,7 +93,13 @@ namespace FootballRpg.Simulation
                 throw new ArgumentException("Controlled player must be in the starting lineup.");
             if (startWithControlledPlayer && controlledPlayerId == null)
                 throw new ArgumentException("An opening controlled possession requires a controlled player.");
-            GiveBall(startWithControlledPlayer ? players.Single(p => p.Player.Id == controlledPlayerId)
+            if (openingArrivalHeight.HasValue && (!startWithControlledPlayer || double.IsNaN(openingArrivalHeight.Value) || double.IsInfinity(openingArrivalHeight.Value) || openingArrivalHeight.Value < 0 || openingArrivalHeight.Value > 3))
+                throw new ArgumentException("Opening reception requires a controlled player and a reachable height.");
+            if (openingArrivalHeight.HasValue && openingArrivalHeight.Value > players.Single(p => p.Player.Id == controlledPlayerId).Player.HeightCm / 100 + .9)
+                throw new ArgumentException("Opening arrival is above the player's aerial reach.");
+            if (openingArrivalHeight.HasValue)
+                BeginArrival(players.Single(p => p.Player.Id == controlledPlayerId), openingArrivalHeight.Value, 12);
+            else GiveBall(startWithControlledPlayer ? players.Single(p => p.Player.Id == controlledPlayerId)
                 : players.First(p => p.IsHome && p.Player.PrimaryPositionId != "gk"));
             session.TickAdvanced += Step;
         }
@@ -124,6 +130,7 @@ namespace FootballRpg.Simulation
         {
             // Defend against direct clock resume: a pending user choice may never be delegated to AI.
             if (PendingDecision != null) { session.Pause(); return; }
+            if (BallState == BallPhase.Incoming) { ChooseAiReception(); return; }
             double dt = session.FixedStep.TotalSeconds;
             challengeSeconds = Math.Max(0, challengeSeconds - dt);
             var owner = players.FirstOrDefault(p => p.Player.Id == OwnerId);
@@ -141,8 +148,14 @@ namespace FootballRpg.Simulation
             {
                 flightSeconds += dt;
                 BallPosition = flightOrigin.MoveTowards(destination, flightOrigin.Distance(destination) * Math.Min(1, flightSeconds / flightDuration));
+                if (activeFootballAction != null)
+                {
+                    double t = Math.Min(1, flightSeconds / flightDuration);
+                    BallHeight = flightStartHeight * (1 - t) + activeFootballAction.Preview.DeliveryHeight * t + Math.Sin(Math.PI * t) * flightArc;
+                }
                 if (flightSeconds >= flightDuration)
                 {
+                    if (activeFootballAction != null) { FinishFootballAction(); return; }
                     if (LastPass.Outcome == PassOutcome.Received)
                     { CompletedPasses++; GiveBall(receiver); }
                     else if (LastPass.Outcome == PassOutcome.Intercepted) GiveBall(receiver);
@@ -183,7 +196,7 @@ namespace FootballRpg.Simulation
                 float chance = ClampChance(.45 + (challenger.Player.FootballAttributes["tackling"] - owner.Player.FootballAttributes["dribbling"]) * .004);
                 if (Resolve(challenger, owner, "tackle", chance)) { MakeLoose(); return; }
             }
-            if (heldSeconds >= 2.5) Pass(owner);
+            if (heldSeconds >= 2.5 && !ChooseAiAction(owner)) Pass(owner);
         }
 
         private PitchPoint TacticalTarget(FootballerMotion player, FootballerMotion owner)
@@ -253,6 +266,8 @@ namespace FootballRpg.Simulation
 
         private void BeginFlight(PassResolved result, FootballerMotion owner)
         {
+            activeFootballAction = null;
+            BallHeight = .3;
             LastPass = result;
             destination = LastPass.Destination;
             receiver = LastPass.ReceivingPlayerId == null ? null : players.Single(p => p.Player.Id == LastPass.ReceivingPlayerId);
@@ -285,6 +300,8 @@ namespace FootballRpg.Simulation
         {
             if (lastClub != null && lastClub != player.Player.ClubId) PossessionChanges++;
             lastClub = PossessionClubId = player.Player.ClubId;
+            BallHeight = .3;
+            IncomingPlayerId = null;
             OwnerId = player.Player.Id;
             receiver = null;
             BallPosition = player.Position;
@@ -299,16 +316,17 @@ namespace FootballRpg.Simulation
             var owner = players.Single(p => p.Player.Id == OwnerId);
             var options = players.Where(p => p.IsHome == owner.IsHome && p != owner && p.Position.Distance(owner.Position) >= .1)
                 .SelectMany(p => new[] { PreviewPass(p.Player.Id, PassKind.ToFeet), PreviewPass(p.Player.Id, PassKind.ThroughBall) }).ToArray();
-            if (options.Length == 0) return; // No eligible recipient: retain ordinary AI possession.
+            var actions = AvailableActions(owner);
             session.Pause();
             PendingDecision = new PassDecision(session.SessionId + ":possession-" + possessionSequence,
-                session.Tick, OwnerId, options);
+                session.Tick, OwnerId, options, actions);
             DecisionCount++;
         }
 
         public PassResolved CommitDecision(string decisionId, string receiverId, PassKind kind)
         {
             if (decisionId == null) throw new ArgumentNullException(nameof(decisionId));
+            if (committedFootballDecisions.ContainsKey(decisionId)) throw new InvalidOperationException("A different action already used this decision.");
             if (committedDecisions.TryGetValue(decisionId, out var previous))
             {
                 if (previous.Preview.Receiver.Id != receiverId || previous.Preview.Kind != kind)
@@ -340,6 +358,8 @@ namespace FootballRpg.Simulation
         }
         private void MakeLoose()
         {
+            BallHeight = .3;
+            IncomingPlayerId = null;
             OwnerId = null;
             receiver = null;
             PossessionClubId = null;

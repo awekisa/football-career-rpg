@@ -1,6 +1,6 @@
-# First playable pass loop (SME-113)
+# Player decisions (SME-113 / SME-114)
 
-The interactive pitch opens with the user already holding the ball so the first choice is immediately accessible. Choose a teammate by clicking them or pressing R, choose a pass to feet (1) or a through ball (2), then Play pass / Enter. The cyan line and ring preview the destination. The percentage beside each action is its frozen, exact resolution chance.
+The interactive pitch opens with the user already holding the ball so the first choice is immediately accessible. Choose a teammate by clicking them or pressing R, choose a pass to feet (1), through ball (2), or a contextual action in the lower row (3–7), then Play action / Enter. Repeating an action button cycles its variants. The cyan line and ring preview the destination. The percentage beside each action is its frozen, exact resolution chance.
 
 Inspect teammates or opponents with mouse selection or Tab. Opponent inspection preserves the selected pass; the panel names the recipient explicitly. Camera controls and the lime expected-position area remain available. Space pauses/resumes ordinary play and pass flight. During a pending possession decision, play stays paused until a valid pass is committed; Space does not delegate the choice to AI. Escape returns to the launch screen.
 
@@ -18,4 +18,4 @@ The Resolving state covers the atomic commit boundary. Simulation resumes into f
 
 The packaged --pitch-smoke-test checks both AI-only play and the real presentation commit methods. It verifies one draw, exact chance, duplicate-click prevention, manual pause and completed flight, and logs FOOTBALL_RPG_DECISION_LOOP_PASSED.
 
-This remains a pass-only prototype. Dribbling/shooting, defensive choices, full laws, match highlights, creation and career systems belong to later issues. Native mouse injection has been unreliable in desktop automation; picking is covered by ray tests, and the keyboard path provides a complete playable verification route.
+SME-114 adds [attacking and receiving actions](football-actions.md) to the same decision lifecycle. Defensive choices, full laws, match highlights, creation and career systems remain later work. Native mouse injection has been unreliable in desktop automation; picking is covered by ray tests, and the keyboard path provides a complete playable verification route.

@@ -14,7 +14,10 @@ namespace FootballRpg.Simulation
     {
         public string Id { get; }
         public string ClubId { get; }
+        public string RoleId { get; }
         public string PreferredFoot { get; }
+        public float HeightCm { get; }
+        public float WeightKg { get; }
         public PitchPoint Position { get; }
         public PitchPoint Facing { get; }
         public IReadOnlyDictionary<string, int> Attributes { get; }
@@ -26,7 +29,8 @@ namespace FootballRpg.Simulation
             if (player == null) throw new ArgumentNullException(nameof(player));
             if (!Finite(position) || !Finite(facing) || facing.Distance(new PitchPoint(0, 0)) < .001)
                 throw new ArgumentException("A finite position and nonzero facing are required.");
-            Id = player.Id; ClubId = player.ClubId; PreferredFoot = player.PreferredFoot;
+            Id = player.Id; ClubId = player.ClubId; RoleId = player.PrimaryPositionId; PreferredFoot = player.PreferredFoot;
+            HeightCm = player.HeightCm; WeightKg = player.WeightKg;
             Position = position; Facing = facing;
             Attributes = new ReadOnlyDictionary<string, int>(player.FootballAttributes.ToDictionary(p => p.Key, p => p.Value));
             Confidence = player.Confidence; Morale = player.Morale; Fatigue = player.Fatigue;

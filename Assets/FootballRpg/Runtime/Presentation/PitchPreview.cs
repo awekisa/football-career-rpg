@@ -17,6 +17,8 @@ namespace FootballRpg.Presentation
         private LineRenderer passPath;
         private string selectedDecisionId, selectedReceiverId;
         private PassKind selectedPassKind;
+        private string selectedFootballOptionId;
+        public FootballActionPreview ChosenFootballAction => World?.PendingDecision?.Actions.FirstOrDefault(p => p.OptionId == selectedFootballOptionId);
         private int inputReadyFrame;
         public PassPreview ChosenPass => World?.PendingDecision?.Options.FirstOrDefault(p => p.Receiver.Id == selectedReceiverId && p.Kind == selectedPassKind);
         public OpenPlayWorld World { get; private set; }
@@ -36,7 +38,7 @@ namespace FootballRpg.Presentation
         private float UiScale => Mathf.Max(.5f, Screen.height / 900f);
         private float SidebarPixels => 360 * UiScale;
 
-        public void Initialize(CareerState career, Action close = null, bool interactive = true)
+        public void Initialize(CareerState career, Action close = null, bool interactive = true, double? openingArrivalHeight = null)
         {
             if (Career != null) throw new InvalidOperationException("Preview already initialized.");
             Career = career ?? throw new ArgumentNullException(nameof(career));
@@ -71,7 +73,7 @@ namespace FootballRpg.Presentation
             light.transform.rotation = Quaternion.Euler(55, -35, 0);
             geometry = new PitchGeometry(transform);
             geometry.BuildField();
-            World = new OpenPlayWorld(career, Match, interactive ? career.UserPlayerId : null, interactive);
+            World = new OpenPlayWorld(career, Match, interactive ? career.UserPlayerId : null, interactive, openingArrivalHeight);
             BuildPlayers();
             ballView = geometry.Root.Find("Ball");
             tacticalMarker = geometry.Circle("Expected Tactical Position", 3,
@@ -129,15 +131,16 @@ namespace FootballRpg.Presentation
             EnsureDecisionSelection();
             foreach (var marker in players)
                 marker.transform.localPosition = ToVector(World.Players.First(p => p.Player.Id == marker.PlayerId).Position);
-            ballView.localPosition = ToVector(World.BallPosition) + Vector3.up * .3f;
+            ballView.localPosition = ToVector(World.BallPosition) + Vector3.up * (float)World.BallHeight;
             tacticalMarker.localPosition = ToVector(World.Players.First(p => p.Player.Id == Career.UserPlayerId).Target);
-            passTargetMarker.gameObject.SetActive(ChosenPass != null);
-            passPath.gameObject.SetActive(ChosenPass != null);
-            if (ChosenPass != null)
+            var target = ChosenFootballAction?.Target ?? ChosenPass?.Target;
+            passTargetMarker.gameObject.SetActive(target.HasValue);
+            passPath.gameObject.SetActive(target.HasValue);
+            if (target.HasValue)
             {
-                passTargetMarker.localPosition = ToVector(ChosenPass.Target);
+                passTargetMarker.localPosition = ToVector(target.Value);
                 passPath.SetPosition(0, ToVector(World.BallPosition) + Vector3.up * .14f);
-                passPath.SetPosition(1, ToVector(ChosenPass.Target) + Vector3.up * .14f);
+                passPath.SetPosition(1, ToVector(target.Value) + Vector3.up * .14f);
             }
         }
 
@@ -149,7 +152,13 @@ namespace FootballRpg.Presentation
             if (player == null) return false;
             SelectedPlayer = Career.Players[id];
             EnsureDecisionSelection();
-            if (World.PendingDecision?.Options.Any(p => p.Receiver.Id == id) == true) selectedReceiverId = id;
+            if (World.PendingDecision?.Options.Any(p => p.Receiver.Id == id) == true || World.PendingDecision?.Actions.Any(p => p.Receiver?.Id == id) == true)
+            {
+                var action = ChosenFootballAction;
+                selectedReceiverId = id;
+                if (action?.Receiver != null)
+                    selectedFootballOptionId = World.PendingDecision.Actions.FirstOrDefault(p => p.Kind == action.Kind && p.Variant == action.Variant && p.Receiver?.Id == id)?.OptionId;
+            }
             foreach (var marker in players) marker.SetSelected(marker == player);
             return true;
         }
@@ -173,28 +182,55 @@ namespace FootballRpg.Presentation
             if (decision == null) { selectedDecisionId = null; return; }
             if (selectedDecisionId == decision.Id) return;
             selectedDecisionId = decision.Id;
-            selectedReceiverId = decision.Options.OrderByDescending(p => p.Chance).First().Receiver.Id;
+            selectedReceiverId = decision.Options.OrderByDescending(p => p.Chance).FirstOrDefault()?.Receiver.Id
+                ?? decision.Actions.FirstOrDefault(p => p.Receiver != null)?.Receiver.Id;
             selectedPassKind = PassKind.ToFeet;
+            selectedFootballOptionId = decision.Options.Count == 0 ? decision.Actions.FirstOrDefault()?.OptionId : null;
         }
 
         public void ChoosePassKind(PassKind kind)
         {
             EnsureDecisionSelection();
             if (World.PendingDecision?.Options.Any(p => p.Receiver.Id == selectedReceiverId && p.Kind == kind) == true)
-                selectedPassKind = kind;
+            { selectedPassKind = kind; selectedFootballOptionId = null; }
         }
 
         public void CyclePassTarget()
         {
             EnsureDecisionSelection();
             if (World.PendingDecision == null) return;
-            var targets = World.PendingDecision.Options.Select(p => p.Receiver.Id).Distinct().ToArray();
+            var targets = World.PendingDecision.Options.Select(p => p.Receiver.Id)
+                .Concat(World.PendingDecision.Actions.Where(p => p.Receiver != null).Select(p => p.Receiver.Id)).Distinct().ToArray();
+            if (targets.Length == 0) return;
             SelectPlayer(targets[(Array.IndexOf(targets, selectedReceiverId) + 1) % targets.Length]);
         }
+
+        public void ChooseFootballAction(FootballActionKind kind)
+        {
+            EnsureDecisionSelection();
+            if (World.PendingDecision == null) return;
+            var choices = World.PendingDecision.Actions.Where(p => p.Kind == kind && (p.Receiver == null || p.Receiver.Id == selectedReceiverId)).ToArray();
+            if (choices.Length == 0) choices = World.PendingDecision.Actions.Where(p => p.Kind == kind).ToArray();
+            if (choices.Length == 0) return;
+            int current = Array.FindIndex(choices, p => p.OptionId == selectedFootballOptionId);
+            var chosen = choices[(current + 1) % choices.Length];
+            selectedFootballOptionId = chosen.OptionId;
+            if (chosen.Receiver != null) selectedReceiverId = chosen.Receiver.Id;
+        }
+
+        public FootballActionKind[] ContextualActionKinds => World.BallState == BallPhase.Incoming
+            ? new[] { FootballActionKind.Control, FootballActionKind.FirstTimePass, FootballActionKind.HeaderPass, FootballActionKind.HeaderShot, FootballActionKind.Clearance }
+            : new[] { FootballActionKind.Dribble, FootballActionKind.Shot, FootballActionKind.Cross, FootballActionKind.Clearance };
 
         public bool CommitChosenPass()
         {
             EnsureDecisionSelection();
+            if (ChosenFootballAction != null)
+            {
+                World.CommitFootballDecision(selectedDecisionId, ChosenFootballAction.OptionId);
+                selectedDecisionId = null; selectedFootballOptionId = null;
+                return true;
+            }
             var chosen = ChosenPass;
             if (chosen == null) return false;
             World.CommitDecision(selectedDecisionId, chosen.Receiver.Id, chosen.Kind);
@@ -234,6 +270,8 @@ namespace FootballRpg.Presentation
             EnsureDecisionSelection();
             if (Input.GetKeyDown(KeyCode.Alpha1)) ChoosePassKind(PassKind.ToFeet);
             if (Input.GetKeyDown(KeyCode.Alpha2)) ChoosePassKind(PassKind.ThroughBall);
+            var kinds = ContextualActionKinds;
+            for (int i = 0; i < kinds.Length; i++) if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha3 + i))) ChooseFootballAction(kinds[i]);
             if (Input.GetKeyDown(KeyCode.R)) CyclePassTarget();
             if (Input.GetKeyDown(KeyCode.Return)) CommitChosenPass();
             UpdateCamera();
@@ -246,7 +284,7 @@ namespace FootballRpg.Presentation
             float z = (Input.GetKey(KeyCode.W) ? 1 : 0) - (Input.GetKey(KeyCode.S) ? 1 : 0);
             float rotation = (Input.GetKey(KeyCode.E) ? 1 : 0) - (Input.GetKey(KeyCode.Q) ? 1 : 0);
             var mouse = Input.mousePosition;
-            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > 65 * UiScale && mouse.y < Screen.height - (World.PendingDecision != null ? 215 : 105) * UiScale;
+            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (World.PendingDecision != null ? 180 : 65) * UiScale && mouse.y < Screen.height - (World.PendingDecision != null ? 215 : 105) * UiScale;
             float scroll = overPitch ? Input.mouseScrollDelta.y : 0;
             if (overPitch && Input.GetMouseButton(1))
             {

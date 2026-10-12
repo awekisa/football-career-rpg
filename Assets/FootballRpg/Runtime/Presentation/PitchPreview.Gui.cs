@@ -36,14 +36,15 @@ namespace FootballRpg.Presentation
             Panel(new Rect(left, 0, 360, 900), Ink);
             Panel(new Rect(0, 0, left, 106), new Color(.03f, .065f, .075f, .97f));
             Panel(new Rect(0, 832, left, 68), new Color(.03f, .065f, .075f, .97f));
-            Text(new Rect(28, 22, 300, 25), "FIRST WEEK  /  PITCH PREVIEW", small, Lime);
+            Text(new Rect(28, 22, 300, 25), "FIRST WEEK  /  " + World.HomeGoals + " – " + World.AwayGoals, small, Lime);
             Text(new Rect(28, 58, left - 220, 35), (Career.Clubs[Career.Fixture.HomeClubId].Name + "  /  " + Career.Clubs[Career.Fixture.AwayClubId].Name).ToUpperInvariant(), label, Color.white);
             Text(new Rect(left - 192, 18, 155, 27), Match.Elapsed.ToString(@"mm\:ss"), label, Color.white);
             GUI.enabled = World.PendingDecision == null;
-            if (Button(new Rect(left - 192, 54, 160, 34), World.PendingDecision != null ? "CHOOSE A PASS" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
+            if (Button(new Rect(left - 192, 54, 160, 34), World.PendingDecision != null ? "CHOOSE ACTION" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
                 TogglePause();
             GUI.enabled = true;
             DrawDecisionPanel(left);
+            DrawFootballActions(left);
 
             Text(new Rect(left + 24, 26, 310, 25), "PLAYER INSPECTION", small, Lime);
             var selectedMarker = players.First(p => p.PlayerId == SelectedPlayer.Id);
@@ -92,18 +93,54 @@ namespace FootballRpg.Presentation
         {
             var decision = World.PendingDecision;
             var chosen = ChosenPass;
-            if (decision == null || chosen == null) return;
+            var action = ChosenFootballAction;
+            if (decision == null) return;
             Panel(new Rect(0, 106, left, 105), new Color(.04f, .12f, .14f, .98f));
-            Text(new Rect(24, 115, left - 230, 30), "YOUR BALL  ·  Pass to " + Career.Players[chosen.Receiver.Id].Name, label, Lime);
+            string title = action != null ? ActionLabel(action.Kind) + " / " + action.Variant + "  " + action.Percent + "%"
+                : "Pass to " + (chosen == null ? "teammate" : Career.Players[chosen.Receiver.Id].Name);
+            if (action?.Receiver != null) title += " → " + Career.Players[action.Receiver.Id].Name;
+            Text(new Rect(24, 115, left - 230, 30), title, label, Lime);
             if (Button(new Rect(left - 192, 114, 168, 29), "NEXT TEAMMATE  [R]")) CyclePassTarget();
             float w = (left - 72) / 3;
-            var feet = decision.Options.First(p => p.Receiver.Id == chosen.Receiver.Id && p.Kind == Simulation.PassKind.ToFeet);
-            var through = decision.Options.First(p => p.Receiver.Id == chosen.Receiver.Id && p.Kind == Simulation.PassKind.ThroughBall);
-            if (Button(new Rect(24, 154, w, 40), (chosen.Kind == Simulation.PassKind.ToFeet ? "● " : "") + "TO FEET  " + feet.Percent + "%  [1]"))
+            var feet = decision.Options.FirstOrDefault(p => p.Receiver.Id == selectedReceiverId && p.Kind == Simulation.PassKind.ToFeet);
+            var through = decision.Options.FirstOrDefault(p => p.Receiver.Id == selectedReceiverId && p.Kind == Simulation.PassKind.ThroughBall);
+            GUI.enabled = feet != null;
+            if (Button(new Rect(24, 154, w, 40), feet == null ? "RECEIVING BALL" : (action == null && chosen?.Kind == Simulation.PassKind.ToFeet ? "● " : "") + "TO FEET  " + feet.Percent + "%  [1]"))
                 ChoosePassKind(Simulation.PassKind.ToFeet);
-            if (Button(new Rect(36 + w, 154, w, 40), (chosen.Kind == Simulation.PassKind.ThroughBall ? "● " : "") + "THROUGH BALL  " + through.Percent + "%  [2]"))
+            GUI.enabled = through != null;
+            if (Button(new Rect(36 + w, 154, w, 40), through == null ? "CHOOSE AN ACTION BELOW" : (action == null && chosen?.Kind == Simulation.PassKind.ThroughBall ? "● " : "") + "THROUGH BALL  " + through.Percent + "%  [2]"))
                 ChoosePassKind(Simulation.PassKind.ThroughBall);
-            if (Button(new Rect(48 + w * 2, 154, w, 40), "PLAY PASS  [ENTER]")) CommitChosenPass();
+            GUI.enabled = action != null || chosen != null;
+            if (Button(new Rect(48 + w * 2, 154, w, 40), "PLAY ACTION  [ENTER]")) CommitChosenPass();
+            GUI.enabled = true;
+        }
+
+        private void DrawFootballActions(float left)
+        {
+            if (World.PendingDecision == null) return;
+            Panel(new Rect(0, 714, left, 80), Ink);
+            Text(new Rect(24, 719, left - 48, 22), "ACTION VARIANTS  ·  Press the same action again to change its variant", small, Lime);
+            var kinds = ContextualActionKinds;
+            float w = (left - 48) / kinds.Length;
+            for (int i = 0; i < kinds.Length; i++)
+            {
+                GUI.enabled = World.PendingDecision.Actions.Any(p => p.Kind == kinds[i]);
+                if (Button(new Rect(24 + i * w, 746, w - 8, 35), ActionLabel(kinds[i]) + "  [" + (i + 3) + "]")) ChooseFootballAction(kinds[i]);
+            }
+            GUI.enabled = true;
+        }
+
+        private static string ActionLabel(Simulation.FootballActionKind kind)
+        {
+            switch (kind)
+            {
+                case Simulation.FootballActionKind.FirstTimePass: return "First-time pass";
+                case Simulation.FootballActionKind.HeaderPass: return "Head to teammate";
+                case Simulation.FootballActionKind.HeaderShot: return "Head at goal";
+                case Simulation.FootballActionKind.Shot: return "Shoot";
+                case Simulation.FootballActionKind.Clearance: return "Clear";
+                default: return kind.ToString();
+            }
         }
 
         private void Browse(int direction)
