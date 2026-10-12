@@ -31,6 +31,7 @@ namespace FootballRpg.Presentation
         }
         public PassPreview ChosenPass => World?.PendingDecision?.Options.FirstOrDefault(p => p.Receiver.Id == selectedReceiverId && p.Kind == selectedPassKind);
         public OpenPlayWorld World { get; private set; }
+        public MatchPlayback Playback => GetComponent<MatchDriver>().Playback;
         private Camera launchCamera;
         private bool launchCameraEnabled;
         private Vector3 focus;
@@ -84,6 +85,7 @@ namespace FootballRpg.Presentation
             geometry = new PitchGeometry(transform);
             geometry.BuildField();
             World = new OpenPlayWorld(career, Match, interactive ? career.UserPlayerId : null, interactive, openingArrivalHeight);
+            GetComponent<MatchDriver>().AttachWorld(World);
             BuildPlayers();
             ballView = geometry.Root.Find("Ball");
             tacticalMarker = geometry.Circle("Expected Tactical Position", 3,
@@ -197,6 +199,7 @@ namespace FootballRpg.Presentation
         public void TogglePause()
         {
             World.TogglePause();
+            Playback.ResetTiming();
         }
 
         private void EnsureDecisionSelection()
@@ -300,6 +303,8 @@ namespace FootballRpg.Presentation
         {
             if (Career == null || Time.frameCount <= inputReadyFrame) return;
             EnsureDecisionSelection();
+            if (Input.GetKeyDown(KeyCode.H)) ToggleViewingMode();
+            if (Input.GetKeyDown(KeyCode.M)) CycleViewingSpeed();
             SetPieceKeys();
             if (Input.GetKeyDown(KeyCode.F)) ToggleKeeperFeet();
             if (World.PendingKeeper != null && !showKeeperFeet)

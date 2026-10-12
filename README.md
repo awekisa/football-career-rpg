@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** fatigue, injuries and substitutions (SME-121). Coaches can bring you on from the bench or take you off; fatigue and injury readiness persist on your player. Substitution limits, shared windows, halftime changes and short-handed play are enforced. Career gameplay comes later.
+**Current milestone:** full-match and position-aware highlights (SME-122). Watch at normal or faster speed, or fast-forward quiet passages and return for your involvement. Every mode runs the same simulation and preserves required decisions. Character creation, training and club-life integration come next.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
@@ -20,6 +20,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 - [Referee decisions and sanctions](docs/referee.md)
 - [Set-piece duties, deliveries and records](docs/set-pieces.md)
 - [Fatigue, injuries, bench entry and substitutions](docs/injuries-and-substitutions.md)
+- [Full-match and highlight viewing](docs/match-viewing.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 

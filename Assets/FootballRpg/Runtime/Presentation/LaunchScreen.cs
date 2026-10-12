@@ -53,7 +53,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); VerifyReferee(); VerifySetPieces(); VerifyParticipation(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); VerifyReferee(); VerifySetPieces(); VerifyParticipation(); VerifyViewing(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -330,6 +330,38 @@ namespace FootballRpg.Presentation
             }
             if (!entered || !removed || view.World.FixturePhase != FixturePhase.FullTime) throw new InvalidOperationException("Spectator fixture failed to finish.");
             view.Close(); Debug.Log("FOOTBALL_RPG_PARTICIPATION_PASSED");
+        }
+
+        private void VerifyViewing()
+        {
+            foreach (string user in new[] { "harbour-player-01", "harbour-player-04", "harbour-player-08", "harbour-player-11", "harbour-player-17" })
+            {
+                string[] expected = null;
+                foreach (var mode in new[] { MatchViewingMode.FullMatch, MatchViewingMode.Highlights })
+                {
+                    var definitions = PrototypeContent.Load(); definitions.userPlayerId = user;
+                    var root = new GameObject("Viewing Smoke"); var view = root.AddComponent<PitchPreview>();
+                    view.Initialize(CareerState.Create(definitions)); view.GetComponent<MatchDriver>().enabled = false;
+                    view.World.StartFixture(new CompetitionRules(12, 0, .1)); view.Playback.SetMode(mode); view.Playback.SetFullMatchSpeed(4);
+                    bool fast = false, focused = false;
+                    for (int frame = 0; frame < 20000 && view.World.FixturePhase != FixturePhase.FullTime; frame++)
+                    {
+                        if (view.World.RefereeNoticePending || view.World.OffsideNoticePending || view.World.HasPendingDecision || view.UserRestart || view.World.FixturePhase == FixturePhase.HalfTime)
+                            view.CommitChosenPass();
+                        fast |= view.Playback.EffectiveSpeed > 1; focused |= view.Playback.Focus != HighlightFocus.Quiet;
+                        view.Playback.Advance(TimeSpan.FromMilliseconds(17));
+                    }
+                    view.SyncWorldView();
+                    if (view.World.FixturePhase != FixturePhase.FullTime || !fast || !focused) throw new InvalidOperationException("Viewing mode failed for " + user);
+                    var facts = view.Match.Diagnostics.Select(d => d.ToJsonLine()).Concat(view.World.FixtureEvents.Select(e => e.Id + e.Kind + e.Tick)).Concat(new[] {
+                        view.Match.Tick + ":" + view.Match.RandomState + ":" + view.World.HomeGoals + ":" + view.World.AwayGoals,
+                        string.Join("|", view.Career.Players.Values.Select(p => p.Id + ":" + p.Fatigue.ToString("R") + ":" + p.InjuryDaysRemaining)) }).ToArray();
+                    if (expected == null) expected = facts;
+                    else if (!expected.SequenceEqual(facts)) throw new InvalidOperationException("Viewing changed the seeded match for " + user);
+                    view.Close();
+                }
+            }
+            Debug.Log("FOOTBALL_RPG_VIEWING_PASSED");
         }
 
         private bool shortFixture;
