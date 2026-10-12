@@ -48,8 +48,9 @@ namespace FootballRpg.Presentation
             DrawKeeperPanel(left);
             DrawDefenseAndIntent(left);
             DrawFixture(left);
-            Text(new Rect(24, 735, left - 48, 26), "Your status: " + World.UserParticipation + " · Subs " + World.SubstitutionsUsed(true) + " / " + World.SubstitutionsUsed(false), small, Lime);
-            Text(new Rect(24, 764, left - 48, 28), World.ParticipationMessage ?? "Coach selects substitutions at stoppages", small, Color.white);
+            DrawViewingControls(left);
+            Text(new Rect(24, 796, left - 390, 30), "Your status: " + World.UserParticipation + " · Subs " + World.SubstitutionsUsed(true) + " / " + World.SubstitutionsUsed(false) + " · " +
+                (World.ParticipationMessage ?? "Coach selects substitutions at stoppages"), small, Lime);
 
             Text(new Rect(left + 24, 26, 310, 25), "PLAYER INSPECTION", small, Lime);
             var selectedMarker = players.First(p => p.PlayerId == SelectedPlayer.Id);

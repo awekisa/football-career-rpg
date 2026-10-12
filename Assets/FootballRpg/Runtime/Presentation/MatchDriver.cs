@@ -9,6 +9,7 @@ namespace FootballRpg.Presentation
     {
         [Range(1, 64)] public int playbackMultiplier = 1;
         public MatchSession Session { get; private set; }
+        public MatchPlayback Playback { get; private set; }
         private long lastSample;
         private bool hasSample;
         private int loggedCount;
@@ -16,11 +17,19 @@ namespace FootballRpg.Presentation
         public void Initialize(MatchSession session)
         {
             Session = session ?? throw new ArgumentNullException(nameof(session));
+            Playback = null;
             hasSample = false;
             loggedCount = 0;
         }
 
-        private void OnDisable() => hasSample = false;
+        public void AttachWorld(OpenPlayWorld world)
+        {
+            var playback = new MatchPlayback(world);
+            if (!ReferenceEquals(playback.Session, Session)) throw new ArgumentException("World and driver must share a match session.");
+            Playback = playback; hasSample = false;
+        }
+
+        private void OnDisable() { hasSample = false; Playback?.ResetTiming(); }
 
         private void Update()
         {
@@ -30,7 +39,8 @@ namespace FootballRpg.Presentation
             long delta = hasSample ? Math.Max(0, sample - lastSample) : 0;
             lastSample = sample;
             hasSample = true;
-            Session.Advance(TimeSpan.FromTicks(delta), playbackMultiplier);
+            if (Playback == null) Session.Advance(TimeSpan.FromTicks(delta), playbackMultiplier);
+            else Playback.Advance(TimeSpan.FromTicks(delta));
             FlushDiagnostics();
         }
 

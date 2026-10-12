@@ -56,3 +56,6 @@ Before a teammate/opponent takes a restart, choose follow zone [1], mark [2], at
 
 
 SME-121 adds **B / Start on bench** on the launch screen. The coach can bring the reserve central midfielder on at halftime. The match view shows participation, substitutions and availability; removed players remain inspectable but cannot act. See [fatigue and substitutions](injuries-and-substitutions.md).
+
+
+SME-122 adds **H** to switch Full Match / Highlights and **M** to cycle viewing speed. Quiet highlights accelerate; involvement returns to 1× and decisions remain paused. Modes can change while inspecting. See [match viewing](match-viewing.md).

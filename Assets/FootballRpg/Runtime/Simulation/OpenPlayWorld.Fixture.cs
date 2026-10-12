@@ -39,7 +39,7 @@ namespace FootballRpg.Simulation
         private void RecordFixture(string kind, bool? home = null, RestartKind? restart = null)
         {
             var fact = new FixtureEvent(session.SessionId + ":fixture-" + (++fixtureSequence), kind, session.Tick, home, restart);
-            fixtureEvents.Add(fact); FixtureChanged?.Invoke(fact);
+            fixtureEvents.Add(fact); RememberViewingEvent(kind); FixtureChanged?.Invoke(fact);
         }
         private void ClearPlay()
         {
