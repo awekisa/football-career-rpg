@@ -104,7 +104,7 @@ namespace FootballRpg.Presentation
             var awayKit = geometry.Material(new Color(.96f, .40f, .28f));
             var keeperKit = geometry.Material(new Color(.86f, .68f, .22f));
             var shorts = geometry.Material(new Color(.055f, .09f, .13f));
-            var skin = geometry.Material(new Color(.75f, .55f, .38f));
+            var skins = new[] { new Color(.9f, .72f, .58f), new Color(.75f, .55f, .38f), new Color(.5f, .32f, .22f), new Color(.28f, .17f, .12f) }.Select(c => geometry.Material(c)).ToArray();
             var userColor = geometry.Material(new Color(.72f, .96f, .35f), true);
             var selectedColor = geometry.Material(Color.white, true);
             foreach (bool home in new[] { true, false })
@@ -121,7 +121,7 @@ namespace FootballRpg.Presentation
                     var kit = state.PrimaryPositionId == "gk" ? keeperKit : home ? homeKit : awayKit;
                     geometry.Shape("Shirt", PrimitiveType.Capsule, new Vector3(0, 1.2f, 0), new Vector3(1.05f, .65f, 1.05f), kit, root);
                     geometry.Shape("Shorts", PrimitiveType.Cube, new Vector3(0, .4f, 0), new Vector3(.8f, .65f, .65f), shorts, root);
-                    geometry.Shape("Head", PrimitiveType.Sphere, new Vector3(0, 2.05f, 0), Vector3.one * .68f, skin, root);
+                    geometry.Shape("Head", PrimitiveType.Sphere, new Vector3(0, 2.05f, 0), Vector3.one * .68f, skins[state.AppearanceId == "placeholder-2" ? 1 : state.AppearanceId == "placeholder-3" ? 2 : state.AppearanceId == "placeholder-4" ? 3 : 0], root);
                     var collider = root.gameObject.AddComponent<CapsuleCollider>();
                     collider.center = new Vector3(0, 1.1f, 0);
                     collider.height = 3.2f;

@@ -9,7 +9,7 @@ using UnityEngine;
 namespace FootballRpg.Presentation
 {
     /// <summary>Honest foundation screen; career entry arrives with the playable-week milestone.</summary>
-    public sealed class LaunchScreen : MonoBehaviour
+    public sealed partial class LaunchScreen : MonoBehaviour
     {
         public CareerState Career { get; private set; }
         private PitchPreview preview;
@@ -382,6 +382,8 @@ namespace FootballRpg.Presentation
 
         private void Update()
         {
+            if (creationDraft != null) { UpdateCreation(); return; }
+            if (preview == null && Input.GetKeyDown(KeyCode.C)) BeginCreation();
             if (preview == null && Input.GetKeyDown(KeyCode.Return)) OpenPitch();
             if (preview == null && Input.GetKeyDown(KeyCode.L)) shortFixture = !shortFixture;
             if (preview == null && Input.GetKeyDown(KeyCode.B)) OpenPitch(bench: true);
@@ -400,13 +402,14 @@ namespace FootballRpg.Presentation
                 Quaternion.identity, new Vector3(scale, scale, 1));
 
             Fill(new Rect(0, 0, 1440, 900), new Color(0.025f, 0.06f, 0.07f, 0.96f));
+            if (creationDraft != null) { DrawCreation(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             Fill(new Rect(68, 78, 42, 4), new Color(0.66f, 0.91f, 0.43f));
             GUI.Label(new Rect(68, 108, 620, 30), "ONE PLAYER. YOUR CAREER.", eyebrow);
             GUI.Label(new Rect(64, 172, 850, 180), "FOOTBALL\nCAREER RPG", title);
             GUI.Label(new Rect(70, 398, 580, 110),
                 "Read the game. Choose your moment.\nEarn your place, on and off the pitch.", body);
             GUI.Label(new Rect(70, 543, 550, 96),
-                "Explore the pitch and inspect both teams.\nThe playable career is still in development.", small);
+                Career.UserPlayer.Name + " · " + Career.UserPlayer.PrimaryPositionId.ToUpperInvariant() + "\nCreate your prospect, then play the fixture.", small);
 
             if (GUI.Button(new Rect(70, 683, 260, 58), "PLAY MATCH  [ENTER]", button))
                 OpenPitch();
@@ -418,6 +421,7 @@ namespace FootballRpg.Presentation
             if (GUI.Button(new Rect(420, 754, 380, 45), "START ON BENCH  [B]", button)) OpenPitch(bench: true);
 
             if (GUI.Button(new Rect(490, 683, 310, 58), shortFixture ? "4-MINUTE MATCH  [L]" : "90-MINUTE MATCH  [L]", button)) shortFixture = !shortFixture;
+            if (GUI.Button(new Rect(872, 730, 460, 58), "CREATE FOOTBALLER  [C]", button)) BeginCreation();
             DrawPitch(new Rect(872, 200, 460, 500));
             GUI.Label(new Rect(70, 810, 1100, 30), "PROTOTYPE  /  FOUNDATION     •     SINGLE PLAYER", eyebrow);
             GUI.matrix = originalMatrix;
