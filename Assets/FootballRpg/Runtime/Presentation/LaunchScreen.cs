@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using FootballRpg.Content;
+using FootballRpg.Simulation;
 using UnityEngine;
 
 namespace FootballRpg.Presentation
@@ -7,6 +9,7 @@ namespace FootballRpg.Presentation
     /// <summary>Honest foundation screen; career entry arrives with the playable-week milestone.</summary>
     public sealed class LaunchScreen : MonoBehaviour
     {
+        public CareerState Career { get; private set; }
         private bool showScope;
         private GUIStyle title;
         private GUIStyle eyebrow;
@@ -16,8 +19,20 @@ namespace FootballRpg.Presentation
 
         private IEnumerator Start()
         {
+            bool smokeTest = Array.IndexOf(Environment.GetCommandLineArgs(), "--smoke-test") >= 0;
+            try
+            {
+                Career = PrototypeContent.CreateCareer();
+                Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error);
+                if (smokeTest) Application.Quit(1);
+                throw;
+            }
             Debug.Log("FOOTBALL_RPG_LAUNCH_READY");
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--smoke-test") < 0)
+            if (!smokeTest)
                 yield break;
 
             // Exercise the real launch scene and lifecycle in a built player before exiting.
