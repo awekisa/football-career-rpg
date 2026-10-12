@@ -91,7 +91,7 @@ namespace FootballRpg.Simulation
                 schemaVersion = content.schemaVersion, userPlayerId = created.id,
                 footballAttributes = content.footballAttributes, personalityTraits = content.personalityTraits,
                 positions = content.positions, actions = content.actions, coaches = content.coaches,
-                clubs = content.clubs, fixture = content.fixture,
+                clubs = content.clubs, fixture = content.fixture, calendar = content.calendar,
                 players = content.players.Select(p => p.id == slot.id ? created : p).ToArray()
             };
             return CareerState.Create(session);

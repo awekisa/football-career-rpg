@@ -16,6 +16,7 @@ namespace FootballRpg.Simulation
         public CoachDefinition[] coaches;
         public ClubDefinition[] clubs;
         public FixtureDefinition fixture;
+        public CalendarDefinition calendar;
     }
 
     [Serializable]
