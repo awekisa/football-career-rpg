@@ -120,6 +120,26 @@ namespace FootballRpg.Simulation
             return diagnostic;
         }
 
+        /// <summary>Resolve an AI choice synchronously without discarding accumulated render time.</summary>
+        public ActionDiagnostic ResolveAutomatic(ActionRequest request)
+        {
+            if (State != MatchRunState.Running)
+                throw new InvalidOperationException("Automatic choices require a running match.");
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (requests.TryGetValue(request.RequestId, out var previous))
+            {
+                if (!previous.Request.SameChoice(request))
+                    throw new InvalidOperationException("Request ID reused with a different choice.");
+                return previous;
+            }
+            long remainder = pendingTimeTicks;
+            Pause();
+            var result = BeginResolution(request);
+            CompleteResolution(result.Result.EventId);
+            pendingTimeTicks = remainder;
+            return result;
+        }
+
         /// <summary>Animation completion resumes the clock; it never resolves or publishes the action again.</summary>
         public bool CompleteResolution(string eventId)
         {

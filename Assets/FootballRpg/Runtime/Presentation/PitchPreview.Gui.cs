@@ -65,7 +65,7 @@ namespace FootballRpg.Presentation
             if (Button(new Rect(left + 184, 724, 150, 37), "AWAY TEAM")) SelectPlayer(players.First(p => !p.IsHome).PlayerId);
             if (Button(new Rect(left + 24, 774, 150, 37), "PREVIOUS")) Browse(-1);
             if (Button(new Rect(left + 184, 774, 150, 37), "NEXT")) Browse(1);
-            Text(new Rect(left + 24, 836, 312, 55), "Static positioning preview.\nPlayer movement comes next.", muted, new Color(.63f, .73f, .73f));
+            Text(new Rect(left + 24, 836, 312, 55), "AI open play  ·  " + World.BallState + "\nLime area: expected position.", muted, new Color(.63f, .73f, .73f));
 
             Text(new Rect(28, 847, left - 400, 43), "Click / Tab to inspect  ·  Scroll to zoom\nWASD / right-drag to pan  ·  Q / E to rotate", muted, new Color(.7f, .78f, .76f));
             if (Button(new Rect(left - 342, 848, 80, 32), "−")) AdjustCamera(0, 0, 0, 5);

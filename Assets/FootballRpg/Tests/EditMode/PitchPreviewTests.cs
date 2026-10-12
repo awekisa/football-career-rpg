@@ -110,6 +110,28 @@ namespace FootballRpg.Tests
         }
 
         [Test]
+        public void ViewsAndTacticalMarkerFollowTheWorldAndFreezeOnPause()
+        {
+            preview.TogglePause();
+            preview.Match.Advance(TimeSpan.FromSeconds(5));
+            preview.SyncWorldView();
+            foreach (var marker in preview.Players)
+            {
+                var motion = preview.World.Players.Single(p => p.Player.Id == marker.PlayerId);
+                Assert.That(marker.transform.localPosition.x, Is.EqualTo((float)motion.Position.X));
+                Assert.That(marker.transform.localPosition.z, Is.EqualTo((float)motion.Position.Z));
+            }
+            var target = root.GetComponentsInChildren<Transform>().Single(t => t.name == "Expected Tactical Position");
+            var user = preview.World.Players.Single(p => p.Player.Id == career.UserPlayerId);
+            Assert.That(target.localPosition.x, Is.EqualTo((float)user.Target.X));
+            preview.TogglePause();
+            var previous = target.localPosition;
+            preview.Match.Advance(TimeSpan.FromHours(1));
+            preview.SyncWorldView();
+            Assert.That(target.localPosition, Is.EqualTo(previous));
+        }
+
+        [Test]
         public void ClosingPreviewRestoresTheOriginalCamera()
         {
             preview.Close();
