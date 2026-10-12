@@ -41,7 +41,7 @@ This ticket does not implement progression, transfers, relationships, probabilit
 
 ## Event contracts
 
-Events are immutable facts emitted after state changes. They carry stable event/player IDs and sequence numbers; generation/dispatch belongs to simulation infrastructure. These types generate no random GUID or wall-clock timestamp.
+Events are immutable facts emitted after state changes. They carry stable event/player IDs and sequence numbers. MatchSession now generates action sequences; dispatch for other systems remains future work. These types generate no random GUID or wall-clock timestamp.
 
 - `ActivityResolved`: activity and slot IDs, attended/skipped/late outcome.
 - `ActionResolved`: action/target/outcome IDs, exact probability and random draw in [0,1). Success derives from `roll < chance`, avoiding contradictory flags. No random numbers or probabilities are calculated here.

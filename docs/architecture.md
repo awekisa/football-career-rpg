@@ -4,7 +4,7 @@
 
 ## Assemblies
 
-- **Simulation**: pure C# game rules and state. `noEngineReferences` prevents accidental Unity dependencies. Owns definition DTOs, validation, career state and event contracts. SME-109 adds simulation time and randomness.
+- **Simulation**: pure C# game rules and state. `noEngineReferences` prevents accidental Unity dependencies. Owns definition DTOs, validation, career state and event contracts. MatchSession owns fixed simulation time, seeded randomness and action diagnostics.
 - **Content**: Unity content definitions and adapters, allowed to reference Simulation. Loads editable prototype JSON and validates it through Simulation.
 - **Presentation**: scenes, UI, camera, animation and input; may reference Content and Simulation. Presentation must not own outcome randomness or apply skill XP.
 - **Editor**: asset setup and reproducible build entry points, excluded from players.
@@ -20,4 +20,4 @@ Launch.unity is a committed, editable scene with a camera and a foundation scree
 
 ## Next components
 
-SME-108 provides shared data/events and a validated 36-player fixture (see [data ownership](game-data.md)). SME-109 introduces deterministic time and randomness. SME-110 through SME-113 implement the first visible pass loop. Later issues connect football outcomes to career consequences. Follow explicit Linear dependencies rather than treating every milestone as a serial gate.
+SME-108 provides shared data/events and a validated 36-player fixture (see [data ownership](game-data.md)). SME-109 provides deterministic time and randomness (see [match simulation](match-simulation.md)). SME-110 through SME-113 implement the first visible pass loop. Later issues connect football outcomes to career consequences. Follow explicit Linear dependencies rather than treating every milestone as a serial gate.
