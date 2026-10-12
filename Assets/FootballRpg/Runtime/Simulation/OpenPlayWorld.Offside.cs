@@ -23,6 +23,7 @@ namespace FootballRpg.Simulation
         {
             if (Rules == null || offence == null) return false;
             if (Advantage != null) { RecallAdvantage(); return true; }
+            RecordSetPieceOutcome("Offside", false);
             LastOffside = offence;
             bool offendingHome = players.Single(p => p.Player.Id == offence.PlayerId).IsHome;
             var awarded = players.First(p => p.IsHome != offendingHome);

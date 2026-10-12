@@ -148,12 +148,14 @@ namespace FootballRpg.Simulation
             }
             else if (result.Outcome == KeeperOutcome.Held)
             {
+                RecordSetPieceOutcome("Keeper held", false);
                 keeper.Position = preview.Target;
                 Handling.RecordTouch(keeper.Player.Id, keeper.Player.ClubId, BallTouchKind.Other);
                 HoldingKeeperId = keeper.Player.Id; ReceiveBall(keeper, preview.Context.Situation != KeeperSituation.Shot);
             }
             else if (result.Outcome == KeeperOutcome.Deflected)
             {
+                RecordSetPieceOutcome("Keeper deflected", false);
                 RecordOffsideTouch(keeper, preview.Context.Situation == KeeperSituation.Shot ? OffsideTouch.Save : OffsideTouch.Deflection);
                 Handling.RecordTouch(keeper.Player.Id, keeper.Player.ClubId, BallTouchKind.Other);
                 BallPosition = new PitchPoint(BallPosition.X + 5 * keeper.Direction, BallPosition.Z >= 0 ? 8 : -8).Bounded();
@@ -162,7 +164,7 @@ namespace FootballRpg.Simulation
             else if (preview.Context.Situation == KeeperSituation.Shot)
             { ScoreShot(threat); }
             else if (preview.Context.Situation == KeeperSituation.Cross)
-            { BeginArrival(players.Single(p => p.Player.Id == threat.Preview.Receiver.Id), threat.Preview.DeliveryHeight, 14); }
+            { BeginDeliveryArrival(players.Single(p => p.Player.Id == threat.Preview.Receiver.Id), threat.Preview.DeliveryHeight, 14); }
             else if (preview.Context.Situation == KeeperSituation.Distribution) MakeLoose();
             else if (result.Outcome == KeeperOutcome.Positioned) keeper.Position = preview.Target;
             else if (preview.Kind == KeeperAction.RushOut)

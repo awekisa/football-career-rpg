@@ -17,8 +17,9 @@ namespace FootballRpg.Simulation
         public double Height { get; }
         public double Speed { get; }
         public int Direction { get; }
+        public RestartKind? Restart { get; }
         public IReadOnlyList<PassActor> Opponents { get; }
-        public FootballActionContext(PassActor actor, BallSituation situation, double height, double speed, int direction, IEnumerable<PassActor> opponents)
+        public FootballActionContext(PassActor actor, BallSituation situation, double height, double speed, int direction, IEnumerable<PassActor> opponents, RestartKind? restart = null)
         {
             Actor = actor ?? throw new ArgumentNullException(nameof(actor));
             if (!Enum.IsDefined(typeof(BallSituation), situation) || double.IsNaN(height) || double.IsInfinity(height) || height < 0 ||
@@ -27,7 +28,7 @@ namespace FootballRpg.Simulation
             var array = opponents.ToArray();
             if (array.Any(p => p == null || p.ClubId == actor.ClubId) || array.Select(p => p.Id).Distinct().Count() != array.Length)
                 throw new ArgumentException("Use unique opposing players.");
-            Situation = situation; Height = height; Speed = speed; Direction = direction;
+            Restart = restart; Situation = situation; Height = height; Speed = speed; Direction = direction;
             Opponents = Array.AsReadOnly(array);
         }
     }
@@ -113,7 +114,7 @@ namespace FootballRpg.Simulation
                 case FootballActionKind.FirstTimePass: return !controlled && context.Height < 1.2 && teammate;
                 case FootballActionKind.Dribble: return controlled && context.Actor.Position.X * context.Direction < 49 &&
                     (variant == "carry" || context.Opponents.Any(p => p.Position.Distance(context.Actor.Position) <= 8));
-                case FootballActionKind.Cross: return controlled && Math.Abs(context.Actor.Position.Z) >= 16 && teammate;
+                case FootballActionKind.Cross: return controlled && (Math.Abs(context.Actor.Position.Z) >= 16 || context.Restart == RestartKind.Corner || context.Restart == RestartKind.DirectFreeKick || context.Restart == RestartKind.IndirectFreeKick) && teammate;
                 case FootballActionKind.Shot: return controlled;
                 case FootballActionKind.HeaderPass: return aerial && teammate;
                 case FootballActionKind.HeaderShot: return aerial;

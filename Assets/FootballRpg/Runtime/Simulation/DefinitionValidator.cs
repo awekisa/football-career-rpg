@@ -77,6 +77,18 @@ namespace FootballRpg.Simulation
                 Unit(club.staffQuality, club.id + ": staff quality");
                 Unit(club.facilityQuality, club.id + ": facility quality");
                 References(club.squadPlayerIds, players, club.id + ": squad");
+                if (club.setPieces != null)
+                {
+                    foreach (var takers in new[] { club.setPieces.penaltyTakers, club.setPieces.freeKickTakers, club.setPieces.cornerTakers })
+                    {
+                        Require(takers != null && takers.Length > 0 && takers.Distinct().Count() == takers.Length && takers.All(id => club.squadPlayerIds.Contains(id)), club.id + ": invalid set-piece takers.");
+                    }
+                    Require(club.setPieces.roles != null, club.id + ": missing set-piece roles.");
+                    var roles = new HashSet<string>();
+                    foreach (var role in club.setPieces.roles)
+                        Require(role != null && positions.ContainsKey(role.positionId ?? "") && roles.Add(role.positionId) &&
+                            Enum.GetNames(typeof(SetPieceDuty)).Contains(role.attackingDuty) && Enum.GetNames(typeof(SetPieceDuty)).Contains(role.defendingDuty), club.id + ": invalid set-piece role.");
+                }
                 foreach (var id in club.squadPlayerIds)
                 {
                     Require(membership.Add(id), id + ": assigned to multiple squads.");

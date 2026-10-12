@@ -92,6 +92,7 @@ namespace FootballRpg.Simulation
         public float StaffQuality { get; }
         public float FacilityQuality { get; }
         public IReadOnlyList<string> SquadPlayerIds { get; }
+        public SetPiecePlan SetPieces { get; }
 
         internal ClubState(ClubDefinition source)
         {
@@ -101,6 +102,7 @@ namespace FootballRpg.Simulation
             CurrencyCode = source.currencyCode;
             StaffQuality = source.staffQuality;
             FacilityQuality = source.facilityQuality;
+            SetPieces = new SetPiecePlan(source.setPieces);
             SquadPlayerIds = Array.AsReadOnly((string[])source.squadPlayerIds.Clone());
         }
     }

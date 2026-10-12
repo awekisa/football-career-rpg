@@ -144,24 +144,25 @@ namespace FootballRpg.Simulation
             }
             return message;
         }
-        public FootballActionPreview RestartShotPreview()
+        public FootballActionPreview RestartShotPreview(string variant = "placed")
         {
             if (Restart == null || (Restart.Kind != RestartKind.Penalty && Restart.Kind != RestartKind.DirectFreeKick)) return null;
             var taker = players.Single(p => p.Player.Id == Restart.TakerId);
             var context = new FootballActionContext(Snapshot(taker), BallSituation.Controlled, 0, 0, taker.Direction, players.Where(p => p.IsHome != taker.IsHome).Select(Snapshot));
-            return FootballActionResolver.Preview(context, FootballActionKind.Shot, "placed");
+            return FootballActionResolver.Preview(context, FootballActionKind.Shot, variant);
         }
-        public FootballActionResolved ShootRestart(string id)
+        public FootballActionResolved ShootRestart(string id, string variant = "placed")
         {
-            if (id != null && restartShots.TryGetValue(id, out var cached)) return cached;
-            if (Restart == null || Restart.Id != id || RefereeNoticePending || OffsideNoticePending) throw new InvalidOperationException("Restart is not ready.");
-            var preview = RestartShotPreview();
+            if (id != null && restartShots.TryGetValue(id, out var cached)) { if (cached.Preview.Variant != variant) throw new InvalidOperationException("Restart already shot differently."); return cached; }
+            if (Restart == null || Restart.Id != id || PendingSetPiece != null || RefereeNoticePending || OffsideNoticePending) throw new InvalidOperationException("Restart is not ready.");
+            var preview = RestartShotPreview(variant);
             if (preview == null) throw new InvalidOperationException("This restart cannot score directly.");
             var restart = Restart; var taker = players.Single(p => p.Player.Id == restart.TakerId);
             session.Resume();
             var result = FootballActionResolver.Commit(session, id, preview, true);
             restartShots.Add(id, result); periodStarted = true; Restart = null; penaltyInProgress = restart.Kind == RestartKind.Penalty;
-            PossessionClubId = taker.Player.ClubId; BeginFootballFlight(taker, result);
+            PossessionClubId = taker.Player.ClubId; BeginFootballFlightCore(taker, result, restart.Kind);
+            RecordSetPieceTaking(restart, result.Action, "Shot:" + variant);
             directRestart = restart.Kind; directRestartHome = restart.IsHome;
             RecordFixture("RestartReleased", restart.IsHome, restart.Kind); FootballActionCommitted?.Invoke(result); return result;
         }
