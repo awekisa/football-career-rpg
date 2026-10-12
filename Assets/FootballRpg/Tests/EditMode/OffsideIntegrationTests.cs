@@ -175,7 +175,7 @@ namespace FootballRpg.Tests
                 var view = root.AddComponent<PitchPreview>(); view.Initialize(CareerState.Create(data)); view.World.StartFixture(new CompetitionRules(600));
                 for (int i = 0; i < 24000 && view.World.LastOffside == null; i++)
                 {
-                    if (view.World.FixturePhase == FixturePhase.HalfTime || view.World.HasPendingDecision || view.UserRestart) view.CommitChosenPass();
+                    if (view.World.RefereeNoticePending || view.World.FixturePhase == FixturePhase.HalfTime || view.World.HasPendingDecision || view.UserRestart) view.CommitChosenPass();
                     var intent = view.World.CanSetIntent(OffBallIntent.ForwardRun) ? OffBallIntent.ForwardRun : OffBallIntent.Counterattack;
                     if (view.World.CanSetIntent(intent) && view.World.ActiveIntent?.Kind != intent) view.ChooseIntent(intent);
                     view.Match.Advance(Step);

@@ -45,3 +45,7 @@ The launch starts a full fixture. L switches between 90-minute and four-minute m
 ## Offside explanation (SME-118)
 
 A fixture pauses when offside is called. The panel names the offender, explains the active involvement and identifies IFAB 2026/27. Player inspection remains available. Enter/Continue acknowledges the notice; the awarded taker then uses the normal restart recipient controls. Space cannot skip the explanation.
+
+## Referee controls
+
+Enter acknowledges a paused referee notice. Advantage continues play. A penalty taker uses Enter to shoot; direct free kicks offer pass and shoot controls. Inspection shows bookings/dismissals, and sent-off players leave the pitch. See [referee rules](referee.md).

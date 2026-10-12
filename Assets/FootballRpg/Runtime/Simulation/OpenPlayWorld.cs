@@ -23,13 +23,14 @@ namespace FootballRpg.Simulation
     {
         public PlayerState Player { get; }
         public bool IsHome { get; }
+        public bool IsGoalkeeper { get; internal set; }
         public int Direction { get; internal set; }
         public PitchPoint Anchor { get; internal set; }
         public PitchPoint Position { get; internal set; }
         public PitchPoint Target { get; internal set; }
         public PitchPoint Facing { get; internal set; }
         internal FootballerMotion(PlayerState player, bool home, PitchPoint anchor)
-        { Player = player; IsHome = home; Direction = home ? 1 : -1; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
+        { Player = player; IsGoalkeeper = player.PrimaryPositionId == "gk"; IsHome = home; Direction = home ? 1 : -1; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
     }
 
     public enum BallPhase { Owned, Travelling, Loose, OutOfPlay, Incoming, KeeperIntervention }
@@ -100,7 +101,7 @@ namespace FootballRpg.Simulation
             if (openingArrivalHeight.HasValue)
                 BeginArrival(players.Single(p => p.Player.Id == controlledPlayerId), openingArrivalHeight.Value, 12);
             else GiveBall(startWithControlledPlayer ? players.Single(p => p.Player.Id == controlledPlayerId)
-                : players.First(p => p.IsHome && p.Player.PrimaryPositionId != "gk"));
+                : players.First(p => p.IsHome && !p.IsGoalkeeper));
             session.TickAdvanced += Step;
         }
 
@@ -129,8 +130,8 @@ namespace FootballRpg.Simulation
         private void Step(long tick)
         {
             // Defend against direct clock resume: a pending user choice may never be delegated to AI.
-            if (HasPendingDecision || OffsideNoticePending) { session.Pause(); return; }
-            if (StepFixture()) return;
+            if (HasPendingDecision || OffsideNoticePending || RefereeNoticePending) { session.Pause(); return; }
+            if (StepReferee() || StepFixture()) return;
             if (CheckOffsideInterference()) return;
             RefreshIntent();
             if (BallState == BallPhase.Incoming) { ChooseAiReception(); return; }
@@ -140,7 +141,7 @@ namespace FootballRpg.Simulation
             if (owner != null && HoldingKeeperId == null) RecordOffsideTouch(owner);
             if (TryKeeperThreat(owner)) return;
             if (TryOpenDefense(owner)) return;
-            if (owner != null && owner.Player.PrimaryPositionId == "gk" && owner.Player.Id != controlledPlayerId && heldSeconds >= .5)
+            if (owner != null && owner.IsGoalkeeper && owner.Player.Id != controlledPlayerId && heldSeconds >= .5)
             { OpenKeeperPossession(owner); return; }
             // Calculate every target from the same snapshot before integrating anyone's movement.
             foreach (var player in players) player.Target = IntendedTarget(player, owner);
@@ -209,6 +210,7 @@ namespace FootballRpg.Simulation
                 challengeSeconds = 1.2;
                 var preview = DefenseResolver.Preview(Snapshot(challenger), Snapshot(owner), challenger.Direction, DefensiveAction.Tackle);
                 var result = DefenseResolver.Commit(session, "open-play-" + (++actionSequence), preview, true);
+                if (JudgeChallenge(result, challenger, owner)) return;
                 if (result.Action.Succeeded) { GiveBall(challenger); return; }
             }
             if (session.Tick < containedUntilTick && owner.Player.Id == containedPlayerId) return;
@@ -228,11 +230,11 @@ namespace FootballRpg.Simulation
             if (player.Player.Id == HoldingKeeperId) return player.Position;
             if (player == owner)
                 return new PitchPoint(player.Position.X + 8 * player.Direction, player.Position.Z * .9).Bounded();
-            if (player.Player.PrimaryPositionId == "gk")
+            if (player.IsGoalkeeper)
                 return new PitchPoint((-48 + (attacking ? 3 : 0)) * player.Direction, ball.Z * .13);
             if (!attacking && owner != null)
             {
-                var presser = players.Where(p => p.IsHome == player.IsHome && p.Player.PrimaryPositionId != "gk")
+                var presser = players.Where(p => p.IsHome == player.IsHome && !p.IsGoalkeeper)
                     .OrderBy(p => p.Position.Distance(ball)).First();
                 if (player == presser) return ball;
             }
@@ -268,7 +270,7 @@ namespace FootballRpg.Simulation
                 players.Where(p => p.IsHome != owner.IsHome).Select(Snapshot));
         }
 
-        private static PassActor Snapshot(FootballerMotion player) => new PassActor(player.Player, player.Position, player.Facing);
+        private static PassActor Snapshot(FootballerMotion player) => new PassActor(player.Player, player.Position, player.Facing, player.IsGoalkeeper ? "gk" : null);
 
         private void Pass(FootballerMotion owner)
         {
@@ -314,7 +316,9 @@ namespace FootballRpg.Simulation
 
         private bool ReceiveBall(FootballerMotion player, bool deliberate)
         {
+            if (!CanParticipate(player.Player.Id)) return false;
             if (CheckOffsideTouch(player)) return false;
+            penaltyInProgress = false;
             directRestart = null;
             if (lastClub != null && lastClub != player.Player.ClubId) PossessionChanges++;
             lastClub = PossessionClubId = player.Player.ClubId;
@@ -328,10 +332,10 @@ namespace FootballRpg.Simulation
             heldSeconds = 0;
             possessionSequence++;
             RefreshIntent();
-            if (player.Player.PrimaryPositionId != "gk") Handling.RecordTouch(player.Player.Id, player.Player.ClubId, BallTouchKind.Other);
+            if (!player.IsGoalkeeper) Handling.RecordTouch(player.Player.Id, player.Player.ClubId, BallTouchKind.Other);
             if (HoldingKeeperId != player.Player.Id) HoldingKeeperId = null;
             if (player.Player.Id == controlledPlayerId)
-            { if (player.Player.PrimaryPositionId == "gk") OpenKeeperPossession(player); else OpenDecision(); }
+            { if (player.IsGoalkeeper) OpenKeeperPossession(player); else OpenDecision(); }
             return true;
         }
 
@@ -377,7 +381,7 @@ namespace FootballRpg.Simulation
 
         public void TogglePause()
         {
-            if (FixturePhase == FixturePhase.FullTime || OffsideNoticePending) return;
+            if (FixturePhase == FixturePhase.FullTime || OffsideNoticePending || RefereeNoticePending) return;
             if (FixturePhase == FixturePhase.HalfTime) { ContinueSecondHalf(); return; }
             if (HasPendingDecision || (Restart != null && Restart.TakerId == controlledPlayerId)) return;
             if (session.State == MatchRunState.Paused) session.Resume();

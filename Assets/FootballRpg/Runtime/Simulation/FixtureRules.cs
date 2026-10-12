@@ -3,7 +3,7 @@ using System;
 namespace FootballRpg.Simulation
 {
     public enum FixturePhase { Practice, FirstHalf, HalfTime, SecondHalf, FullTime }
-    public enum RestartKind { Kickoff, ThrowIn, Corner, GoalKick, IndirectFreeKick }
+    public enum RestartKind { Kickoff, ThrowIn, Corner, GoalKick, IndirectFreeKick, DirectFreeKick, Penalty }
 
     /// <summary>Regulation-only competition. Durations are match seconds, independent of playback speed.</summary>
     public sealed class CompetitionRules

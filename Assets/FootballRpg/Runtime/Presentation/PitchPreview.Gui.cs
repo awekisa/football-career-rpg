@@ -21,7 +21,7 @@ namespace FootballRpg.Presentation
             Color originalBackground = GUI.backgroundColor;
             GUI.matrix = Matrix4x4.identity;
             GUI.backgroundColor = Ink;
-            foreach (var player in players)
+            foreach (var player in players.Where(p => p.gameObject.activeSelf))
             {
                 Vector3 point = ViewCamera.WorldToScreenPoint(player.transform.position + Vector3.up * 3.1f);
                 if (point.z <= 0 || !ViewCamera.pixelRect.Contains(point)) continue;
@@ -39,7 +39,7 @@ namespace FootballRpg.Presentation
             Text(new Rect(28, 22, 300, 25), (World.Rules == null ? "PRACTICE" : FixturePhaseLabel + (World.AnnouncedAddedSeconds > 0 ? " +" + World.AnnouncedAddedSeconds.ToString("0.#") + "s" : "")) + "  /  " + World.HomeGoals + " – " + World.AwayGoals, small, Lime);
             Text(new Rect(28, 58, left - 220, 35), (Career.Clubs[Career.Fixture.HomeClubId].Name + "  /  " + Career.Clubs[Career.Fixture.AwayClubId].Name).ToUpperInvariant(), label, Color.white);
             Text(new Rect(left - 192, 18, 155, 27), MatchClockText, label, Color.white);
-            GUI.enabled = !World.HasPendingDecision && !World.OffsideNoticePending && !UserRestart && World.FixturePhase != Simulation.FixturePhase.FullTime;
+            GUI.enabled = !World.HasPendingDecision && !World.OffsideNoticePending && !World.RefereeNoticePending && !UserRestart && World.FixturePhase != Simulation.FixturePhase.FullTime;
             if (Button(new Rect(left - 192, 54, 160, 34), World.FixturePhase == Simulation.FixturePhase.FullTime ? "MATCH FINISHED" : World.FixturePhase == Simulation.FixturePhase.HalfTime ? "2ND HALF [SPACE]" : World.HasPendingDecision || UserRestart ? "CHOOSE ACTION" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
                 TogglePause();
             GUI.enabled = true;
@@ -66,7 +66,7 @@ namespace FootballRpg.Presentation
                 Bar(left + 24, 352 + i * 48, attributes[id].name, (SelectedPlayer.FootballAttributes[id] - attributes[id].minimum) / (float)(attributes[id].maximum - attributes[id].minimum),
                     SelectedPlayer.FootballAttributes[id].ToString(), teamColor);
             }
-            Text(new Rect(left + 24, 565, 312, 25), "MATCH READINESS", small, new Color(.63f, .73f, .73f));
+            Text(new Rect(left + 24, 565, 312, 25), (World.Discipline.IsDismissed(SelectedPlayer.Id) ? "SENT OFF" : World.Discipline.Yellows(SelectedPlayer.Id) > 0 ? "YELLOW CARD" : "MATCH READINESS"), small, new Color(.63f, .73f, .73f));
             Bar(left + 24, 604, "Confidence", SelectedPlayer.Confidence, Mathf.RoundToInt(SelectedPlayer.Confidence * 100) + "%", Lime);
             Bar(left + 24, 651, "Fatigue", SelectedPlayer.Fatigue, Mathf.RoundToInt(SelectedPlayer.Fatigue * 100) + "%", Coral);
             if (Button(new Rect(left + 24, 724, 150, 37), "HOME TEAM")) SelectPlayer(players.First(p => p.IsHome).PlayerId);
@@ -74,7 +74,7 @@ namespace FootballRpg.Presentation
             if (Button(new Rect(left + 24, 774, 150, 37), "PREVIOUS")) Browse(-1);
             if (Button(new Rect(left + 184, 774, 150, 37), "NEXT")) Browse(1);
             string passInfo = "AI open play  ·  " + World.BallState + "\nLime area: current movement target.";
-            if (World.OwnerId != null && World.OwnerId != SelectedPlayer.Id &&
+            if (World.CanParticipate(SelectedPlayer.Id) && World.OwnerId != null && World.OwnerId != SelectedPlayer.Id &&
                 Career.Players[World.OwnerId].ClubId == SelectedPlayer.ClubId &&
                 World.Players.First(p => p.Player.Id == World.OwnerId).Position.Distance(World.Players.First(p => p.Player.Id == SelectedPlayer.Id).Position) >= .1)
                 passInfo = "From ball carrier to selected player\nFeet " + World.PreviewPass(SelectedPlayer.Id, Simulation.PassKind.ToFeet).Percent +

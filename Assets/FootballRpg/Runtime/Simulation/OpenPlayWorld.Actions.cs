@@ -121,10 +121,11 @@ namespace FootballRpg.Simulation
 
         private void BeginFootballFlight(FootballerMotion actor, FootballActionResolved result)
         {
+            if (Advantage != null && actor.Player.ClubId == Advantage.ClubId && (result.Preview.Kind == FootballActionKind.Shot || result.Preview.Kind == FootballActionKind.HeaderShot)) RealizeAdvantage();
             RecordOffsideTouch(actor);
             LastFootballAction = activeFootballAction = result;
             HoldingKeeperId = null;
-            if (actor.Player.PrimaryPositionId != "gk" || (result.Preview.Kind != FootballActionKind.Control && result.Preview.Kind != FootballActionKind.Dribble))
+            if (!actor.IsGoalkeeper || (result.Preview.Kind != FootballActionKind.Control && result.Preview.Kind != FootballActionKind.Dribble))
                 Handling.RecordTouch(actor.Player.Id, actor.Player.ClubId,
                 result.Preview.Kind == FootballActionKind.HeaderPass || result.Preview.Kind == FootballActionKind.HeaderShot ? BallTouchKind.Header : BallTouchKind.DeliberateKick, result.Preview.Receiver?.Id);
             destination = result.Destination;

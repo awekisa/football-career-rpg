@@ -139,9 +139,15 @@ namespace FootballRpg.Presentation
         {
             EnsureDecisionSelection();
             foreach (var marker in players)
-                marker.transform.localPosition = ToVector(World.Players.First(p => p.Player.Id == marker.PlayerId).Position);
+            {
+                var motion = World.Players.FirstOrDefault(p => p.Player.Id == marker.PlayerId);
+                marker.gameObject.SetActive(motion != null);
+                if (motion != null) marker.transform.localPosition = ToVector(motion.Position);
+            }
             ballView.localPosition = ToVector(World.BallPosition) + Vector3.up * (float)World.BallHeight;
-            tacticalMarker.localPosition = ToVector(World.Players.First(p => p.Player.Id == Career.UserPlayerId).Target);
+            var userMotion = World.Players.FirstOrDefault(p => p.Player.Id == Career.UserPlayerId);
+            tacticalMarker.gameObject.SetActive(userMotion != null);
+            if (userMotion != null) tacticalMarker.localPosition = ToVector(userMotion.Target);
             var target = ChosenRestart?.Target ?? ChosenKeeperAction?.Target ?? ChosenDefense?.Target ?? ChosenFootballAction?.Target ?? ChosenPass?.Target;
             passTargetMarker.gameObject.SetActive(target.HasValue);
             passPath.gameObject.SetActive(target.HasValue);
@@ -241,9 +247,10 @@ namespace FootballRpg.Presentation
 
         public bool CommitChosenPass()
         {
+            if (World.RefereeNoticePending) { World.AcknowledgeReferee(); return true; }
             if (World.OffsideNoticePending) { World.AcknowledgeOffside(); return true; }
             if (World.FixturePhase == FixturePhase.HalfTime) { World.ContinueSecondHalf(); return true; }
-            if (UserRestart) { World.ReleaseRestart(World.Restart.Id, ChosenRestart.Receiver.Id); return true; }
+            if (UserRestart) { if (World.Restart.Kind == RestartKind.Penalty) World.ShootRestart(World.Restart.Id); else World.ReleaseRestart(World.Restart.Id, ChosenRestart.Receiver.Id); return true; }
             EnsureDecisionSelection();
             if (ChosenKeeperAction != null)
             { World.CommitKeeperDecision(World.PendingKeeper.Id, ChosenKeeperAction.OptionId); return true; }
@@ -325,7 +332,7 @@ namespace FootballRpg.Presentation
             float z = (Input.GetKey(KeyCode.W) ? 1 : 0) - (Input.GetKey(KeyCode.S) ? 1 : 0);
             float rotation = (Input.GetKey(KeyCode.E) ? 1 : 0) - (Input.GetKey(KeyCode.Q) ? 1 : 0);
             var mouse = Input.mousePosition;
-            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (showIntentMenu && World.PendingDecision == null ? 300 : 190) * UiScale && mouse.y < Screen.height - (World.OffsideNoticePending ? 300 : World.HasPendingDecision || UserRestart ? 250 : 105) * UiScale;
+            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (showIntentMenu && World.PendingDecision == null ? 300 : 190) * UiScale && mouse.y < Screen.height - (World.OffsideNoticePending || World.RefereeNoticePending ? 300 : World.HasPendingDecision || UserRestart ? 250 : 105) * UiScale;
             float scroll = overPitch ? Input.mouseScrollDelta.y : 0;
             if (overPitch && Input.GetMouseButton(1))
             {
