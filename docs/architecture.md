@@ -14,10 +14,10 @@ Dependency direction is Presentation → Content → Simulation, with Presentati
 
 ## Current state
 
-Launch.unity is a committed, editable scene with a camera and a foundation screen. Its chapter button shows the first playable scope; it does not start a playable career. The pitch diagram is placeholder presentation, not a match simulation.
+Launch.unity is a committed, editable scene with a camera and a foundation screen. Its Explore the pitch button creates a temporary PitchPreview using the same canonical career state. The preview owns procedural geometry, camera, inspection UI and a paused MatchSession driven by MatchDriver. Its initial 22 players are stationary fixture placeholders; it does not start a playable career. Closing it restores the launch camera and releases owned objects/materials.
 
 `--smoke-test` runs the built scene for two frames, loads and validates the fixture, checks its camera/controller, logs a result and exits. This verifies lifecycle, not visuals or gameplay. The scene generator is explicit and only runs if the scene is absent; normal imports/builds never regenerate authored scenes.
 
 ## Next components
 
-SME-108 provides shared data/events and a validated 36-player fixture (see [data ownership](game-data.md)). SME-109 provides deterministic time and randomness (see [match simulation](match-simulation.md)). SME-110 through SME-113 implement the first visible pass loop. Later issues connect football outcomes to career consequences. Follow explicit Linear dependencies rather than treating every milestone as a serial gate.
+SME-108 provides shared data/events and a validated 36-player fixture (see [data ownership](game-data.md)). SME-109 provides deterministic time and randomness (see [match simulation](match-simulation.md)). SME-110 provides the [pitch preview](pitch-preview.md). SME-111 through SME-113 add movement and the first visible pass loop. Later issues connect football outcomes to career consequences. Follow explicit Linear dependencies rather than treating every milestone as a serial gate.
