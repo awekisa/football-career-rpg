@@ -32,7 +32,7 @@ namespace FootballRpg.Simulation
         { Player = player; IsHome = home; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
     }
 
-    public enum BallPhase { Owned, Travelling, Loose, OutOfPlay, Incoming }
+    public enum BallPhase { Owned, Travelling, Loose, OutOfPlay, Incoming, KeeperIntervention }
 
     /// <summary>Seeded open-play sandbox with frozen user decisions and temporary movement intentions.</summary>
     public sealed partial class OpenPlayWorld : IDisposable
@@ -135,7 +135,10 @@ namespace FootballRpg.Simulation
             double dt = session.FixedStep.TotalSeconds;
             challengeSeconds = Math.Max(0, challengeSeconds - dt);
             var owner = players.FirstOrDefault(p => p.Player.Id == OwnerId);
+            if (TryKeeperThreat(owner)) return;
             if (TryOpenDefense(owner)) return;
+            if (owner != null && owner.Player.PrimaryPositionId == "gk" && owner.Player.Id != controlledPlayerId && heldSeconds >= .5)
+            { OpenKeeperPossession(owner); return; }
             // Calculate every target from the same snapshot before integrating anyone's movement.
             foreach (var player in players) player.Target = IntendedTarget(player, owner);
             foreach (var player in players)
@@ -148,6 +151,7 @@ namespace FootballRpg.Simulation
                 if (previous.Distance(player.Position) > .001)
                     player.Facing = new PitchPoint(player.Position.X - previous.X, player.Position.Z - previous.Z);
             }
+            if (keeperFlight != null) { StepKeeperDistribution(dt); return; }
             if (BallState == BallPhase.Travelling)
             {
                 flightSeconds += dt;
@@ -195,7 +199,7 @@ namespace FootballRpg.Simulation
             BallPosition = owner.Position;
             heldSeconds += dt;
             var challenger = players.Where(p => p.IsHome != owner.IsHome).OrderBy(p => p.Position.Distance(BallPosition)).First();
-            if (challenger.Player.Id != controlledPlayerId && challenger.Position.Distance(BallPosition) < 2 && challengeSeconds <= 0)
+            if (HoldingKeeperId != owner.Player.Id && challenger.Player.Id != controlledPlayerId && challenger.Position.Distance(BallPosition) < 2 && challengeSeconds <= 0)
             {
                 challengeSeconds = 1.2;
                 var preview = DefenseResolver.Preview(Snapshot(challenger), Snapshot(owner), challenger.Direction, DefensiveAction.Tackle);
@@ -216,6 +220,7 @@ namespace FootballRpg.Simulation
                 if (player == chaser) return ball;
             }
             if (BallState == BallPhase.Travelling && player == receiver) return destination;
+            if (player.Player.Id == HoldingKeeperId) return player.Position;
             if (player == owner)
                 return new PitchPoint(player.Position.X + 8 * player.Direction, player.Position.Z * .9).Bounded();
             if (player.Player.PrimaryPositionId == "gk")
@@ -274,6 +279,8 @@ namespace FootballRpg.Simulation
         private void BeginFlight(PassResolved result, FootballerMotion owner)
         {
             activeFootballAction = null;
+            HoldingKeeperId = null;
+            Handling.RecordTouch(owner.Player.Id, owner.Player.ClubId, BallTouchKind.DeliberateKick, result.Preview.Receiver.Id);
             BallHeight = .3;
             LastPass = result;
             destination = LastPass.Destination;
@@ -299,7 +306,7 @@ namespace FootballRpg.Simulation
         {
             if (lastClub != null && lastClub != player.Player.ClubId) PossessionChanges++;
             lastClub = PossessionClubId = player.Player.ClubId;
-            BallHeight = .3;
+            BallHeight = HoldingKeeperId == player.Player.Id ? 1.2 : .3;
             IncomingPlayerId = null;
             OwnerId = player.Player.Id;
             receiver = null;
@@ -308,10 +315,13 @@ namespace FootballRpg.Simulation
             heldSeconds = 0;
             possessionSequence++;
             RefreshIntent();
-            if (player.Player.Id == controlledPlayerId) OpenDecision();
+            if (player.Player.PrimaryPositionId != "gk") Handling.RecordTouch(player.Player.Id, player.Player.ClubId, BallTouchKind.Other);
+            if (HoldingKeeperId != player.Player.Id) HoldingKeeperId = null;
+            if (player.Player.Id == controlledPlayerId)
+            { if (player.Player.PrimaryPositionId == "gk") OpenKeeperPossession(player); else OpenDecision(); }
         }
 
-        private void OpenDecision()
+        private void OpenDecision(bool count = true)
         {
             var owner = players.Single(p => p.Player.Id == OwnerId);
             var options = players.Where(p => p.IsHome == owner.IsHome && p != owner && p.Position.Distance(owner.Position) >= .1)
@@ -320,7 +330,7 @@ namespace FootballRpg.Simulation
             session.Pause();
             PendingDecision = new PassDecision(session.SessionId + ":possession-" + possessionSequence,
                 session.Tick, OwnerId, options, actions);
-            DecisionCount++;
+            if (count) DecisionCount++;
         }
 
         public PassResolved CommitDecision(string decisionId, string receiverId, PassKind kind)
@@ -343,6 +353,7 @@ namespace FootballRpg.Simulation
             var result = PassResolver.Commit(session, decision.Id, preview, false);
             BeginFlight(result, owner);
             PendingDecision = null;
+            PendingKeeper = null;
             committedDecisions.Add(decision.Id, result);
             // Resume into the committed flight. Movement represents the fact; it never resolves it again.
             session.CompleteResolution(result.EventId);
@@ -358,6 +369,7 @@ namespace FootballRpg.Simulation
         }
         private void MakeLoose()
         {
+            HoldingKeeperId = null;
             BallHeight = .3;
             IncomingPlayerId = null;
             OwnerId = null;

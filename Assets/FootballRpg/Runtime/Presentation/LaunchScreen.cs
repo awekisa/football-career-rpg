@@ -52,7 +52,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -184,16 +184,55 @@ namespace FootballRpg.Presentation
             view.Close(); Debug.Log("FOOTBALL_RPG_DEFENSE_PASSED");
         }
 
-        public void OpenPitch(bool interactive = true)
+        private void VerifyGoalkeeper()
+        {
+            var definitions = PrototypeContent.Load(); definitions.userPlayerId = "harbour-player-01";
+            var root = new GameObject("Goalkeeper Smoke"); var view = root.AddComponent<PitchPreview>();
+            view.Initialize(CareerState.Create(definitions)); view.GetComponent<MatchDriver>().enabled = false;
+            if (view.World.PendingKeeper == null) throw new InvalidOperationException("Missing goalkeeper distribution prompt.");
+            view.ChooseKeeperAction(KeeperAction.ShortKick); var choice = view.ChosenKeeperAction;
+            if (!view.CommitChosenPass() || view.World.LastKeeperAction.Action.SuccessProbability != choice.Chance)
+                throw new InvalidOperationException("Goalkeeper distribution failed.");
+            bool defended = false;
+            for (int i = 0; i < 40000 && !defended; i++)
+            {
+                var d = view.World.PendingKeeper;
+                if (d != null)
+                {
+                    if (d.Context.Situation != KeeperSituation.Distribution)
+                    {
+                        choice = view.ChosenKeeperAction; long draws = view.Match.DrawCount;
+                        view.TogglePause(); view.Match.Advance(TimeSpan.FromSeconds(10));
+                        if (!view.CommitChosenPass() || view.Match.DrawCount != draws + 1 || view.World.LastKeeperAction.Action.SuccessProbability != choice.Chance)
+                            throw new InvalidOperationException("Goalkeeper defense failed.");
+                        defended = true;
+                    }
+                    else { view.ChooseKeeperAction(KeeperAction.ShortKick); view.CommitChosenPass(); }
+                }
+                else if (view.World.HasPendingDecision) view.CommitChosenPass();
+                view.Match.Advance(TimeSpan.FromMilliseconds(50));
+            }
+            if (!defended) throw new InvalidOperationException("No relevant goalkeeper threat reached.");
+            view.Close(); Debug.Log("FOOTBALL_RPG_GOALKEEPER_PASSED");
+        }
+
+        public void OpenPitch(bool interactive = true, bool goalkeeper = false)
         {
             if (preview != null || Career == null) return;
             preview = new GameObject("Pitch Preview").AddComponent<PitchPreview>();
-            preview.Initialize(Career, () => preview = null, interactive);
+            var selectedCareer = Career;
+            if (goalkeeper)
+            {
+                var definitions = PrototypeContent.Load(); definitions.userPlayerId = "harbour-player-01";
+                selectedCareer = CareerState.Create(definitions);
+            }
+            preview.Initialize(selectedCareer, () => preview = null, interactive);
         }
 
         private void Update()
         {
             if (preview == null && Input.GetKeyDown(KeyCode.Return)) OpenPitch();
+            if (preview == null && Input.GetKeyDown(KeyCode.G)) OpenPitch(goalkeeper: true);
         }
 
         private void OnGUI()
@@ -220,6 +259,8 @@ namespace FootballRpg.Presentation
                 OpenPitch();
             if (GUI.Button(new Rect(346, 683, 125, 58), "QUIT", button))
                 Application.Quit();
+
+            if (GUI.Button(new Rect(70, 754, 330, 45), "PLAY AS GOALKEEPER  [G]", button)) OpenPitch(goalkeeper: true);
 
             DrawPitch(new Rect(872, 200, 460, 500));
             GUI.Label(new Rect(70, 810, 1100, 30), "PROTOTYPE  /  FOUNDATION     •     SINGLE PLAYER", eyebrow);

@@ -110,6 +110,7 @@ namespace FootballRpg.Simulation
             var result = FootballActionResolver.Commit(session, decisionId, preview, false);
             BeginFootballFlight(actor, result);
             PendingDecision = null;
+            PendingKeeper = null;
             committedFootballDecisions.Add(decisionId, result);
             session.CompleteResolution(result.EventId);
             FootballActionCommitted?.Invoke(result);
@@ -119,6 +120,10 @@ namespace FootballRpg.Simulation
         private void BeginFootballFlight(FootballerMotion actor, FootballActionResolved result)
         {
             LastFootballAction = activeFootballAction = result;
+            HoldingKeeperId = null;
+            if (actor.Player.PrimaryPositionId != "gk" || (result.Preview.Kind != FootballActionKind.Control && result.Preview.Kind != FootballActionKind.Dribble))
+                Handling.RecordTouch(actor.Player.Id, actor.Player.ClubId,
+                result.Preview.Kind == FootballActionKind.HeaderPass || result.Preview.Kind == FootballActionKind.HeaderShot ? BallTouchKind.Header : BallTouchKind.DeliberateKick, result.Preview.Receiver?.Id);
             destination = result.Destination;
             receiver = result.ReceivingPlayerId == null ? null : players.Single(p => p.Player.Id == result.ReceivingPlayerId);
             flightOrigin = BallPosition;
@@ -138,6 +143,7 @@ namespace FootballRpg.Simulation
         {
             var result = activeFootballAction;
             activeFootballAction = null;
+            if (TryKeeperIntervention(result)) return;
             switch (result.Outcome)
             {
                 case FootballOutcome.Controlled:
@@ -148,9 +154,9 @@ namespace FootballRpg.Simulation
                     GiveBall(receiver); break;
                 case FootballOutcome.DeliveryArrives:
                     BeginArrival(receiver, result.Preview.DeliveryHeight, 14); break;
+                case FootballOutcome.ShotOnTarget:
                 case FootballOutcome.Goal:
-                    if (players.Single(p => p.Player.Id == result.PlayerId).IsHome) HomeGoals++; else AwayGoals++;
-                    BallState = BallPhase.OutOfPlay; PossessionClubId = null; restartSeconds = 0; receiver = null; break;
+                    ScoreShot(result); break;
                 case FootballOutcome.Wide:
                     BallState = BallPhase.OutOfPlay; PossessionClubId = null; restartSeconds = 0; receiver = null; break;
                 default: MakeLoose(); break;

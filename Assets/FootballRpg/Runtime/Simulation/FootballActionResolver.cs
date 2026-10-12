@@ -8,7 +8,7 @@ namespace FootballRpg.Simulation
 {
     public enum FootballActionKind { Control, FirstTimePass, Dribble, Cross, Shot, HeaderPass, HeaderShot, Clearance }
     public enum BallSituation { Controlled, Arriving }
-    public enum FootballOutcome { Controlled, TeammateControls, DeliveryArrives, DefenderBeaten, Advanced, Goal, Cleared, Dispossessed, LooseBall, Wide }
+    public enum FootballOutcome { Controlled, TeammateControls, DeliveryArrives, DefenderBeaten, Advanced, Goal, Cleared, Dispossessed, LooseBall, Wide, ShotOnTarget }
 
     public sealed class FootballActionContext
     {
@@ -147,14 +147,14 @@ namespace FootballRpg.Simulation
                 case FootballActionKind.Shot:
                     target = new PitchPoint(52.5 * context.Direction, variant == "placed" ? 2 : 0);
                     skill = actor.Position.Distance(target) > 24 ? "long-shots" : "finishing";
-                    chance = variant == "placed" ? .76 : .70; success = FootballOutcome.Goal; height = variant == "placed" ? .5 : 1; break;
+                    chance = variant == "placed" ? .76 : .70; success = FootballOutcome.ShotOnTarget; height = variant == "placed" ? .5 : 1; break;
                 case FootballActionKind.HeaderPass:
                     target = receiver.Position; skill = "heading"; chance = variant == "direct" ? .77 : .65;
                     success = FootballOutcome.TeammateControls; height = .5; break;
                 case FootballActionKind.HeaderShot:
                     target = new PitchPoint(52.5 * context.Direction, variant == "downward" ? 1.5 : 0);
                     skill = "heading"; chance = variant == "downward" ? .69 : .64;
-                    success = FootballOutcome.Goal; height = .4; break;
+                    success = FootballOutcome.ShotOnTarget; height = .4; break;
                 default:
                     target = variant == "wide" ? new PitchPoint(actor.Position.X + 15 * context.Direction, actor.Position.Z >= 0 ? -32 : 32).Bounded()
                         : new PitchPoint(actor.Position.X + 28 * (actor.Position.X * context.Direction > 23 ? -context.Direction : context.Direction), actor.Position.Z * .7).Bounded();
@@ -167,19 +167,18 @@ namespace FootballRpg.Simulation
             if (kind == FootballActionKind.Dribble)
                 chance += (actor.Attributes["agility"] - 50) * .001 + (actor.Attributes["strength"] - 50) * .001
                     - Math.Max(0, actor.WeightKg - 75) * .001 - (opponent == null ? 0 : (opponent.Attributes["tackling"] - 50) * .002);
-            else chance -= distance * (success == FootballOutcome.Goal ? .014 : .003);
+            else chance -= distance * (success == FootballOutcome.ShotOnTarget ? .014 : .003);
             if (receiver != null)
                 chance += (receiver.Attributes["off-ball-movement"] - 50) * .001 - receiver.Fatigue * .05;
             if (kind == FootballActionKind.HeaderPass || kind == FootballActionKind.HeaderShot)
                 chance += (actor.HeightCm - 180) * .002 + (actor.Attributes["jumping"] - 50) * .0015
                     + (actor.Attributes["strength"] - 50) * .001;
-            if (success == FootballOutcome.Goal)
+            if (success == FootballOutcome.ShotOnTarget)
             {
-                var keeper = context.Opponents.Where(p => p.RoleId == "gk").OrderBy(p => p.Position.Distance(target)).FirstOrDefault();
+                // This roll now means on target; a reachable keeper gets a separate explicit response.
                 chance -= Math.Abs(actor.Position.Z) * .004;
-                if (keeper != null) chance -= (keeper.Attributes["reflexes"] + keeper.Attributes["positioning"]) * .001;
             }
-            var failure = success == FootballOutcome.Goal ? FootballOutcome.Wide : opponent != null && pressure > .25 ? FootballOutcome.Dispossessed : FootballOutcome.LooseBall;
+            var failure = success == FootballOutcome.ShotOnTarget ? FootballOutcome.Wide : opponent != null && pressure > .25 ? FootballOutcome.Dispossessed : FootballOutcome.LooseBall;
             var failureTarget = failure == FootballOutcome.Wide ? new PitchPoint(53 * context.Direction, 5)
                 : failure == FootballOutcome.Dispossessed ? opponent.Position : actor.Position.MoveTowards(target, distance * .4).Bounded();
             var skills = new Dictionary<string, float> { [skill] = .8f, ["decisions"] = .2f };
