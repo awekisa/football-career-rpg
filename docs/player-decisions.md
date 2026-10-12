@@ -19,3 +19,5 @@ The Resolving state covers the atomic commit boundary. Simulation resumes into f
 The packaged --pitch-smoke-test checks both AI-only play and the real presentation commit methods. It verifies one draw, exact chance, duplicate-click prevention, manual pause and completed flight, and logs FOOTBALL_RPG_DECISION_LOOP_PASSED.
 
 SME-114 adds [attacking and receiving actions](football-actions.md) to the same decision lifecycle. SME-115 adds [defensive choices and persistent off-ball instructions](defense-and-intentions.md). Full laws, match highlights, creation and career systems remain later work. Native mouse injection has been unreliable in desktop automation; picking is covered by ray tests, and the keyboard path provides a complete playable verification route.
+
+SME-116 adds [goalkeeper decisions](goalkeeper.md). With the ball at feet, keeper distribution and ordinary football menus represent the same opportunity: committing either invalidates the other. Holding the ball offers hand distribution or a drop to feet; handling restrictions persist through ordinary control and dribbling.

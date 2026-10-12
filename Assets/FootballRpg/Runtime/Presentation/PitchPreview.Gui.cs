@@ -45,6 +45,7 @@ namespace FootballRpg.Presentation
             GUI.enabled = true;
             DrawDecisionPanel(left);
             DrawFootballActions(left);
+            DrawKeeperPanel(left);
             DrawDefenseAndIntent(left);
 
             Text(new Rect(left + 24, 26, 310, 25), "PLAYER INSPECTION", small, Lime);
@@ -95,9 +96,9 @@ namespace FootballRpg.Presentation
             var decision = World.PendingDecision;
             var chosen = ChosenPass;
             var action = ChosenFootballAction;
-            if (decision == null) return;
+            if (decision == null || (World.PendingKeeper != null && !showKeeperFeet)) return;
             Panel(new Rect(0, 106, left, 105), new Color(.04f, .12f, .14f, .98f));
-            string title = action != null ? ActionLabel(action.Kind) + " / " + action.Variant + "  " + action.Percent + "%"
+            string title = action != null ? ActionLabel(action.Kind) + " / " + action.Variant + "  " + action.Percent + (action.Success == Simulation.FootballOutcome.ShotOnTarget ? "% on target" : "%")
                 : "Pass to " + (chosen == null ? "teammate" : Career.Players[chosen.Receiver.Id].Name);
             if (action?.Receiver != null) title += " → " + Career.Players[action.Receiver.Id].Name;
             Text(new Rect(24, 115, left - 230, 30), title, label, Lime);
@@ -118,7 +119,7 @@ namespace FootballRpg.Presentation
 
         private void DrawFootballActions(float left)
         {
-            if (World.PendingDecision == null) return;
+            if (World.PendingDecision == null || (World.PendingKeeper != null && !showKeeperFeet)) return;
             Panel(new Rect(0, 714, left, 80), Ink);
             Text(new Rect(24, 719, left - 48, 22), "ACTION VARIANTS  ·  Press the same action again to change its variant", small, Lime);
             var kinds = ContextualActionKinds;

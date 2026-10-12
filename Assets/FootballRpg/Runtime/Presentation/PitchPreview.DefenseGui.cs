@@ -22,6 +22,7 @@ namespace FootballRpg.Presentation
         }
         private void DrawDefenseAndIntent(float left)
         {
+            if (World.PendingKeeper != null) return;
             var decision = World.PendingDefense;
             if (decision != null)
             {

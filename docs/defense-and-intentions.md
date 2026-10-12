@@ -8,7 +8,7 @@ The controlled footballer pauses the match when an opposing ball carrier is with
 | Contain | Ball carrier within 6 m | Follow a goal-side position, slow the attacker to quarter speed and delay their next action for 2 seconds | Same beaten/recovery result |
 | Block | Within 6 m, goal-side, within 2.5 m of the first 6 m of the shooting lane; attacker within 30 m of goal | Deflect the ball sideways into loose play | Same beaten/recovery result |
 
-Blocking is a pre-shot intervention against a nearby shooting threat. It does not reroll an already committed shot. Goalkeeper saves, fouls and formal restarts remain later tickets. Defensive movement currently uses placeholder repositioning rather than character animations. A 2.5-second response cooldown allows the result to play out before another defensive pause.
+Blocking is a pre-shot intervention against a nearby shooting threat. It does not reroll an already committed shot. SME-116 adds [goalkeeper saves and handling restrictions](goalkeeper.md); fouls and formal restarts remain later tickets. Defensive movement currently uses placeholder repositioning rather than character animations. A 2.5-second response cooldown allows the result to play out before another defensive pause.
 
 The displayed integer percentage is the exact probability passed to `MatchSession`. A single seeded draw incorporates tackling or positioning, anticipation, the opponent's dribbling, distance, fatigue and confidence. Containment is easier than winning the ball. Frozen previews, typed `DefenseResolved` events and skill attribution support later progression. Retries return the same result without applying its effects again. AI tackles now use this same preview/resolver and success means actual possession.
 

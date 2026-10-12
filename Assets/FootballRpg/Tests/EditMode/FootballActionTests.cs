@@ -119,12 +119,14 @@ namespace FootballRpg.Tests
                     var result = world.CommitFootballDecision(decision.Id, option.OptionId);
                     if (!result.Action.Succeeded) continue;
                     for (int i = 0; i < 500 && world.BallState == BallPhase.Travelling; i++) session.Advance(TimeSpan.FromMilliseconds(50));
+                    if (world.HomeGoals == 0) continue; // An on-target shot may now be saved.
                     Assert.That(world.HomeGoals, Is.EqualTo(1));
+                    long drawsAfterSave = session.DrawCount;
                     Assert.That(world.BallState, Is.EqualTo(BallPhase.OutOfPlay));
                     world.CommitFootballDecision(decision.Id, option.OptionId);
                     session.Advance(TimeSpan.FromMilliseconds(50));
                     Assert.That(world.HomeGoals, Is.EqualTo(1));
-                    Assert.That(session.DrawCount, Is.EqualTo(1));
+                    Assert.That(session.DrawCount, Is.EqualTo(drawsAfterSave));
                     scored = true;
                 }
             }

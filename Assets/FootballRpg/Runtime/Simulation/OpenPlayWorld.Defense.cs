@@ -20,7 +20,7 @@ namespace FootballRpg.Simulation
         private string containedPlayerId;
         private readonly Dictionary<string, DefenseResolved> committedDefense = new Dictionary<string, DefenseResolved>();
         public DefenseDecision PendingDefense { get; private set; }
-        public bool HasPendingDecision => PendingDecision != null || PendingDefense != null;
+        public bool HasPendingDecision => PendingDecision != null || PendingDefense != null || PendingKeeper != null;
         public DefenseResolved LastDefense { get; private set; }
         public event Action<DefenseResolved> DefenseCommitted;
         public MovementIntent ActiveIntent { get; private set; }
@@ -32,7 +32,7 @@ namespace FootballRpg.Simulation
         private bool TryOpenDefense(FootballerMotion owner)
         {
             var defender = Controlled;
-            if (defender == null || owner == null || owner.IsHome == defender.IsHome || BallState != BallPhase.Owned || session.Tick < defenseCooldownTick) return false;
+            if (defender == null || (defender.Player.PrimaryPositionId == "gk" && HandlingRules.InOwnArea(BallPosition, defender.Direction)) || owner == null || owner.Player.Id == HoldingKeeperId || owner.IsHome == defender.IsHome || BallState != BallPhase.Owned || session.Tick < defenseCooldownTick) return false;
             var actor = Snapshot(defender); var threat = Snapshot(owner);
             var options = ((DefensiveAction[])Enum.GetValues(typeof(DefensiveAction)))
                 .Where(k => DefenseResolver.IsAvailable(actor, threat, defender.Direction, k))
@@ -74,6 +74,7 @@ namespace FootballRpg.Simulation
             else
             {
                 BallPosition = new PitchPoint(attacker.Position.X, attacker.Position.Z + (attacker.Position.Z >= 0 ? 4 : -4)).Bounded();
+                Handling.RecordTouch(defender.Player.Id, defender.Player.ClubId, BallTouchKind.Other);
                 MakeLoose();
             }
             RefreshIntent();
@@ -86,7 +87,7 @@ namespace FootballRpg.Simulation
             var user = Controlled;
             if (user == null || !Enum.IsDefined(typeof(OffBallIntent), kind)) return false;
             if (kind == OffBallIntent.Automatic) return true;
-            if (OwnerId == controlledPlayerId || IncomingPlayerId == controlledPlayerId || BallState == BallPhase.OutOfPlay) return false;
+            if (OwnerId == controlledPlayerId || IncomingPlayerId == controlledPlayerId || BallState == BallPhase.OutOfPlay || BallState == BallPhase.KeeperIntervention) return false;
             bool attacking = PossessionClubId == user.Player.ClubId;
             if (kind == OffBallIntent.Press || kind == OffBallIntent.PersonalMark || kind == OffBallIntent.Track)
             {
