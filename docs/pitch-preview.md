@@ -37,3 +37,7 @@ The EditMode suite includes pitch dimensions and lineup identity, mouse-ray sele
 Off the ball, open **Off-ball instruction [I]** to set movement intent. For marking/tracking, inspect an opposing player first. Defensive prompts use **1 / 2 / 3** for tackle / contain / block and **Enter** to commit. See [defense and intentions](defense-and-intentions.md).
 
 Use **Play as goalkeeper [G]** on the launch screen for the keeper. Numbered options cover goalkeeper responses and distribution. **R** cycles a recipient and **F** switches to ordinary football actions while the ball is at feet. Hand-held balls must be distributed or dropped first.
+
+## Fixture controls (SME-117)
+
+The launch starts a full fixture. L switches between 90-minute and four-minute matches before entry. A user restart pauses for teammate selection (click or R) and release (Enter). Halftime waits for Enter/Space and switches ends. Full time stops play; Escape returns to the launch. The header shows the half, score and added time. See [fixture rules](fixture-rules.md).

@@ -22,7 +22,7 @@ namespace FootballRpg.Presentation
         }
         private void DrawDefenseAndIntent(float left)
         {
-            if (World.PendingKeeper != null) return;
+            if (World.PendingKeeper != null || World.Restart != null || World.FixturePhase == FixturePhase.HalfTime || World.FixturePhase == FixturePhase.FullTime) return;
             var decision = World.PendingDefense;
             if (decision != null)
             {

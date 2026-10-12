@@ -142,7 +142,7 @@ namespace FootballRpg.Presentation
                 marker.transform.localPosition = ToVector(World.Players.First(p => p.Player.Id == marker.PlayerId).Position);
             ballView.localPosition = ToVector(World.BallPosition) + Vector3.up * (float)World.BallHeight;
             tacticalMarker.localPosition = ToVector(World.Players.First(p => p.Player.Id == Career.UserPlayerId).Target);
-            var target = ChosenKeeperAction?.Target ?? ChosenDefense?.Target ?? ChosenFootballAction?.Target ?? ChosenPass?.Target;
+            var target = ChosenRestart?.Target ?? ChosenKeeperAction?.Target ?? ChosenDefense?.Target ?? ChosenFootballAction?.Target ?? ChosenPass?.Target;
             passTargetMarker.gameObject.SetActive(target.HasValue);
             passPath.gameObject.SetActive(target.HasValue);
             if (target.HasValue)
@@ -160,6 +160,7 @@ namespace FootballRpg.Presentation
             var player = players.Find(p => p.PlayerId == id);
             if (player == null) return false;
             SelectedPlayer = Career.Players[id];
+            if (UserRestart && World.RestartRecipients().Any(p => p.Receiver.Id == id)) restartTargetId = id;
             var keeperAction = ChosenKeeperAction;
             if (keeperAction?.Receiver != null)
             {
@@ -212,6 +213,7 @@ namespace FootballRpg.Presentation
 
         public void CyclePassTarget()
         {
+            if (UserRestart) { CycleRestartTarget(); return; }
             EnsureDecisionSelection();
             if (World.PendingDecision == null) return;
             var targets = World.PendingDecision.Options.Select(p => p.Receiver.Id)
@@ -239,6 +241,8 @@ namespace FootballRpg.Presentation
 
         public bool CommitChosenPass()
         {
+            if (World.FixturePhase == FixturePhase.HalfTime) { World.ContinueSecondHalf(); return true; }
+            if (UserRestart) { World.ReleaseRestart(World.Restart.Id, ChosenRestart.Receiver.Id); return true; }
             EnsureDecisionSelection();
             if (ChosenKeeperAction != null)
             { World.CommitKeeperDecision(World.PendingKeeper.Id, ChosenKeeperAction.OptionId); return true; }
