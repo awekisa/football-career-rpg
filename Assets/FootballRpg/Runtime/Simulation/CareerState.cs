@@ -19,6 +19,7 @@ namespace FootballRpg.Simulation
         public string CurrencyCode { get; }
         public long BalanceMinor { get; }
         public long WeeklyWageMinor { get; }
+        private readonly Dictionary<string, int> footballLevels;
         public IReadOnlyDictionary<string, int> FootballAttributes { get; }
         public IReadOnlyDictionary<string, int> PersonalityTraits { get; }
         public float Confidence { get; private set; }
@@ -40,10 +41,13 @@ namespace FootballRpg.Simulation
             CurrencyCode = definitions.clubs.Single(c => c.id == ClubId).currencyCode;
             BalanceMinor = source.balanceMinor;
             WeeklyWageMinor = source.weeklyWageMinor;
-            FootballAttributes = Values(definitions.footballAttributes, source.attributes);
+            footballLevels = Values(definitions.footballAttributes, source.attributes).ToDictionary(p => p.Key, p => p.Value);
+            FootballAttributes = new ReadOnlyDictionary<string, int>(footballLevels);
             PersonalityTraits = Values(definitions.personalityTraits, source.traits);
             SetCondition(source.confidence, source.morale, source.fatigue);
         }
+
+        internal void SetFootballLevel(string id, int value) => footballLevels[id] = value;
 
         internal void SetCondition(float confidence, float morale, float fatigue)
         {
@@ -138,7 +142,9 @@ namespace FootballRpg.Simulation
         public IReadOnlyDictionary<string, CoachState> Coaches { get; }
         public FixtureState Fixture { get; }
 
-        private CareerState(GameDefinitions definitions)
+        public SkillProgression Progression { get; }
+
+        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules)
         {
             UserPlayerId = definitions.userPlayerId;
             Players = new ReadOnlyDictionary<string, PlayerState>(
@@ -148,12 +154,13 @@ namespace FootballRpg.Simulation
             Coaches = new ReadOnlyDictionary<string, CoachState>(
                 definitions.coaches.ToDictionary(c => c.id, c => new CoachState(c), StringComparer.Ordinal));
             Fixture = new FixtureState(definitions.fixture);
+            Progression = new SkillProgression(this, definitions.footballAttributes, progressionRules);
         }
 
-        public static CareerState Create(GameDefinitions definitions)
+        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null)
         {
             DefinitionValidator.Validate(definitions);
-            return new CareerState(definitions);
+            return new CareerState(definitions, progressionRules ?? new ProgressionRules());
         }
 
         public void SetPlayerCondition(string playerId, float confidence, float morale, float fatigue)

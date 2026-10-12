@@ -72,6 +72,7 @@ namespace FootballRpg.Simulation
         public OpenPlayWorld(CareerState career, MatchSession match, string controlledPlayerId = null, bool startWithControlledPlayer = false, double? openingArrivalHeight = null)
         {
             if (career == null) throw new ArgumentNullException(nameof(career));
+            progression = career.Progression;
             session = match ?? throw new ArgumentNullException(nameof(match));
             this.controlledPlayerId = controlledPlayerId;
             foreach (var club in career.Clubs.Values) setPieceClubs.Add(club.Id, club);
@@ -291,6 +292,7 @@ namespace FootballRpg.Simulation
 
         private void BeginPassFlight(PassResolved result, FootballerMotion owner, RestartKind? restart)
         {
+            Progress(result.Action, result.SkillAttribution, (result.Preview.Target.X - owner.Position.X) * owner.Direction > 8 ? 1.5 : .5, restart);
             RecordOffsideTouch(owner, OffsideTouch.DeliberatePlay, restart);
             activeFootballAction = null;
             HoldingKeeperId = null;

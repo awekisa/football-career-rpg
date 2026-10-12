@@ -118,6 +118,8 @@ namespace FootballRpg.Simulation
 
         private void ApplyKeeperAction(KeeperResolved result)
         {
+            if (result.Preview.Kind != KeeperAction.HandleIllegally)
+                Progress(result.Action, result.SkillAttribution, GoalkeeperResolver.IsDistribution(result.Preview.Kind) ? .75 : result.Preview.Kind == KeeperAction.ReleaseToFeet || result.Preview.Kind == KeeperAction.SetPosition ? .5 : 2);
             LastKeeperAction = result;
             var preview = result.Preview; var keeper = players.Single(p => p.Player.Id == result.PlayerId);
             var threat = keeperThreat; keeperThreat = null;

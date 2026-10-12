@@ -77,3 +77,5 @@ Do not add `-quit` to tests: the runner exits on completion. Build menu equivale
 Work on an issue branch and submit a PR. Commit Assets with their `.meta` files, Packages and ProjectSettings. Never commit generated caches, test output or builds. Preserve the boundary between deterministic rules and presentation. Each issue's verification criteria are part of its deliverable.
 
 Character creation is available with **C** on the launch screen: separate football/personality budgets, every starting position, physical profile and four placeholder appearance presets. See [character creation](docs/character-creation.md).
+
+Match actions now award or remove football skill XP, with level changes, specialist set-piece attribution and repetition limits. Pitch inspection shows progress toward the next level. See [skill progression](docs/skill-progression.md).

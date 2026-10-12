@@ -30,6 +30,7 @@ namespace FootballRpg.Simulation
             if (Rules != null || session.Tick != 0 || session.DrawCount != 0) throw new InvalidOperationException("Start a fixture once, before advancing the practice clock.");
             Rules = rules ?? new CompetitionRules();
             FitnessRules = fitnessRules ?? new MatchFitnessRules();
+            progressionMatchId = progression.BeginMatch();
             ClearPlay(); DecisionCount = 0; session.Resume();
             FixturePhase = FixturePhase.FirstHalf;
             AddedSeconds = Rules.MinimumAddedSeconds;
