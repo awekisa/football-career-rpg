@@ -143,6 +143,7 @@ namespace FootballRpg.Simulation
         public FixtureState Fixture { get; }
 
         public SkillProgression Progression { get; }
+        public CareerCalendar Calendar { get; }
 
         private CareerState(GameDefinitions definitions, ProgressionRules progressionRules)
         {
@@ -155,6 +156,7 @@ namespace FootballRpg.Simulation
                 definitions.coaches.ToDictionary(c => c.id, c => new CoachState(c), StringComparer.Ordinal));
             Fixture = new FixtureState(definitions.fixture);
             Progression = new SkillProgression(this, definitions.footballAttributes, progressionRules);
+            Calendar = definitions.calendar == null ? null : new CareerCalendar(UserPlayerId, definitions.calendar);
         }
 
         public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null)

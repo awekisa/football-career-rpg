@@ -10,6 +10,7 @@ namespace FootballRpg.Simulation
         {
             Require(data != null, "Content is missing.");
             Require(data.schemaVersion == 1, "Unsupported content schemaVersion.");
+            if (data.calendar != null) CareerCalendar.Validate(data.calendar);
             var attributes = Index(data.footballAttributes, v => v.id, "football attributes");
             var traits = Index(data.personalityTraits, v => v.id, "personality traits");
             var positions = Index(data.positions, p => p.id, "positions");

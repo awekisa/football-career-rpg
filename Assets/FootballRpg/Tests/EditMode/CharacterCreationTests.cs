@@ -33,6 +33,8 @@ namespace FootballRpg.Tests
             draft = JsonUtility.FromJson<CharacterDraft>(JsonUtility.ToJson(draft));
             var career = CharacterCreation.CreateCareer(content, draft, rules);
             Assert.That(career.UserPlayer.Name, Is.EqualTo("Test Prospect"));
+            Assert.That(career.Calendar, Is.Not.Null);
+            Assert.That(career.Calendar.Minute, Is.Zero);
             Assert.That(career.UserPlayer.PrimaryPositionId, Is.EqualTo(position));
             Assert.That(career.UserPlayer.HeightCm, Is.EqualTo(196));
             Assert.That(career.UserPlayer.WeightKg, Is.EqualTo(89));

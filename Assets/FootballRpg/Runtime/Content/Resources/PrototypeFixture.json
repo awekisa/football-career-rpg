@@ -2107,5 +2107,128 @@
     "playersPerTeam": 11,
     "benchSize": 7,
     "substitutionLimit": 5
+  },
+  "calendar": {
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "slots": [
+      "Morning",
+      "Afternoon",
+      "Evening",
+      "Night"
+    ],
+    "minutesPerSlot": 360,
+    "activities": [
+      {
+        "id": "training",
+        "name": "Team training",
+        "durationSlots": 1,
+        "training": true
+      },
+      {
+        "id": "extra-practice",
+        "name": "Extra practice",
+        "durationSlots": 1,
+        "training": true,
+        "extraPractice": true,
+        "selectable": true
+      },
+      {
+        "id": "rest",
+        "name": "Rest",
+        "durationSlots": 1,
+        "selectable": true
+      },
+      {
+        "id": "party",
+        "name": "Party (60-minute oversleep)",
+        "durationSlots": 1,
+        "delayMinutes": 60,
+        "selectable": true
+      },
+      {
+        "id": "travel",
+        "name": "Team travel",
+        "durationSlots": 2
+      },
+      {
+        "id": "media",
+        "name": "Local media interview",
+        "durationSlots": 1
+      },
+      {
+        "id": "agent",
+        "name": "Agent meeting",
+        "durationSlots": 1
+      },
+      {
+        "id": "match",
+        "name": "Match-day commitment",
+        "durationSlots": 2
+      }
+    ],
+    "commitments": [
+      {
+        "id": "mon-training",
+        "activityId": "training",
+        "startSlot": 0,
+        "required": true
+      },
+      {
+        "id": "mon-media",
+        "activityId": "media",
+        "startSlot": 2,
+        "required": false
+      },
+      {
+        "id": "tue-training",
+        "activityId": "training",
+        "startSlot": 4,
+        "required": true
+      },
+      {
+        "id": "wed-travel",
+        "activityId": "travel",
+        "startSlot": 8,
+        "required": true
+      },
+      {
+        "id": "thu-training",
+        "activityId": "training",
+        "startSlot": 12,
+        "required": true
+      },
+      {
+        "id": "fri-training",
+        "activityId": "training",
+        "startSlot": 16,
+        "required": true
+      },
+      {
+        "id": "fri-agent",
+        "activityId": "agent",
+        "startSlot": 17,
+        "required": false
+      },
+      {
+        "id": "sat-training",
+        "activityId": "training",
+        "startSlot": 20,
+        "required": true
+      },
+      {
+        "id": "sun-match",
+        "activityId": "match",
+        "startSlot": 25,
+        "required": true
+      }
+    ]
   }
 }

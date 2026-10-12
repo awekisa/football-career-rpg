@@ -79,3 +79,5 @@ Work on an issue branch and submit a PR. Commit Assets with their `.meta` files,
 Character creation is available with **C** on the launch screen: separate football/personality budgets, every starting position, physical profile and four placeholder appearance presets. See [character creation](docs/character-creation.md).
 
 Match actions now award or remove football skill XP, with level changes, specialist set-piece attribution and repetition limits. Pitch inspection shows progress toward the next level. See [skill progression](docs/skill-progression.md).
+
+Open the **Career Calendar [K]** from launch to preview and confirm attendance, skips, replacements, waiting and extra practice. See [career calendar](docs/career-calendar.md) for timing and current integration limits.
