@@ -16,6 +16,7 @@ namespace FootballRpg.Simulation
         private SeededRandom fitnessRandom;
         private int substitutionLimit;
         private long stoppage;
+        private readonly HashSet<string> matchParticipants = new HashSet<string>();
         private bool rebuildingRoster;
         public MatchFitnessRules FitnessRules { get; private set; }
         public IReadOnlyList<ParticipationEvent> ParticipationEvents => participationEvents.AsReadOnly();
@@ -54,8 +55,9 @@ namespace FootballRpg.Simulation
             {
                 double effort = p.IsGoalkeeper ? .35 : 1;
                 double stamina = p.Player.FootballAttributes["stamina"] / 100.0;
-                double fatigue = p.Player.Fatigue + FitnessRules.FatiguePerSecond * seconds * effort * (1.4 - .7 * stamina);
-                p.Player.SetCondition(p.Player.Confidence, p.Player.Morale, (float)Math.Min(1, fatigue));
+                matchParticipants.Add(p.Player.Id);
+                double fatigue = FitnessRules.FatiguePerSecond * seconds * effort * (1.4 - .7 * stamina);
+                readiness.Exertion(progressionMatchId, p.Player.Id, fatigue, seconds);
                 injuryExposure[p.Player.Id] += seconds * effort * (1 + FitnessRules.FatigueRiskMultiplier * p.Player.Fatigue);
             }
         }
@@ -126,8 +128,7 @@ namespace FootballRpg.Simulation
                     {
                         injuredOut = fitnessRandom.NextUnitFloat() < FitnessRules.MatchEndingChance;
                         RecordParticipation("Injury", p.Player.Id, severity: injuredOut ? InjurySeverity.MatchEnding : InjurySeverity.Knock);
-                        if (injuredOut) p.Player.InjuryDaysRemaining = FitnessRules.RecoveryDays;
-                        else p.Player.SetCondition(p.Player.Confidence, p.Player.Morale, (float)Math.Min(1, p.Player.Fatigue + .1));
+                        readiness.Injury(progressionMatchId, p.Player.Id, participationEvents.Count.ToString(), injuredOut ? FitnessRules.RecoveryDays : 0);
                     }
                 }
                 string requested; coachRequests.TryGetValue(p.Player.Id, out requested);

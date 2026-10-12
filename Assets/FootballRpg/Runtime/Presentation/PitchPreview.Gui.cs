@@ -75,8 +75,10 @@ namespace FootballRpg.Presentation
             if (development != null)
                 Text(new Rect(left + 24, 544, 312, 20), $"Last action: {development.Deltas.Values.Sum():+0.0;-0.0;0} skill XP", small, Lime);
             Text(new Rect(left + 24, 565, 312, 25), (World.Participation(SelectedPlayer.Id).ToString().ToUpperInvariant() + (World.Discipline.Yellows(SelectedPlayer.Id) > 0 && World.CanParticipate(SelectedPlayer.Id) ? " · YELLOW CARD" : "") + (SelectedPlayer.InjuryDaysRemaining > 0 ? " · " + SelectedPlayer.InjuryDaysRemaining + " DAYS OUT" : "")), small, new Color(.63f, .73f, .73f));
-            Bar(left + 24, 604, "Confidence", SelectedPlayer.Confidence, Mathf.RoundToInt(SelectedPlayer.Confidence * 100) + "%", Lime);
+            Bar(left + 24, 604, $"Confidence · Morale {SelectedPlayer.Morale:P0}", SelectedPlayer.Confidence, Mathf.RoundToInt(SelectedPlayer.Confidence * 100) + "%", Lime);
             Bar(left + 24, 651, "Fatigue", SelectedPlayer.Fatigue, Mathf.RoundToInt(SelectedPlayer.Fatigue * 100) + "%", Coral);
+            var condition = Career.Readiness.Changes.LastOrDefault(c => c.PlayerId == SelectedPlayer.Id);
+            if (condition != null) Text(new Rect(left + 24, 694, 312, 25), condition.Reason, small, Lime);
             if (Button(new Rect(left + 24, 724, 150, 37), "HOME TEAM")) SelectPlayer(players.First(p => p.IsHome).PlayerId);
             if (Button(new Rect(left + 184, 724, 150, 37), "AWAY TEAM")) SelectPlayer(players.First(p => !p.IsHome).PlayerId);
             if (Button(new Rect(left + 24, 774, 150, 37), "PREVIOUS")) Browse(-1);

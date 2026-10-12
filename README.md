@@ -81,3 +81,5 @@ Character creation is available with **C** on the launch screen: separate footba
 Match actions now award or remove football skill XP, with level changes, specialist set-piece attribution and repetition limits. Pitch inspection shows progress toward the next level. See [skill progression](docs/skill-progression.md).
 
 Open the **Career Calendar [K]** from launch to preview and confirm attendance, skips, replacements, waiting and extra practice. See [career calendar](docs/career-calendar.md) for timing and current integration limits.
+
+Training workloads, rest, match performance and injuries now update shared temporary readiness. Calendar inspection shows the reasons and training-yield multiplier. See [readiness](docs/readiness.md).
