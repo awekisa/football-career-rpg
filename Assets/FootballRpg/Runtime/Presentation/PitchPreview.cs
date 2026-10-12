@@ -20,6 +20,15 @@ namespace FootballRpg.Presentation
         private string selectedFootballOptionId;
         public FootballActionPreview ChosenFootballAction => World?.PendingDecision?.Actions.FirstOrDefault(p => p.OptionId == selectedFootballOptionId);
         private int inputReadyFrame;
+        private DefensiveAction selectedDefense = DefensiveAction.Contain;
+        public DefensePreview ChosenDefense => World?.PendingDefense?.Options.FirstOrDefault(p => p.Kind == selectedDefense) ?? World?.PendingDefense?.Options.FirstOrDefault();
+        public void ChooseDefense(DefensiveAction kind) { if (World.PendingDefense?.Options.Any(p => p.Kind == kind) == true) selectedDefense = kind; }
+        public bool ChooseIntent(OffBallIntent kind)
+        {
+            string target = SelectedPlayer?.Id;
+            if (!World.CanSetIntent(kind, target)) return false;
+            World.SetIntent(kind, target); return true;
+        }
         public PassPreview ChosenPass => World?.PendingDecision?.Options.FirstOrDefault(p => p.Receiver.Id == selectedReceiverId && p.Kind == selectedPassKind);
         public OpenPlayWorld World { get; private set; }
         private Camera launchCamera;
@@ -133,7 +142,7 @@ namespace FootballRpg.Presentation
                 marker.transform.localPosition = ToVector(World.Players.First(p => p.Player.Id == marker.PlayerId).Position);
             ballView.localPosition = ToVector(World.BallPosition) + Vector3.up * (float)World.BallHeight;
             tacticalMarker.localPosition = ToVector(World.Players.First(p => p.Player.Id == Career.UserPlayerId).Target);
-            var target = ChosenFootballAction?.Target ?? ChosenPass?.Target;
+            var target = ChosenDefense?.Target ?? ChosenFootballAction?.Target ?? ChosenPass?.Target;
             passTargetMarker.gameObject.SetActive(target.HasValue);
             passPath.gameObject.SetActive(target.HasValue);
             if (target.HasValue)
@@ -225,6 +234,8 @@ namespace FootballRpg.Presentation
         public bool CommitChosenPass()
         {
             EnsureDecisionSelection();
+            if (ChosenDefense != null)
+            { World.CommitDefense(World.PendingDefense.Id, ChosenDefense.Kind); return true; }
             if (ChosenFootballAction != null)
             {
                 World.CommitFootballDecision(selectedDecisionId, ChosenFootballAction.OptionId);
@@ -268,6 +279,13 @@ namespace FootballRpg.Presentation
         {
             if (Career == null || Time.frameCount <= inputReadyFrame) return;
             EnsureDecisionSelection();
+            if (World.PendingDefense != null)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha1)) ChooseDefense(DefensiveAction.Tackle);
+                if (Input.GetKeyDown(KeyCode.Alpha2)) ChooseDefense(DefensiveAction.Contain);
+                if (Input.GetKeyDown(KeyCode.Alpha3)) ChooseDefense(DefensiveAction.Block);
+            }
+            if (Input.GetKeyDown(KeyCode.I)) showIntentMenu = !showIntentMenu;
             if (Input.GetKeyDown(KeyCode.Alpha1)) ChoosePassKind(PassKind.ToFeet);
             if (Input.GetKeyDown(KeyCode.Alpha2)) ChoosePassKind(PassKind.ThroughBall);
             var kinds = ContextualActionKinds;
@@ -284,7 +302,7 @@ namespace FootballRpg.Presentation
             float z = (Input.GetKey(KeyCode.W) ? 1 : 0) - (Input.GetKey(KeyCode.S) ? 1 : 0);
             float rotation = (Input.GetKey(KeyCode.E) ? 1 : 0) - (Input.GetKey(KeyCode.Q) ? 1 : 0);
             var mouse = Input.mousePosition;
-            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (World.PendingDecision != null ? 180 : 65) * UiScale && mouse.y < Screen.height - (World.PendingDecision != null ? 215 : 105) * UiScale;
+            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (showIntentMenu && World.PendingDecision == null ? 300 : 190) * UiScale && mouse.y < Screen.height - (World.HasPendingDecision ? 245 : 105) * UiScale;
             float scroll = overPitch ? Input.mouseScrollDelta.y : 0;
             if (overPitch && Input.GetMouseButton(1))
             {

@@ -52,7 +52,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -159,6 +159,29 @@ namespace FootballRpg.Presentation
                 view.Close();
             }
             Debug.Log("FOOTBALL_RPG_FOOTBALL_ACTIONS_PASSED");
+        }
+
+        private void VerifyDefense()
+        {
+            var root = new GameObject("Defense Smoke");
+            var view = root.AddComponent<PitchPreview>(); view.Initialize(Career);
+            view.GetComponent<MatchDriver>().enabled = false;
+            view.CommitChosenPass();
+            if (!view.ChooseIntent(OffBallIntent.HoldZone)) throw new InvalidOperationException("Off-ball instruction failed.");
+            view.ChooseIntent(OffBallIntent.Automatic);
+            for (int i = 0; i < 24000 && view.World.PendingDefense == null; i++)
+            {
+                if (view.World.PendingDecision != null) view.CommitChosenPass();
+                view.Match.Advance(TimeSpan.FromMilliseconds(50));
+            }
+            if (view.World.PendingDefense == null) throw new InvalidOperationException("No defensive decision reached.");
+            view.ChooseDefense(DefensiveAction.Contain);
+            var chosen = view.ChosenDefense; long draws = view.Match.DrawCount;
+            view.TogglePause(); view.Match.Advance(TimeSpan.FromSeconds(2));
+            if (view.World.PendingDefense == null || !view.CommitChosenPass() || view.Match.DrawCount != draws + 1 ||
+                view.World.LastDefense.Action.SuccessProbability != chosen.Chance)
+                throw new InvalidOperationException("Defensive pause/resolution failed.");
+            view.Close(); Debug.Log("FOOTBALL_RPG_DEFENSE_PASSED");
         }
 
         public void OpenPitch(bool interactive = true)

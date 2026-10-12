@@ -156,7 +156,7 @@ namespace FootballRpg.Tests
             {
                 PassResolved active = null; long draws = 0; int applied = 0;
                 world.PassCommitted += result => { active = result; draws = session.DrawCount; };
-                for (int i = 0; i < 6000; i++)
+                for (int i = 0; i < 12000; i++)
                 {
                     session.Advance(TimeSpan.FromMilliseconds(50));
                     if (active == null) continue;

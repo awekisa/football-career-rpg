@@ -39,12 +39,13 @@ namespace FootballRpg.Presentation
             Text(new Rect(28, 22, 300, 25), "FIRST WEEK  /  " + World.HomeGoals + " – " + World.AwayGoals, small, Lime);
             Text(new Rect(28, 58, left - 220, 35), (Career.Clubs[Career.Fixture.HomeClubId].Name + "  /  " + Career.Clubs[Career.Fixture.AwayClubId].Name).ToUpperInvariant(), label, Color.white);
             Text(new Rect(left - 192, 18, 155, 27), Match.Elapsed.ToString(@"mm\:ss"), label, Color.white);
-            GUI.enabled = World.PendingDecision == null;
-            if (Button(new Rect(left - 192, 54, 160, 34), World.PendingDecision != null ? "CHOOSE ACTION" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
+            GUI.enabled = !World.HasPendingDecision;
+            if (Button(new Rect(left - 192, 54, 160, 34), World.HasPendingDecision ? "CHOOSE ACTION" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
                 TogglePause();
             GUI.enabled = true;
             DrawDecisionPanel(left);
             DrawFootballActions(left);
+            DrawDefenseAndIntent(left);
 
             Text(new Rect(left + 24, 26, 310, 25), "PLAYER INSPECTION", small, Lime);
             var selectedMarker = players.First(p => p.PlayerId == SelectedPlayer.Id);
@@ -70,7 +71,7 @@ namespace FootballRpg.Presentation
             if (Button(new Rect(left + 184, 724, 150, 37), "AWAY TEAM")) SelectPlayer(players.First(p => !p.IsHome).PlayerId);
             if (Button(new Rect(left + 24, 774, 150, 37), "PREVIOUS")) Browse(-1);
             if (Button(new Rect(left + 184, 774, 150, 37), "NEXT")) Browse(1);
-            string passInfo = "AI open play  ·  " + World.BallState + "\nLime area: expected position.";
+            string passInfo = "AI open play  ·  " + World.BallState + "\nLime area: current movement target.";
             if (World.OwnerId != null && World.OwnerId != SelectedPlayer.Id &&
                 Career.Players[World.OwnerId].ClubId == SelectedPlayer.ClubId &&
                 World.Players.First(p => p.Player.Id == World.OwnerId).Position.Distance(World.Players.First(p => p.Player.Id == SelectedPlayer.Id).Position) >= .1)

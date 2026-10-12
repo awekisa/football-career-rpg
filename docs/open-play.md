@@ -17,3 +17,5 @@ Presentation copies positions after simulation advances; it never integrates mov
 Three five-minute seeded scenarios check all 22 roles move, all ball phases occur, passes/tackles sustain play, possession changes, loose balls recover within a bounded interval and ownership remains consistent. Replay checks compare exact positions and complete action diagnostics across frame sizes, playback speeds and pauses. Further checks cover all role anchors, changing targets, disposal, automatic resolution idempotency, and presentation/marker synchronization.
 
 The packaged --pitch-smoke-test also runs 30 seconds of open play and requires movement and completed passes, logging FOOTBALL_RPG_OPEN_PLAY_PASSED. Full match laws and user-directed actions remain out of scope.
+
+SME-115 replaces provisional AI tackle rolls with the shared defensive resolver, adds controlled-player threat pauses, and allows persistent movement overrides. See [defense and intentions](defense-and-intentions.md).

@@ -24,7 +24,7 @@ Blue shirts identify the home team, coral shirts the visitors, and yellow shirts
 
 ## Ownership and limits
 
-One Unity unit is one metre. PitchGeometry draws a 105 by 68 metre field, markings, 7.32 by 2.44 metre goals and a ball. OpenPlayWorld places the first eleven fixture squad entries using role anchors and updates movement on fixed ticks. This is a simple role-based formation, not a coach lineup selection system. Passing, pressure and loose-ball recovery sustain open play; possession decisions let the user choose passes; SME-114 adds shots, dribbles, crosses, receiving and headers; full match rules are later tickets. See [open play](open-play.md).
+One Unity unit is one metre. PitchGeometry draws a 105 by 68 metre field, markings, 7.32 by 2.44 metre goals and a ball. OpenPlayWorld places the first eleven fixture squad entries using role anchors and updates movement on fixed ticks. This is a simple role-based formation, not a coach lineup selection system. Passing, pressure and loose-ball recovery sustain open play; possession decisions let the user choose passes; SME-114 adds shots, dribbles, crosses, receiving and headers; SME-115 adds defensive pauses and off-ball instructions; full match rules are later tickets. See [open play](open-play.md).
 
 The preview reuses LaunchScreen.Career and reads player records without editing them. Its separate MatchSession uses the SME-109 fixed clock; pausing stops clock ticks, while camera and inspection continue using presentation input. Neither selection nor camera movement consumes match randomness. Closing releases the preview and restores the launch camera.
 
@@ -33,3 +33,5 @@ Material templates live in Content/Resources so Standard and Unlit/Color shaders
 ## Verification
 
 The EditMode suite includes pitch dimensions and lineup identity, mouse-ray selection of all 22 players in running and paused states, unchanged career/clock/random state during inspection, camera bounds/reset, invalid selection and closing the preview. The macOS build is also checked using --pitch-smoke-test; this verifies packaged content, all selection rays and clock pause/resume AI movement/passing and the player-decision commit/pause/flight path without graphics. Visual checks cover field layout, the initial user inspector and keyboard camera/selection controls. Automated native mouse input did not register with the Unity window, so direct manual mouse interaction remains a check for a human tester; ray selection is covered by automated tests.
+
+Off the ball, open **Off-ball instruction [I]** to set movement intent. For marking/tracking, inspect an opposing player first. Defensive prompts use **1 / 2 / 3** for tackle / contain / block and **Enter** to commit. See [defense and intentions](defense-and-intentions.md).
