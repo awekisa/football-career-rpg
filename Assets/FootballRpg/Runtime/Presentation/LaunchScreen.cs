@@ -52,7 +52,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -137,6 +137,28 @@ namespace FootballRpg.Presentation
                 throw new InvalidOperationException("Committed pass flight stalled or rerolled.");
             view.Close();
             Debug.Log("FOOTBALL_RPG_DECISION_LOOP_PASSED");
+        }
+
+        private void VerifyFootballActions()
+        {
+            foreach (bool incoming in new[] { false, true })
+            {
+                var root = new GameObject("Football Action Smoke");
+                var view = root.AddComponent<PitchPreview>();
+                view.Initialize(Career, openingArrivalHeight: incoming ? (double?)1.8 : null);
+                view.GetComponent<MatchDriver>().enabled = false;
+                view.ChooseFootballAction(incoming ? FootballActionKind.HeaderPass : FootballActionKind.Dribble);
+                var choice = view.ChosenFootballAction;
+                if (choice == null || !view.CommitChosenPass() || view.CommitChosenPass())
+                    throw new InvalidOperationException("Football action selection/commit failed.");
+                for (int i = 0; i < 500 && view.World.BallState == BallPhase.Travelling; i++)
+                    view.Match.Advance(TimeSpan.FromMilliseconds(50));
+                if (view.World.BallState == BallPhase.Travelling || view.Match.DrawCount != 1 ||
+                    view.World.LastFootballAction.Action.SuccessProbability != choice.Chance)
+                    throw new InvalidOperationException("Football action flight/chance failed.");
+                view.Close();
+            }
+            Debug.Log("FOOTBALL_RPG_FOOTBALL_ACTIONS_PASSED");
         }
 
         public void OpenPitch(bool interactive = true)

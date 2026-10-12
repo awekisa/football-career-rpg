@@ -15,7 +15,8 @@ Open Launch.unity and press Play, then choose Explore the pitch or press Enter. 
 | Reset camera | Home or Reset view |
 | Choose pass recipient | Click a teammate, or R / Next teammate |
 | Choose pass type | 1 for feet, 2 for through ball, or action buttons |
-| Commit the chosen pass | Enter or Play pass |
+| Other contextual actions / variants | Lower row, keys 3–7; repeat to cycle variant |
+| Commit the chosen action | Enter or Play action |
 | Pause/resume clock between decisions | Space or clock button |
 | Return to menu | Escape or Back to menu |
 
@@ -23,7 +24,7 @@ Blue shirts identify the home team, coral shirts the visitors, and yellow shirts
 
 ## Ownership and limits
 
-One Unity unit is one metre. PitchGeometry draws a 105 by 68 metre field, markings, 7.32 by 2.44 metre goals and a ball. OpenPlayWorld places the first eleven fixture squad entries using role anchors and updates movement on fixed ticks. This is a simple role-based formation, not a coach lineup selection system. Passing, pressure and loose-ball recovery sustain open play; possession decisions let the user choose passes; full match rules and shooting are later tickets. See [open play](open-play.md).
+One Unity unit is one metre. PitchGeometry draws a 105 by 68 metre field, markings, 7.32 by 2.44 metre goals and a ball. OpenPlayWorld places the first eleven fixture squad entries using role anchors and updates movement on fixed ticks. This is a simple role-based formation, not a coach lineup selection system. Passing, pressure and loose-ball recovery sustain open play; possession decisions let the user choose passes; SME-114 adds shots, dribbles, crosses, receiving and headers; full match rules are later tickets. See [open play](open-play.md).
 
 The preview reuses LaunchScreen.Career and reads player records without editing them. Its separate MatchSession uses the SME-109 fixed clock; pausing stops clock ticks, while camera and inspection continue using presentation input. Neither selection nor camera movement consumes match randomness. Closing releases the preview and restores the launch camera.
 

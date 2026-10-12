@@ -10,10 +10,12 @@ namespace FootballRpg.Simulation
         public long Tick { get; }
         public string PlayerId { get; }
         public IReadOnlyList<PassPreview> Options { get; }
-        internal PassDecision(string id, long tick, string playerId, IEnumerable<PassPreview> options)
+        public IReadOnlyList<FootballActionPreview> Actions { get; }
+        internal PassDecision(string id, long tick, string playerId, IEnumerable<PassPreview> options, IEnumerable<FootballActionPreview> actions = null)
         {
             Id = id; Tick = tick; PlayerId = playerId;
             Options = System.Array.AsReadOnly(options.ToArray());
+            Actions = System.Array.AsReadOnly((actions ?? Enumerable.Empty<FootballActionPreview>()).ToArray());
         }
     }
 }
