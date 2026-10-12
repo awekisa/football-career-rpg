@@ -13,7 +13,12 @@ namespace FootballRpg.Presentation
         private readonly Dictionary<string, PositionDefinition> positions = new Dictionary<string, PositionDefinition>();
         private readonly Dictionary<string, ValueDefinition> attributes = new Dictionary<string, ValueDefinition>();
         private PitchGeometry geometry;
-        private Transform ballView, tacticalMarker;
+        private Transform ballView, tacticalMarker, passTargetMarker;
+        private LineRenderer passPath;
+        private string selectedDecisionId, selectedReceiverId;
+        private PassKind selectedPassKind;
+        private int inputReadyFrame;
+        public PassPreview ChosenPass => World?.PendingDecision?.Options.FirstOrDefault(p => p.Receiver.Id == selectedReceiverId && p.Kind == selectedPassKind);
         public OpenPlayWorld World { get; private set; }
         private Camera launchCamera;
         private bool launchCameraEnabled;
@@ -31,11 +36,12 @@ namespace FootballRpg.Presentation
         private float UiScale => Mathf.Max(.5f, Screen.height / 900f);
         private float SidebarPixels => 360 * UiScale;
 
-        public void Initialize(CareerState career, Action close = null)
+        public void Initialize(CareerState career, Action close = null, bool interactive = true)
         {
             if (Career != null) throw new InvalidOperationException("Preview already initialized.");
             Career = career ?? throw new ArgumentNullException(nameof(career));
             onClose = close;
+            inputReadyFrame = Time.frameCount + 1;
             var content = PrototypeContent.Load();
             foreach (var position in content.positions) positions.Add(position.id, position);
             foreach (var attribute in content.footballAttributes) attributes.Add(attribute.id, attribute);
@@ -65,11 +71,14 @@ namespace FootballRpg.Presentation
             light.transform.rotation = Quaternion.Euler(55, -35, 0);
             geometry = new PitchGeometry(transform);
             geometry.BuildField();
-            World = new OpenPlayWorld(career, Match);
+            World = new OpenPlayWorld(career, Match, interactive ? career.UserPlayerId : null, interactive);
             BuildPlayers();
             ballView = geometry.Root.Find("Ball");
             tacticalMarker = geometry.Circle("Expected Tactical Position", 3,
                 new Vector3(0, .1f, 0), geometry.Material(new Color(.72f, .96f, .35f), true), .12f).transform;
+            var passColor = geometry.Material(new Color(.25f, .85f, 1), true);
+            passTargetMarker = geometry.Circle("Chosen Pass Target", 1.4f, new Vector3(0, .14f, 0), passColor, .2f).transform;
+            passPath = geometry.Line("Chosen Pass Path", new Vector3[2], passColor, .10f);
             SyncWorldView();
             SelectPlayer(Career.UserPlayerId);
             ResetCamera();
@@ -117,10 +126,19 @@ namespace FootballRpg.Presentation
 
         public void SyncWorldView()
         {
+            EnsureDecisionSelection();
             foreach (var marker in players)
                 marker.transform.localPosition = ToVector(World.Players.First(p => p.Player.Id == marker.PlayerId).Position);
             ballView.localPosition = ToVector(World.BallPosition) + Vector3.up * .3f;
             tacticalMarker.localPosition = ToVector(World.Players.First(p => p.Player.Id == Career.UserPlayerId).Target);
+            passTargetMarker.gameObject.SetActive(ChosenPass != null);
+            passPath.gameObject.SetActive(ChosenPass != null);
+            if (ChosenPass != null)
+            {
+                passTargetMarker.localPosition = ToVector(ChosenPass.Target);
+                passPath.SetPosition(0, ToVector(World.BallPosition) + Vector3.up * .14f);
+                passPath.SetPosition(1, ToVector(ChosenPass.Target) + Vector3.up * .14f);
+            }
         }
 
         private void LateUpdate() { if (World != null) SyncWorldView(); }
@@ -130,6 +148,8 @@ namespace FootballRpg.Presentation
             var player = players.Find(p => p.PlayerId == id);
             if (player == null) return false;
             SelectedPlayer = Career.Players[id];
+            EnsureDecisionSelection();
+            if (World.PendingDecision?.Options.Any(p => p.Receiver.Id == id) == true) selectedReceiverId = id;
             foreach (var marker in players) marker.SetSelected(marker == player);
             return true;
         }
@@ -144,8 +164,42 @@ namespace FootballRpg.Presentation
 
         public void TogglePause()
         {
-            if (Match.State == MatchRunState.Paused) Match.Resume();
-            else Match.Pause();
+            World.TogglePause();
+        }
+
+        private void EnsureDecisionSelection()
+        {
+            var decision = World.PendingDecision;
+            if (decision == null) { selectedDecisionId = null; return; }
+            if (selectedDecisionId == decision.Id) return;
+            selectedDecisionId = decision.Id;
+            selectedReceiverId = decision.Options.OrderByDescending(p => p.Chance).First().Receiver.Id;
+            selectedPassKind = PassKind.ToFeet;
+        }
+
+        public void ChoosePassKind(PassKind kind)
+        {
+            EnsureDecisionSelection();
+            if (World.PendingDecision?.Options.Any(p => p.Receiver.Id == selectedReceiverId && p.Kind == kind) == true)
+                selectedPassKind = kind;
+        }
+
+        public void CyclePassTarget()
+        {
+            EnsureDecisionSelection();
+            if (World.PendingDecision == null) return;
+            var targets = World.PendingDecision.Options.Select(p => p.Receiver.Id).Distinct().ToArray();
+            SelectPlayer(targets[(Array.IndexOf(targets, selectedReceiverId) + 1) % targets.Length]);
+        }
+
+        public bool CommitChosenPass()
+        {
+            EnsureDecisionSelection();
+            var chosen = ChosenPass;
+            if (chosen == null) return false;
+            World.CommitDecision(selectedDecisionId, chosen.Receiver.Id, chosen.Kind);
+            selectedDecisionId = null;
+            return true;
         }
 
         public void AdjustCamera(float panX, float panZ, float rotate, float zoomDelta)
@@ -176,7 +230,12 @@ namespace FootballRpg.Presentation
 
         private void Update()
         {
-            if (Career == null) return;
+            if (Career == null || Time.frameCount <= inputReadyFrame) return;
+            EnsureDecisionSelection();
+            if (Input.GetKeyDown(KeyCode.Alpha1)) ChoosePassKind(PassKind.ToFeet);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) ChoosePassKind(PassKind.ThroughBall);
+            if (Input.GetKeyDown(KeyCode.R)) CyclePassTarget();
+            if (Input.GetKeyDown(KeyCode.Return)) CommitChosenPass();
             UpdateCamera();
             if (Input.GetKeyDown(KeyCode.Space)) TogglePause();
             if (Input.GetKeyDown(KeyCode.Home)) ResetCamera();
@@ -187,7 +246,7 @@ namespace FootballRpg.Presentation
             float z = (Input.GetKey(KeyCode.W) ? 1 : 0) - (Input.GetKey(KeyCode.S) ? 1 : 0);
             float rotation = (Input.GetKey(KeyCode.E) ? 1 : 0) - (Input.GetKey(KeyCode.Q) ? 1 : 0);
             var mouse = Input.mousePosition;
-            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > 65 * UiScale && mouse.y < Screen.height - 105 * UiScale;
+            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > 65 * UiScale && mouse.y < Screen.height - (World.PendingDecision != null ? 215 : 105) * UiScale;
             float scroll = overPitch ? Input.mouseScrollDelta.y : 0;
             if (overPitch && Input.GetMouseButton(1))
             {

@@ -15,6 +15,7 @@ namespace FootballRpg.Presentation
         {
             if (SelectedPlayer == null || ViewCamera == null) return;
             Styles();
+            EnsureDecisionSelection();
             Matrix4x4 original = GUI.matrix;
             Color originalColor = GUI.color;
             Color originalBackground = GUI.backgroundColor;
@@ -38,8 +39,11 @@ namespace FootballRpg.Presentation
             Text(new Rect(28, 22, 300, 25), "FIRST WEEK  /  PITCH PREVIEW", small, Lime);
             Text(new Rect(28, 58, left - 220, 35), (Career.Clubs[Career.Fixture.HomeClubId].Name + "  /  " + Career.Clubs[Career.Fixture.AwayClubId].Name).ToUpperInvariant(), label, Color.white);
             Text(new Rect(left - 192, 18, 155, 27), Match.Elapsed.ToString(@"mm\:ss"), label, Color.white);
-            if (Button(new Rect(left - 192, 54, 160, 34), Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
+            GUI.enabled = World.PendingDecision == null;
+            if (Button(new Rect(left - 192, 54, 160, 34), World.PendingDecision != null ? "CHOOSE A PASS" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
                 TogglePause();
+            GUI.enabled = true;
+            DrawDecisionPanel(left);
 
             Text(new Rect(left + 24, 26, 310, 25), "PLAYER INSPECTION", small, Lime);
             var selectedMarker = players.First(p => p.PlayerId == SelectedPlayer.Id);
@@ -82,6 +86,24 @@ namespace FootballRpg.Presentation
             GUI.matrix = original;
             GUI.color = originalColor;
             GUI.backgroundColor = originalBackground;
+        }
+
+        private void DrawDecisionPanel(float left)
+        {
+            var decision = World.PendingDecision;
+            var chosen = ChosenPass;
+            if (decision == null || chosen == null) return;
+            Panel(new Rect(0, 106, left, 105), new Color(.04f, .12f, .14f, .98f));
+            Text(new Rect(24, 115, left - 230, 30), "YOUR BALL  ·  Pass to " + Career.Players[chosen.Receiver.Id].Name, label, Lime);
+            if (Button(new Rect(left - 192, 114, 168, 29), "NEXT TEAMMATE  [R]")) CyclePassTarget();
+            float w = (left - 72) / 3;
+            var feet = decision.Options.First(p => p.Receiver.Id == chosen.Receiver.Id && p.Kind == Simulation.PassKind.ToFeet);
+            var through = decision.Options.First(p => p.Receiver.Id == chosen.Receiver.Id && p.Kind == Simulation.PassKind.ThroughBall);
+            if (Button(new Rect(24, 154, w, 40), (chosen.Kind == Simulation.PassKind.ToFeet ? "● " : "") + "TO FEET  " + feet.Percent + "%  [1]"))
+                ChoosePassKind(Simulation.PassKind.ToFeet);
+            if (Button(new Rect(36 + w, 154, w, 40), (chosen.Kind == Simulation.PassKind.ThroughBall ? "● " : "") + "THROUGH BALL  " + through.Percent + "%  [2]"))
+                ChoosePassKind(Simulation.PassKind.ThroughBall);
+            if (Button(new Rect(48 + w * 2, 154, w, 40), "PLAY PASS  [ENTER]")) CommitChosenPass();
         }
 
         private void Browse(int direction)

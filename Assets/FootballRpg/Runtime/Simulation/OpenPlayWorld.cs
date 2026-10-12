@@ -38,6 +38,11 @@ namespace FootballRpg.Simulation
     public sealed class OpenPlayWorld : IDisposable
     {
         private readonly MatchSession session;
+        private readonly string controlledPlayerId;
+        private long possessionSequence;
+        private readonly Dictionary<string, PassResolved> committedDecisions = new Dictionary<string, PassResolved>();
+        public PassDecision PendingDecision { get; private set; }
+        public int DecisionCount { get; private set; }
         private readonly List<FootballerMotion> players = new List<FootballerMotion>();
         private FootballerMotion receiver;
         private PitchPoint destination;
@@ -62,10 +67,11 @@ namespace FootballRpg.Simulation
         public int Recoveries { get; private set; }
         public int PossessionChanges { get; private set; }
 
-        public OpenPlayWorld(CareerState career, MatchSession match)
+        public OpenPlayWorld(CareerState career, MatchSession match, string controlledPlayerId = null, bool startWithControlledPlayer = false)
         {
             if (career == null) throw new ArgumentNullException(nameof(career));
             session = match ?? throw new ArgumentNullException(nameof(match));
+            this.controlledPlayerId = controlledPlayerId;
             foreach (bool home in new[] { true, false })
             {
                 string club = home ? career.Fixture.HomeClubId : career.Fixture.AwayClubId;
@@ -83,7 +89,12 @@ namespace FootballRpg.Simulation
                 }
             }
             Players = players.AsReadOnly();
-            GiveBall(players.First(p => p.IsHome && p.Player.PrimaryPositionId != "gk"));
+            if (controlledPlayerId != null && !players.Any(p => p.Player.Id == controlledPlayerId))
+                throw new ArgumentException("Controlled player must be in the starting lineup.");
+            if (startWithControlledPlayer && controlledPlayerId == null)
+                throw new ArgumentException("An opening controlled possession requires a controlled player.");
+            GiveBall(startWithControlledPlayer ? players.Single(p => p.Player.Id == controlledPlayerId)
+                : players.First(p => p.IsHome && p.Player.PrimaryPositionId != "gk"));
             session.TickAdvanced += Step;
         }
 
@@ -111,6 +122,8 @@ namespace FootballRpg.Simulation
 
         private void Step(long tick)
         {
+            // Defend against direct clock resume: a pending user choice may never be delegated to AI.
+            if (PendingDecision != null) { session.Pause(); return; }
             double dt = session.FixedStep.TotalSeconds;
             challengeSeconds = Math.Max(0, challengeSeconds - dt);
             var owner = players.FirstOrDefault(p => p.Player.Id == OwnerId);
@@ -233,7 +246,14 @@ namespace FootballRpg.Simulation
                 .OrderByDescending(p => PassScore(owner, p)).First();
             var kind = (teammate.Position.X - owner.Position.X) * owner.Direction > 8 ? PassKind.ThroughBall : PassKind.ToFeet;
             var preview = PreviewPass(teammate.Player.Id, kind);
-            LastPass = PassResolver.Commit(session, "open-play-" + (++actionSequence), preview, true);
+            var result = PassResolver.Commit(session, "open-play-" + (++actionSequence), preview, true);
+            BeginFlight(result, owner);
+            PassCommitted?.Invoke(result);
+        }
+
+        private void BeginFlight(PassResolved result, FootballerMotion owner)
+        {
+            LastPass = result;
             destination = LastPass.Destination;
             receiver = LastPass.ReceivingPlayerId == null ? null : players.Single(p => p.Player.Id == LastPass.ReceivingPlayerId);
             flightOrigin = BallPosition;
@@ -244,7 +264,6 @@ namespace FootballRpg.Simulation
             OwnerId = null;
             BallState = BallPhase.Travelling;
             flightSeconds = 0;
-            PassCommitted?.Invoke(LastPass);
         }
 
         private double PassScore(FootballerMotion owner, FootballerMotion candidate)
@@ -271,6 +290,53 @@ namespace FootballRpg.Simulation
             BallPosition = player.Position;
             BallState = BallPhase.Owned;
             heldSeconds = 0;
+            possessionSequence++;
+            if (player.Player.Id == controlledPlayerId) OpenDecision();
+        }
+
+        private void OpenDecision()
+        {
+            var owner = players.Single(p => p.Player.Id == OwnerId);
+            var options = players.Where(p => p.IsHome == owner.IsHome && p != owner && p.Position.Distance(owner.Position) >= .1)
+                .SelectMany(p => new[] { PreviewPass(p.Player.Id, PassKind.ToFeet), PreviewPass(p.Player.Id, PassKind.ThroughBall) }).ToArray();
+            if (options.Length == 0) return; // No eligible recipient: retain ordinary AI possession.
+            session.Pause();
+            PendingDecision = new PassDecision(session.SessionId + ":possession-" + possessionSequence,
+                session.Tick, OwnerId, options);
+            DecisionCount++;
+        }
+
+        public PassResolved CommitDecision(string decisionId, string receiverId, PassKind kind)
+        {
+            if (decisionId == null) throw new ArgumentNullException(nameof(decisionId));
+            if (committedDecisions.TryGetValue(decisionId, out var previous))
+            {
+                if (previous.Preview.Receiver.Id != receiverId || previous.Preview.Kind != kind)
+                    throw new InvalidOperationException("This possession already committed a different pass.");
+                return previous;
+            }
+            var decision = PendingDecision;
+            if (decision == null || decision.Id != decisionId || session.State != MatchRunState.Paused ||
+                session.Tick != decision.Tick || BallState != BallPhase.Owned || OwnerId != decision.PlayerId)
+                throw new InvalidOperationException("The decision is no longer current or the match is not paused.");
+            var preview = decision.Options.SingleOrDefault(p => p.Receiver.Id == receiverId && p.Kind == kind);
+            if (preview == null) throw new ArgumentException("Select one of this possession's valid pass options.");
+            var owner = players.Single(p => p.Player.Id == OwnerId);
+            var result = PassResolver.Commit(session, decision.Id, preview, false);
+            BeginFlight(result, owner);
+            PendingDecision = null;
+            committedDecisions.Add(decision.Id, result);
+            // Resume into the committed flight. Movement represents the fact; it never resolves it again.
+            session.CompleteResolution(result.EventId);
+            PassCommitted?.Invoke(result);
+            return result;
+        }
+
+        public void TogglePause()
+        {
+            if (PendingDecision != null) return;
+            if (session.State == MatchRunState.Paused) session.Resume();
+            else session.Pause();
         }
         private void MakeLoose()
         {
