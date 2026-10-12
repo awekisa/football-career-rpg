@@ -2007,7 +2007,38 @@
         "harbour-player-16",
         "harbour-player-17",
         "harbour-player-18"
-      ]
+      ],
+      "setPieces": {
+        "penaltyTakers": [
+          "harbour-player-11",
+          "harbour-player-08"
+        ],
+        "freeKickTakers": [
+          "harbour-player-08",
+          "harbour-player-07"
+        ],
+        "cornerTakers": [
+          "harbour-player-09",
+          "harbour-player-10"
+        ],
+        "roles": [
+          {
+            "positionId": "gk",
+            "attackingDuty": "FollowZone",
+            "defendingDuty": "FollowZone"
+          },
+          {
+            "positionId": "cb",
+            "attackingDuty": "AttackSpace",
+            "defendingDuty": "MarkPlayer"
+          },
+          {
+            "positionId": "st",
+            "attackingDuty": "AttackSpace",
+            "defendingDuty": "Counterattack"
+          }
+        ]
+      }
     },
     {
       "id": "meadow",
@@ -2035,7 +2066,38 @@
         "meadow-player-16",
         "meadow-player-17",
         "meadow-player-18"
-      ]
+      ],
+      "setPieces": {
+        "penaltyTakers": [
+          "meadow-player-11",
+          "meadow-player-08"
+        ],
+        "freeKickTakers": [
+          "meadow-player-08",
+          "meadow-player-07"
+        ],
+        "cornerTakers": [
+          "meadow-player-09",
+          "meadow-player-10"
+        ],
+        "roles": [
+          {
+            "positionId": "gk",
+            "attackingDuty": "FollowZone",
+            "defendingDuty": "FollowZone"
+          },
+          {
+            "positionId": "cb",
+            "attackingDuty": "AttackSpace",
+            "defendingDuty": "MarkPlayer"
+          },
+          {
+            "positionId": "st",
+            "attackingDuty": "AttackSpace",
+            "defendingDuty": "Counterattack"
+          }
+        ]
+      }
     }
   ],
   "fixture": {

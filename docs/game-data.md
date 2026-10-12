@@ -58,3 +58,7 @@ Reject duplicate IDs, missing position choices, broken references, unknown/dupli
 Run `./scripts/unity.sh test`. Tests load the actual JSON, cover all positions, compare sessions, mutate authoring data to detect aliasing, check read-only views and atomic condition updates, reject malformed content and exercise event boundaries.
 
 The packaged game loads the same resource and logs `FOOTBALL_RPG_DATA_READY: 36 players, 2 clubs`. Missing/invalid content fails startup smoke mode. This checks packaged content inclusion; it does not imply playable matches yet.
+
+## Set-piece plans
+
+Optional club `setPieces` data contains ordered `penaltyTakers`, `freeKickTakers`, `cornerTakers` (club player IDs), and `roles` entries with `positionId`, `attackingDuty`, `defendingDuty`. Duty values are `FollowZone`, `MarkPlayer`, `AttackSpace`, `Counterattack`. References and duplicates are validated; runtime plans copy the authoring arrays. Omitted roles use position defaults.

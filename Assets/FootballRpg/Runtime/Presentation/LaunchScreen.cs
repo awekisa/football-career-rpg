@@ -53,7 +53,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); VerifyReferee(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); VerifyReferee(); VerifySetPieces(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -269,6 +269,36 @@ namespace FootballRpg.Presentation
                 !view.World.FixtureEvents.Any(e => e.Kind == "AdvantageRecalled" || e.Restart == RestartKind.Penalty || e.Restart == RestartKind.DirectFreeKick))
                 throw new InvalidOperationException("Seeded fixture did not exercise fouls and referee restarts through full time.");
             view.Close(); Debug.Log("FOOTBALL_RPG_REFEREE_PASSED");
+        }
+
+        private void VerifySetPieces()
+        {
+            foreach (var user in new[] { "harbour-player-01", "harbour-player-04", "harbour-player-11" })
+            {
+                var root = new GameObject("Set Piece Smoke");
+                var definitions = PrototypeContent.Load(); definitions.userPlayerId = user;
+                var view = root.AddComponent<PitchPreview>(); view.Initialize(CareerState.Create(definitions));
+                view.GetComponent<MatchDriver>().enabled = false; view.World.StartFixture(new CompetitionRules(180));
+                string chosenRestart = null;
+                for (int i = 0; i < 16000; i++)
+                {
+                    if (view.World.RefereeNoticePending || view.World.OffsideNoticePending || view.World.FixturePhase == FixturePhase.HalfTime) view.CommitChosenPass();
+                    else if (view.World.PendingSetPiece != null)
+                    {
+                        chosenRestart = view.World.Restart.Id;
+                        view.SelectSetPieceDuty(SetPieceDuty.Counterattack); view.CommitChosenPass();
+                    }
+                    else if (view.World.HasPendingDecision || view.UserRestart) view.CommitChosenPass();
+                    view.Match.Advance(TimeSpan.FromMilliseconds(50));
+                    if (chosenRestart != null && view.World.SetPieceRecords.Any(r => r.RestartId == chosenRestart && r.Kind == "TakingResult")) break;
+                }
+                view.SyncWorldView();
+                if (chosenRestart == null || !view.World.SetPieceRecords.Any(r => r.RestartId == chosenRestart && r.Kind == "DutyChosen") ||
+                    !view.World.SetPieceRecords.Any(r => r.RestartId == chosenRestart && r.Kind == "TakingResult"))
+                    throw new InvalidOperationException("Set-piece role and delivery were not reached for " + user);
+                view.Close();
+            }
+            Debug.Log("FOOTBALL_RPG_SET_PIECES_PASSED");
         }
 
         private bool shortFixture;

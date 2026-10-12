@@ -49,3 +49,7 @@ A fixture pauses when offside is called. The panel names the offender, explains 
 ## Referee controls
 
 Enter acknowledges a paused referee notice. Advantage continues play. A penalty taker uses Enter to shoot; direct free kicks offer pass and shoot controls. Inspection shows bookings/dismissals, and sent-off players leave the pitch. See [referee rules](referee.md).
+
+## Set-piece controls
+
+Before a teammate/opponent takes a restart, choose follow zone [1], mark [2], attack space [3] or await counter [4], then confirm with Enter. R cycles the opponent to mark. Takers use 1 pass, 2 low delivery, 3 lofted delivery, and 4 shot/variant; R cycles recipients and Enter releases. See [set pieces](set-pieces.md).

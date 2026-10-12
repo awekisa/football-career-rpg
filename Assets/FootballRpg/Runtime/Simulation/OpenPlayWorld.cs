@@ -73,6 +73,7 @@ namespace FootballRpg.Simulation
             if (career == null) throw new ArgumentNullException(nameof(career));
             session = match ?? throw new ArgumentNullException(nameof(match));
             this.controlledPlayerId = controlledPlayerId;
+            foreach (var club in career.Clubs.Values) setPieceClubs.Add(club.Id, club);
             foreach (bool home in new[] { true, false })
             {
                 string club = home ? career.Fixture.HomeClubId : career.Fixture.AwayClubId;
@@ -318,6 +319,7 @@ namespace FootballRpg.Simulation
         {
             if (!CanParticipate(player.Player.Id)) return false;
             if (CheckOffsideTouch(player)) return false;
+            if (takingPlayerId != null) RecordSetPieceOutcome("Controlled by " + player.Player.Id, players.FirstOrDefault(p => p.Player.Id == takingPlayerId)?.IsHome == player.IsHome);
             penaltyInProgress = false;
             directRestart = null;
             if (lastClub != null && lastClub != player.Player.ClubId) PossessionChanges++;

@@ -96,6 +96,7 @@ namespace FootballRpg.Simulation
         public float staffQuality;
         public float facilityQuality;
         public string[] squadPlayerIds;
+        public SetPieceDefinition setPieces;
     }
 
     [Serializable]

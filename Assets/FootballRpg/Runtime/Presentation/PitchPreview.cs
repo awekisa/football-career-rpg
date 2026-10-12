@@ -250,7 +250,7 @@ namespace FootballRpg.Presentation
             if (World.RefereeNoticePending) { World.AcknowledgeReferee(); return true; }
             if (World.OffsideNoticePending) { World.AcknowledgeOffside(); return true; }
             if (World.FixturePhase == FixturePhase.HalfTime) { World.ContinueSecondHalf(); return true; }
-            if (UserRestart) { if (World.Restart.Kind == RestartKind.Penalty) World.ShootRestart(World.Restart.Id); else World.ReleaseRestart(World.Restart.Id, ChosenRestart.Receiver.Id); return true; }
+            if (World.PendingSetPiece != null || UserRestart) return CommitSetPieceChoice();
             EnsureDecisionSelection();
             if (ChosenKeeperAction != null)
             { World.CommitKeeperDecision(World.PendingKeeper.Id, ChosenKeeperAction.OptionId); return true; }
@@ -299,6 +299,7 @@ namespace FootballRpg.Presentation
         {
             if (Career == null || Time.frameCount <= inputReadyFrame) return;
             EnsureDecisionSelection();
+            SetPieceKeys();
             if (Input.GetKeyDown(KeyCode.F)) ToggleKeeperFeet();
             if (World.PendingKeeper != null && !showKeeperFeet)
             {
@@ -320,7 +321,7 @@ namespace FootballRpg.Presentation
                 var kinds = ContextualActionKinds;
                 for (int i = 0; i < kinds.Length; i++) if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha3 + i))) ChooseFootballAction(kinds[i]);
             }
-            if (Input.GetKeyDown(KeyCode.R)) { if (World.PendingKeeper != null && !showKeeperFeet) CycleKeeperTarget(); else CyclePassTarget(); }
+            if (Input.GetKeyDown(KeyCode.R)) { if (World.PendingSetPiece != null) CycleSetPieceMark(); else if (World.PendingKeeper != null && !showKeeperFeet) CycleKeeperTarget(); else CyclePassTarget(); }
             if (Input.GetKeyDown(KeyCode.Return)) CommitChosenPass();
             UpdateCamera();
             if (Input.GetKeyDown(KeyCode.Space)) TogglePause();
@@ -332,7 +333,7 @@ namespace FootballRpg.Presentation
             float z = (Input.GetKey(KeyCode.W) ? 1 : 0) - (Input.GetKey(KeyCode.S) ? 1 : 0);
             float rotation = (Input.GetKey(KeyCode.E) ? 1 : 0) - (Input.GetKey(KeyCode.Q) ? 1 : 0);
             var mouse = Input.mousePosition;
-            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (showIntentMenu && World.PendingDecision == null ? 300 : 190) * UiScale && mouse.y < Screen.height - (World.OffsideNoticePending || World.RefereeNoticePending ? 300 : World.HasPendingDecision || UserRestart ? 250 : 105) * UiScale;
+            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (showIntentMenu && World.PendingDecision == null ? 300 : 190) * UiScale && mouse.y < Screen.height - (World.OffsideNoticePending || World.RefereeNoticePending || World.PendingSetPiece != null || UserRestart ? 300 : World.HasPendingDecision || UserRestart ? 250 : 105) * UiScale;
             float scroll = overPitch ? Input.mouseScrollDelta.y : 0;
             if (overPitch && Input.GetMouseButton(1))
             {

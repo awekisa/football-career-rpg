@@ -119,10 +119,12 @@ namespace FootballRpg.Simulation
             return result;
         }
 
-        private void BeginFootballFlight(FootballerMotion actor, FootballActionResolved result)
+        private void BeginFootballFlight(FootballerMotion actor, FootballActionResolved result) => BeginFootballFlightCore(actor, result, null);
+
+        private void BeginFootballFlightCore(FootballerMotion actor, FootballActionResolved result, RestartKind? restart)
         {
             if (Advantage != null && actor.Player.ClubId == Advantage.ClubId && (result.Preview.Kind == FootballActionKind.Shot || result.Preview.Kind == FootballActionKind.HeaderShot)) RealizeAdvantage();
-            RecordOffsideTouch(actor);
+            RecordOffsideTouch(actor, OffsideTouch.DeliberatePlay, restart);
             LastFootballAction = activeFootballAction = result;
             HoldingKeeperId = null;
             if (!actor.IsGoalkeeper || (result.Preview.Kind != FootballActionKind.Control && result.Preview.Kind != FootballActionKind.Dribble))
@@ -157,7 +159,7 @@ namespace FootballRpg.Simulation
                 case FootballOutcome.Dispossessed:
                     GiveBall(receiver); break;
                 case FootballOutcome.DeliveryArrives:
-                    BeginArrival(receiver, result.Preview.DeliveryHeight, 14); break;
+                    BeginDeliveryArrival(receiver, result.Preview.DeliveryHeight, 14); break;
                 case FootballOutcome.ShotOnTarget:
                 case FootballOutcome.Goal:
                     ScoreShot(result); break;

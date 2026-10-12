@@ -20,7 +20,7 @@ namespace FootballRpg.Simulation
         private string containedPlayerId;
         private readonly Dictionary<string, DefenseResolved> committedDefense = new Dictionary<string, DefenseResolved>();
         public DefenseDecision PendingDefense { get; private set; }
-        public bool HasPendingDecision => PendingDecision != null || PendingDefense != null || PendingKeeper != null;
+        public bool HasPendingDecision => PendingDecision != null || PendingDefense != null || PendingKeeper != null || PendingSetPiece != null;
         public DefenseResolved LastDefense { get; private set; }
         public event Action<DefenseResolved> DefenseCommitted;
         public MovementIntent ActiveIntent { get; private set; }
@@ -105,6 +105,9 @@ namespace FootballRpg.Simulation
             if (!CanSetIntent(kind, targetId)) throw new ArgumentException("Intent requires a valid phase and, for marking/tracking, an opposing starter.");
             if (kind == OffBallIntent.Automatic) { ClearIntent("Following team tactics"); return; }
             var user = Controlled;
+            if (setPieceReleased && setPieceChoices.Remove(user.Player.Id))
+                setPieceRecords.Add(new SetPieceRecord(SetPieceRestartId, setPieceClubs[user.Player.ClubId].CoachId, user.Player.Id,
+                    "DutyOverridden", kind.ToString(), true, null, null, session.Tick));
             ActiveIntent = new MovementIntent(kind, kind == OffBallIntent.PersonalMark || kind == OffBallIntent.Track ? targetId : null,
                 session.Tick + Ticks(20), user.Position);
             IntentStatus = "Active";
@@ -126,6 +129,8 @@ namespace FootballRpg.Simulation
 
         private PitchPoint IntendedTarget(FootballerMotion player, FootballerMotion owner)
         {
+            var setPieceTarget = SetPieceMovementTarget(player);
+            if (setPieceTarget.HasValue) return setPieceTarget.Value;
             if (player.Player.Id != controlledPlayerId) return TacticalTarget(player, owner);
             if (session.Tick < containedUntilTick && owner?.Player.Id == containedPlayerId)
                 return owner.Position.MoveTowards(new PitchPoint(-52.5 * player.Direction, 0), 2).Bounded();

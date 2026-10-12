@@ -42,7 +42,7 @@ namespace FootballRpg.Simulation
         }
         private void ClearPlay()
         {
-            Offside.EndPhase(); penaltyInProgress = false;
+            Offside.EndPhase(); penaltyInProgress = false; ClearSetPiece();
             PendingDecision = null; PendingDefense = null; PendingKeeper = null;
             activeFootballAction = null; keeperThreat = null; keeperFlight = null;
             OwnerId = IncomingPlayerId = HoldingKeeperId = PossessionClubId = null;
@@ -77,6 +77,13 @@ namespace FootballRpg.Simulation
             if (setupElapsed >= Rules.RestartSetupSeconds)
             {
                 if (Restart.Kind == RestartKind.Penalty) { ShootRestart(Restart.Id); return true; }
+                if (Restart.Kind == RestartKind.Corner || (Restart.Kind == RestartKind.IndirectFreeKick && Restart.Spot.X * players.Single(p => p.Player.Id == Restart.TakerId).Direction > 20))
+                {
+                    var delivery = RestartDeliveries().Where(p => p.Variant == "lofted").OrderByDescending(p => p.Receiver.Position.X * p.Situation.Direction).ThenByDescending(p => p.Chance).First();
+                    DeliverRestart(Restart.Id, delivery.OptionId); return true;
+                }
+                if (Restart.Kind == RestartKind.DirectFreeKick && RestartShotPreview().Situation.Actor.Position.Distance(RestartShotPreview().Target) < 28)
+                { ShootRestart(Restart.Id); return true; }
                 var target = RestartRecipients().OrderByDescending(p => p.Chance).First();
                 ReleaseRestart(Restart.Id, target.Receiver.Id);
             }
@@ -101,10 +108,10 @@ namespace FootballRpg.Simulation
             if (Abandoned) return;
             ClearPlay(); directRestart = null;
             var team = players.Where(p => p.IsHome == home);
-            var taker = kind == RestartKind.GoalKick ? team.First(p => p.IsGoalkeeper)
+            var taker = AssignedTaker(kind, home) ?? (kind == RestartKind.GoalKick ? team.First(p => p.IsGoalkeeper)
                 : kind == RestartKind.Penalty ? team.Where(p => !p.IsGoalkeeper).OrderByDescending(p => p.Player.FootballAttributes["finishing"]).First()
                 : kind == RestartKind.Kickoff ? team.OrderByDescending(p => p.Anchor.X * p.Direction).First()
-                : team.Where(p => !p.IsGoalkeeper).OrderBy(p => p.Position.Distance(spot)).First();
+                : team.Where(p => !p.IsGoalkeeper).OrderBy(p => p.Position.Distance(spot)).First());
             Restart = new RestartState(session.SessionId + ":restart-" + (fixtureSequence + 1), kind, home, taker.Player.Id, spot);
             setupElapsed = 0;
             foreach (var p in players)
@@ -145,6 +152,7 @@ namespace FootballRpg.Simulation
             }
             taker.Position = taker.Target = spot;
             BallPosition = spot; BallHeight = kind == RestartKind.ThrowIn ? 1.8 : PitchBoundary.BallRadius;
+            PrepareSetPiece();
             RecordFixture("RestartAwarded", home, kind);
             if (taker.Player.Id == controlledPlayerId) session.Pause();
         }
@@ -165,7 +173,7 @@ namespace FootballRpg.Simulation
                 return lastRestartResult;
             }
             var restart = Restart;
-            if (restart == null || restart.Id != id || RefereeNoticePending || OffsideNoticePending) throw new InvalidOperationException("Stale restart.");
+            if (restart == null || restart.Id != id || RefereeNoticePending || OffsideNoticePending || PendingSetPiece != null) throw new InvalidOperationException("Stale restart.");
             var preview = RestartRecipients().SingleOrDefault(p => p.Receiver.Id == receiverId);
             if (preview == null) throw new ArgumentException("Choose a teammate.");
             var taker = players.Single(p => p.Player.Id == restart.TakerId);
@@ -176,6 +184,7 @@ namespace FootballRpg.Simulation
             directRestart = restart.Kind; directRestartHome = restart.IsHome;
             if (restart.Kind == RestartKind.ThrowIn)
                 Handling.RecordTouch(taker.Player.Id, taker.Player.ClubId, BallTouchKind.ThrowIn, receiverId);
+            RecordSetPieceTaking(restart, result.Action, "Pass");
             lastReleasedRestart = id; lastRestartReceiver = receiverId; lastRestartResult = result;
             // A kick clearly moves on release; a throw enters at the line before normal flight begins.
             BallPosition = restart.Kind == RestartKind.ThrowIn ? new PitchPoint(restart.Spot.X, Math.Sign(restart.Spot.Z) * 33.99)
@@ -201,6 +210,8 @@ namespace FootballRpg.Simulation
                 else { RecallAdvantage(); return; }
             }
             var defending = players.First(p => p.Direction == -(point.X >= 0 ? 1 : -1));
+            bool legalGoal = crossing.IsGoal && !(directRestart.HasValue && directRestartHome == defending.IsHome) && directRestart != RestartKind.ThrowIn && directRestart != RestartKind.IndirectFreeKick;
+            RecordSetPieceOutcome(legalGoal ? "Goal" : "Out of play / restart", legalGoal && takingPlayerId != null && Math.Sign(point.X) == players.First(p => p.Player.Id == takingPlayerId).Direction);
             bool lastHome = players.FirstOrDefault(p => p.Player.Id == Handling.LastPlayerId)?.IsHome ?? !defending.IsHome;
             if (!crossing.GoalLine)
                 AwardRestart(RestartKind.ThrowIn, !lastHome, new PitchPoint(Math.Max(-52.5, Math.Min(52.5, point.X)), Math.Sign(point.Z) * 34));

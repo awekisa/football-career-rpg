@@ -41,6 +41,7 @@ namespace FootballRpg.Presentation
                 if (Button(new Rect(left - 228, 236, 204, 36), "CONTINUE [ENTER]")) World.AcknowledgeOffside();
                 return;
             }
+            if (DrawSetPieceChoice(left)) return;
             if (World.Advantage != null)
                 Text(new Rect(24, 108, left - 48, 32), "ADVANTAGE · play continues", small, Lime);
             if (World.KeeperHoldSeconds >= 3)
@@ -51,18 +52,6 @@ namespace FootballRpg.Presentation
             if (World.Restart != null) phase += "  /  " + OpenPlayWorld.RestartLabel(World.Restart.Kind) + " · " + Career.Players[World.Restart.TakerId].Name;
             Panel(new Rect(0, 106, left, UserRestart ? 139 : 38), Ink);
             Text(new Rect(24, 112, left - 48, 28), phase, small, Lime);
-            if (UserRestart && World.Restart.Kind == RestartKind.Penalty)
-            {
-                Text(new Rect(24, 148, left - 48, 28), "Penalty · " + World.RestartShotPreview().Percent + "% on target (keeper save resolved separately)", label, Color.white);
-                if (Button(new Rect(24, 190, 250, 35), "TAKE PENALTY [ENTER]")) CommitChosenPass();
-            }
-            else if (UserRestart)
-            {
-                Text(new Rect(24, 148, left - 48, 28), "To " + Career.Players[ChosenRestart.Receiver.Id].Name + "  ·  " + Mathf.RoundToInt(ChosenRestart.Chance * 100) + "% received", label, Color.white);
-                if (Button(new Rect(24, 190, 200, 35), "NEXT TEAMMATE [R]")) CycleRestartTarget();
-                if (Button(new Rect(234, 190, 210, 35), "TAKE RESTART [ENTER]")) CommitChosenPass();
-                if (World.Restart?.Kind == RestartKind.DirectFreeKick && Button(new Rect(454, 190, 260, 35), "SHOOT · " + World.RestartShotPreview().Percent + "% ON TARGET")) World.ShootRestart(World.Restart.Id);
-            }
             if (World.FixturePhase == FixturePhase.HalfTime)
             {
                 Panel(new Rect(0, 144, left, 65), Ink);
