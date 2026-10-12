@@ -53,7 +53,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); VerifyReferee(); VerifySetPieces(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); VerifyOffside(); VerifyReferee(); VerifySetPieces(); VerifyParticipation(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -301,16 +301,47 @@ namespace FootballRpg.Presentation
             Debug.Log("FOOTBALL_RPG_SET_PIECES_PASSED");
         }
 
+        private void VerifyParticipation()
+        {
+            var definitions = PrototypeContent.Load(); definitions.userPlayerId = "harbour-player-17";
+            var root = new GameObject("Participation Smoke"); var view = root.AddComponent<PitchPreview>();
+            view.Initialize(CareerState.Create(definitions)); view.GetComponent<MatchDriver>().enabled = false;
+            view.World.StartFixture(new CompetitionRules(8, 0, .1), new MatchFitnessRules(injuryRatePerSecond: 0));
+            if (view.World.UserParticipation != ParticipationState.Bench || view.Players.Any(p => p.IsUser))
+                throw new InvalidOperationException("Bench player appeared on pitch before entering.");
+            bool entered = false, removed = false;
+            for (int i = 0; i < 16000 && view.World.FixturePhase != FixturePhase.FullTime; i++)
+            {
+                if (view.World.FixturePhase == FixturePhase.HalfTime && !entered)
+                {
+                    entered = view.World.UserParticipation == ParticipationState.Playing;
+                    view.SyncWorldView();
+                    if (!entered || !view.Players.Any(p => p.IsUser)) throw new InvalidOperationException("Coach did not bring bench player on at halftime.");
+                }
+                if (entered && !removed && view.World.FixturePhase == FixturePhase.SecondHalf && view.World.Restart != null)
+                {
+                    view.World.RequestSubstitution(definitions.userPlayerId, "harbour-player-18"); removed = true; view.SyncWorldView();
+                    if (view.World.UserParticipation != ParticipationState.Replaced || view.Players.Any(p => p.IsUser))
+                        throw new InvalidOperationException("Removed user still participates.");
+                }
+                if (view.World.RefereeNoticePending || view.World.OffsideNoticePending || view.World.HasPendingDecision || view.UserRestart || view.World.FixturePhase == FixturePhase.HalfTime)
+                    view.CommitChosenPass();
+                view.Match.Advance(TimeSpan.FromMilliseconds(50));
+            }
+            if (!entered || !removed || view.World.FixturePhase != FixturePhase.FullTime) throw new InvalidOperationException("Spectator fixture failed to finish.");
+            view.Close(); Debug.Log("FOOTBALL_RPG_PARTICIPATION_PASSED");
+        }
+
         private bool shortFixture;
 
-        public void OpenPitch(bool interactive = true, bool goalkeeper = false)
+        public void OpenPitch(bool interactive = true, bool goalkeeper = false, bool bench = false)
         {
             if (preview != null || Career == null) return;
             preview = new GameObject("Pitch Preview").AddComponent<PitchPreview>();
             var selectedCareer = Career;
-            if (goalkeeper)
+            if (goalkeeper || bench)
             {
-                var definitions = PrototypeContent.Load(); definitions.userPlayerId = "harbour-player-01";
+                var definitions = PrototypeContent.Load(); definitions.userPlayerId = bench ? "harbour-player-17" : "harbour-player-01";
                 selectedCareer = CareerState.Create(definitions);
             }
             preview.Initialize(selectedCareer, () => preview = null, interactive);
@@ -321,6 +352,7 @@ namespace FootballRpg.Presentation
         {
             if (preview == null && Input.GetKeyDown(KeyCode.Return)) OpenPitch();
             if (preview == null && Input.GetKeyDown(KeyCode.L)) shortFixture = !shortFixture;
+            if (preview == null && Input.GetKeyDown(KeyCode.B)) OpenPitch(bench: true);
             if (preview == null && Input.GetKeyDown(KeyCode.G)) OpenPitch(goalkeeper: true);
         }
 
@@ -350,6 +382,8 @@ namespace FootballRpg.Presentation
                 Application.Quit();
 
             if (GUI.Button(new Rect(70, 754, 330, 45), "PLAY AS GOALKEEPER  [G]", button)) OpenPitch(goalkeeper: true);
+
+            if (GUI.Button(new Rect(420, 754, 380, 45), "START ON BENCH  [B]", button)) OpenPitch(bench: true);
 
             if (GUI.Button(new Rect(490, 683, 310, 58), shortFixture ? "4-MINUTE MATCH  [L]" : "90-MINUTE MATCH  [L]", button)) shortFixture = !shortFixture;
             DrawPitch(new Rect(872, 200, 460, 500));

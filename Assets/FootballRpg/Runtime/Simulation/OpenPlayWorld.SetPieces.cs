@@ -40,7 +40,7 @@ namespace FootballRpg.Simulation
             foreach (var p in players)
             {
                 var club = setPieceClubs[p.Player.ClubId]; bool attacking = p.IsHome == Restart.IsHome;
-                var duty = club.SetPieces.Duty(p.IsGoalkeeper ? "gk" : p.Player.PrimaryPositionId, attacking);
+                var duty = club.SetPieces.Duty(p.IsGoalkeeper ? "gk" : p.PositionRoleId, attacking);
                 var opponent = players.Where(o => o.IsHome != p.IsHome && !o.IsGoalkeeper).OrderBy(o => o.Position.Distance(p.Position)).First();
                 PitchPoint zone = p.Position;
                 bool goalmouth = Restart.Kind == RestartKind.Corner || Restart.Spot.X * (attacking ? p.Direction : -p.Direction) > 15;

@@ -24,6 +24,7 @@ namespace FootballRpg.Simulation
         public float Confidence { get; private set; }
         public float Morale { get; private set; }
         public float Fatigue { get; private set; }
+        public int InjuryDaysRemaining { get; internal set; }
 
         internal PlayerState(PlayerDefinition source, GameDefinitions definitions)
         {
