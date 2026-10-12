@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using FootballRpg.Content;
 using FootballRpg.Simulation;
 using UnityEngine;
@@ -52,7 +53,7 @@ namespace FootballRpg.Presentation
             }
             if (pitchSmoke)
             {
-                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); }
+                try { VerifyPitchPreview(); VerifyDecisionLoop(); VerifyFootballActions(); VerifyDefense(); VerifyGoalkeeper(); VerifyFixture(); }
                 catch (Exception error) { Debug.LogException(error); Application.Quit(1); throw; }
             }
             Debug.Log("FOOTBALL_RPG_SMOKE_PASSED");
@@ -216,6 +217,24 @@ namespace FootballRpg.Presentation
             view.Close(); Debug.Log("FOOTBALL_RPG_GOALKEEPER_PASSED");
         }
 
+        private void VerifyFixture()
+        {
+            var root = new GameObject("Fixture Smoke");
+            var view = root.AddComponent<PitchPreview>(); view.Initialize(Career, interactive: false);
+            view.GetComponent<MatchDriver>().enabled = false;
+            view.World.StartFixture(new CompetitionRules(2, .5, .1));
+            for (int i = 0; i < 400 && view.World.FixturePhase != FixturePhase.FullTime; i++)
+            {
+                if (view.World.FixturePhase == FixturePhase.HalfTime) view.CommitChosenPass();
+                view.Match.Advance(TimeSpan.FromMilliseconds(50)); view.SyncWorldView();
+            }
+            if (view.World.FixturePhase != FixturePhase.FullTime || view.World.FixtureEvents.Count(e => e.Kind == "RestartReleased") < 2)
+                throw new InvalidOperationException("Fixture did not complete both halves and kickoffs.");
+            view.Close(); Debug.Log("FOOTBALL_RPG_FIXTURE_PASSED");
+        }
+
+        private bool shortFixture;
+
         public void OpenPitch(bool interactive = true, bool goalkeeper = false)
         {
             if (preview != null || Career == null) return;
@@ -227,11 +246,13 @@ namespace FootballRpg.Presentation
                 selectedCareer = CareerState.Create(definitions);
             }
             preview.Initialize(selectedCareer, () => preview = null, interactive);
+            if (interactive) preview.World.StartFixture(new CompetitionRules(shortFixture ? 120 : 2700));
         }
 
         private void Update()
         {
             if (preview == null && Input.GetKeyDown(KeyCode.Return)) OpenPitch();
+            if (preview == null && Input.GetKeyDown(KeyCode.L)) shortFixture = !shortFixture;
             if (preview == null && Input.GetKeyDown(KeyCode.G)) OpenPitch(goalkeeper: true);
         }
 
@@ -255,13 +276,14 @@ namespace FootballRpg.Presentation
             GUI.Label(new Rect(70, 543, 550, 96),
                 "Explore the pitch and inspect both teams.\nThe playable career is still in development.", small);
 
-            if (GUI.Button(new Rect(70, 683, 260, 58), "EXPLORE THE PITCH", button))
+            if (GUI.Button(new Rect(70, 683, 260, 58), "PLAY MATCH  [ENTER]", button))
                 OpenPitch();
             if (GUI.Button(new Rect(346, 683, 125, 58), "QUIT", button))
                 Application.Quit();
 
             if (GUI.Button(new Rect(70, 754, 330, 45), "PLAY AS GOALKEEPER  [G]", button)) OpenPitch(goalkeeper: true);
 
+            if (GUI.Button(new Rect(490, 683, 310, 58), shortFixture ? "4-MINUTE MATCH  [L]" : "90-MINUTE MATCH  [L]", button)) shortFixture = !shortFixture;
             DrawPitch(new Rect(872, 200, 460, 500));
             GUI.Label(new Rect(70, 810, 1100, 30), "PROTOTYPE  /  FOUNDATION     •     SINGLE PLAYER", eyebrow);
             GUI.matrix = originalMatrix;

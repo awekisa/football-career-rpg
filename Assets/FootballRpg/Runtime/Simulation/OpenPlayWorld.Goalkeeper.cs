@@ -63,6 +63,7 @@ namespace FootballRpg.Simulation
             foreach (var keeper in players.Where(p => p.Player.PrimaryPositionId == "gk"))
             {
                 if (owner != null && owner.IsHome == keeper.IsHome) continue;
+                if (directRestart.HasValue && keeper.Player.Id == Handling.LastPlayerId) continue;
                 if (keeperCooldowns.TryGetValue(keeper.Player.Id, out var expiry) && session.Tick < expiry) continue;
                 if (!HandlingRules.InOwnArea(BallPosition, keeper.Direction) || keeper.Position.Distance(BallPosition) > 12) continue;
                 if (owner != null && players.Any(p => p.IsHome == keeper.IsHome && p != keeper && p.Position.Distance(owner.Position) < 4)) continue;
@@ -153,6 +154,13 @@ namespace FootballRpg.Simulation
         private void ScoreShot(FootballActionResolved shot)
         {
             if (shot == null) throw new InvalidOperationException("Missing committed shot.");
+            if (Rules != null)
+            {
+                int direction = players.Single(p => p.Player.Id == shot.PlayerId).Direction;
+                var previous = BallPosition;
+                BallPosition = new PitchPoint((52.5 + PitchBoundary.BallRadius + .01) * direction, BallPosition.Z);
+                CheckBoundary(previous, BallHeight); return;
+            }
             if (players.Single(p => p.Player.Id == shot.PlayerId).IsHome) HomeGoals++; else AwayGoals++;
             BallState = BallPhase.OutOfPlay; OwnerId = null; HoldingKeeperId = null; PossessionClubId = null; restartSeconds = 0; receiver = null;
             RefreshIntent();

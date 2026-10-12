@@ -36,17 +36,18 @@ namespace FootballRpg.Presentation
             Panel(new Rect(left, 0, 360, 900), Ink);
             Panel(new Rect(0, 0, left, 106), new Color(.03f, .065f, .075f, .97f));
             Panel(new Rect(0, 832, left, 68), new Color(.03f, .065f, .075f, .97f));
-            Text(new Rect(28, 22, 300, 25), "FIRST WEEK  /  " + World.HomeGoals + " – " + World.AwayGoals, small, Lime);
+            Text(new Rect(28, 22, 300, 25), (World.Rules == null ? "PRACTICE" : FixturePhaseLabel + (World.AnnouncedAddedSeconds > 0 ? " +" + World.AnnouncedAddedSeconds.ToString("0.#") + "s" : "")) + "  /  " + World.HomeGoals + " – " + World.AwayGoals, small, Lime);
             Text(new Rect(28, 58, left - 220, 35), (Career.Clubs[Career.Fixture.HomeClubId].Name + "  /  " + Career.Clubs[Career.Fixture.AwayClubId].Name).ToUpperInvariant(), label, Color.white);
-            Text(new Rect(left - 192, 18, 155, 27), Match.Elapsed.ToString(@"mm\:ss"), label, Color.white);
-            GUI.enabled = !World.HasPendingDecision;
-            if (Button(new Rect(left - 192, 54, 160, 34), World.HasPendingDecision ? "CHOOSE ACTION" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
+            Text(new Rect(left - 192, 18, 155, 27), MatchClockText, label, Color.white);
+            GUI.enabled = !World.HasPendingDecision && !UserRestart && World.FixturePhase != Simulation.FixturePhase.FullTime;
+            if (Button(new Rect(left - 192, 54, 160, 34), World.FixturePhase == Simulation.FixturePhase.FullTime ? "MATCH FINISHED" : World.FixturePhase == Simulation.FixturePhase.HalfTime ? "2ND HALF [SPACE]" : World.HasPendingDecision || UserRestart ? "CHOOSE ACTION" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
                 TogglePause();
             GUI.enabled = true;
             DrawDecisionPanel(left);
             DrawFootballActions(left);
             DrawKeeperPanel(left);
             DrawDefenseAndIntent(left);
+            DrawFixture(left);
 
             Text(new Rect(left + 24, 26, 310, 25), "PLAYER INSPECTION", small, Lime);
             var selectedMarker = players.First(p => p.PlayerId == SelectedPlayer.Id);

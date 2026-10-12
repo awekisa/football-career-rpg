@@ -21,7 +21,7 @@ FootballActionContext snapshots the actor, ball height/speed, attacking directio
 
 Version-one chances use the action skill (control, passing, dribbling, crossing, finishing/long shots or heading), pressure, distance, confidence, morale, fatigue, ball height and arrival speed. Dribbles additionally use agility, strength, weight and opponent tackling. Aerial actions use height, jumping and strength. Shots use lateral angle; opposing goalkeeper ability is applied in the subsequent explicit save response. Variants change targets and/or chance: placed shots aim off-centre, power shots centrally; take-ons change direction and cover more ground; lofted crosses use a higher arc than low deliveries. Selected formula inputs and the unrounded chance are logged alongside the displayed chance. These weights are initial tuning.
 
-Failure is frozen before the roll: shots/goal headers go wide; other actions are dispossessed when closely pressured, otherwise they produce a loose ball. Saves and aerial keeper interventions are explicit SME-116 responses. Fouls and formal restart consequences remain later rules work. Flight applies the resolved fact once; pauses freeze horizontal position and height. Dribbles/control move the actor to the committed destination before possession resumes.
+Failure is frozen before the roll: shots/goal headers go wide; other actions are dispossessed when closely pressured, otherwise they produce a loose ball. Saves and aerial keeper interventions are explicit SME-116 responses. SME-117 supplies boundary restart consequences in fixtures; fouls remain later rules work. Flight applies the resolved fact once; pauses freeze horizontal position and height. Dribbles/control move the actor to the committed destination before possession resumes.
 
 ## Receiving and AI
 
@@ -29,7 +29,7 @@ Successful crosses produce an aerial keeper contest when reachable, otherwise In
 
 AI uses the same previews/resolver. It considers shots near goal, low/lofted crosses from wide attacking positions, clearances under defensive pressure and occasional carries. Receiving choices depend on ball height and field position. All action sequences remain deterministic under the fixed clock.
 
-An on-target shot increments provisional home/away counts once if the keeper cannot reach it or fails the save. Goals and misses use the existing sandbox reset; official kickoffs, throw-ins, corners, match phases and final scores are SME-117 work. The partial OpenPlayWorld.Actions file owns this integration. PassDecision retains its existing pass options and adds a list of generic actions, preserving old pass callers and tests.
+An unsaved on-target shot crosses the goal line once. Fixtures use SME-117 score and kickoff phases; standalone practice scenarios retain the provisional reset. The partial OpenPlayWorld.Actions file owns this integration. PassDecision retains its existing pass options and adds a list of generic actions, preserving old pass callers and tests.
 
 ## Verification
 
@@ -37,4 +37,4 @@ The original SME-114 verification passed 113 EditMode tests; the current suite a
 
 ## Goalkeeper integration (SME-116)
 
-Shot and goal-header success now means **on target**, labelled beside the displayed percentage. A reachable keeper then makes an explicit response, using the shared resolver. A save stops the goal; a missed save or unreachable keeper allows it. Goal counts remain provisional until SME-117. Successful crosses may likewise face a reachable claim/punch attempt before the receiver acts. See [goalkeeper play](goalkeeper.md). This supersedes the earlier direct-goal success definition.
+Shot and goal-header success now means **on target**, labelled beside the displayed percentage. A reachable keeper then makes an explicit response, using the shared resolver. A save stops the goal; a missed save or unreachable keeper allows it. Fixtures integrate these outcomes with SME-117 scoring and restarts. Successful crosses may likewise face a reachable claim/punch attempt before the receiver acts. See [goalkeeper play](goalkeeper.md). This supersedes the earlier direct-goal success definition.

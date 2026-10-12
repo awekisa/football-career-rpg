@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** playable goalkeeper decisions (SME-116). Keep goal with positioning, rush-outs, saves, aerial contests and distribution, or play any existing outfield action. Shots explicitly show on-target chance before a reachable keeper's response. Handling restrictions preserve feet-only options when hands are unlawful. Full match laws and career gameplay come later.
+**Current milestone:** regulation fixture flow (SME-117). Play two halves with goals, halftime, added time, throw-ins, corners and goal kicks. Choose a 90-minute fixture or a four-minute test match, as an outfielder or goalkeeper. Further match laws and career gameplay come later.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
@@ -15,6 +15,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 - [Football actions and receiving](docs/football-actions.md)
 - [Defense and off-ball instructions](docs/defense-and-intentions.md)
 - [Goalkeeper play and handling restrictions](docs/goalkeeper.md)
+- [Match phases and restarts](docs/fixture-rules.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)
 - [First playable checkpoint: SME-113](https://linear.app/smeagol-hermes/issue/SME-113)
 
@@ -23,7 +24,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 1. Install Unity **6000.3.23f1** through Unity Hub and activate a suitable Unity license.
 2. Clone this repository and add its root directory as a project in Unity Hub. Initial import resolves pinned packages and creates local caches.
 3. Open `Assets/FootballRpg/Scenes/Launch.unity` and press Play.
-4. Choose **Explore the pitch** or press Enter; choose **Play as goalkeeper [G]** for the goalkeeper role. Keeper prompts use numbered actions and Enter, R cycles distribution targets, and F switches to ordinary feet actions when available. Click a teammate or press R to select your pass target; choose **To feet** / **Through ball** (1 / 2), then **Play action** (Enter). The lower action row offers contextual choices (3–7); pressing an action again cycles its variants. When defending, 1–3 select tackle, contain or block; Enter commits. Off the ball, I opens persistent movement instructions; select an opponent before marking or tracking. Tab inspects any player. Use WASD to pan, Q/E to rotate, the mouse wheel to zoom, Home to reset, Space to pause/resume between decisions, and Escape to return.
+4. Press L to choose a 90-minute or four-minute match, then choose **Play match** or press Enter; choose **Play as goalkeeper [G]** for the goalkeeper role. Keeper prompts use numbered actions and Enter, R cycles distribution targets, and F switches to ordinary feet actions when available. Click a teammate or press R to select your pass target; choose **To feet** / **Through ball** (1 / 2), then **Play action** (Enter). The lower action row offers contextual choices (3–7); pressing an action again cycles its variants. When defending, 1–3 select tackle, contain or block; Enter commits. Off the ball, I opens persistent movement instructions; select an opponent before marking or tracking. Tab inspects any player. Use WASD to pan, Q/E to rotate, the mouse wheel to zoom, Home to reset, Space to pause/resume between decisions, and Escape to return. For your restarts, R selects a teammate and Enter releases the ball. Enter or Space continues after halftime.
 
 The project uses the built-in renderer and placeholder UI, with no paid assets or external services. Keep the editor version and `Packages/packages-lock.json` committed for consistent imports.
 

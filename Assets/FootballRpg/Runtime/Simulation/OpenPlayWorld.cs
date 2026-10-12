@@ -23,13 +23,13 @@ namespace FootballRpg.Simulation
     {
         public PlayerState Player { get; }
         public bool IsHome { get; }
-        public int Direction => IsHome ? 1 : -1;
-        public PitchPoint Anchor { get; }
+        public int Direction { get; internal set; }
+        public PitchPoint Anchor { get; internal set; }
         public PitchPoint Position { get; internal set; }
         public PitchPoint Target { get; internal set; }
         public PitchPoint Facing { get; internal set; }
         internal FootballerMotion(PlayerState player, bool home, PitchPoint anchor)
-        { Player = player; IsHome = home; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
+        { Player = player; IsHome = home; Direction = home ? 1 : -1; Anchor = anchor; Position = anchor; Target = anchor; Facing = new PitchPoint(home ? 1 : -1, 0); }
     }
 
     public enum BallPhase { Owned, Travelling, Loose, OutOfPlay, Incoming, KeeperIntervention }
@@ -130,6 +130,7 @@ namespace FootballRpg.Simulation
         {
             // Defend against direct clock resume: a pending user choice may never be delegated to AI.
             if (HasPendingDecision) { session.Pause(); return; }
+            if (StepFixture()) return;
             RefreshIntent();
             if (BallState == BallPhase.Incoming) { ChooseAiReception(); return; }
             double dt = session.FixedStep.TotalSeconds;
@@ -154,6 +155,7 @@ namespace FootballRpg.Simulation
             if (keeperFlight != null) { StepKeeperDistribution(dt); return; }
             if (BallState == BallPhase.Travelling)
             {
+                var previousBall = BallPosition; double previousHeight = BallHeight;
                 flightSeconds += dt;
                 BallPosition = flightOrigin.MoveTowards(destination, flightOrigin.Distance(destination) * Math.Min(1, flightSeconds / flightDuration));
                 if (activeFootballAction != null)
@@ -161,6 +163,7 @@ namespace FootballRpg.Simulation
                     double t = Math.Min(1, flightSeconds / flightDuration);
                     BallHeight = flightStartHeight * (1 - t) + activeFootballAction.Preview.DeliveryHeight * t + Math.Sin(Math.PI * t) * flightArc;
                 }
+                if (CheckBoundary(previousBall, previousHeight)) return;
                 if (flightSeconds >= flightDuration)
                 {
                     if (activeFootballAction != null) { FinishFootballAction(); return; }
@@ -192,7 +195,7 @@ namespace FootballRpg.Simulation
             }
             if (BallState == BallPhase.Loose)
             {
-                var nearest = players.OrderBy(p => p.Position.Distance(BallPosition)).First();
+                var nearest = players.Where(p => !directRestart.HasValue || p.Player.Id != Handling.LastPlayerId).OrderBy(p => p.Position.Distance(BallPosition)).First();
                 if (nearest.Position.Distance(BallPosition) <= 1.4) { Recoveries++; GiveBall(nearest); }
                 return;
             }
@@ -304,6 +307,7 @@ namespace FootballRpg.Simulation
 
         private void GiveBall(FootballerMotion player)
         {
+            directRestart = null;
             if (lastClub != null && lastClub != player.Player.ClubId) PossessionChanges++;
             lastClub = PossessionClubId = player.Player.ClubId;
             BallHeight = HoldingKeeperId == player.Player.Id ? 1.2 : .3;
@@ -363,7 +367,9 @@ namespace FootballRpg.Simulation
 
         public void TogglePause()
         {
-            if (HasPendingDecision) return;
+            if (FixturePhase == FixturePhase.FullTime) return;
+            if (FixturePhase == FixturePhase.HalfTime) { ContinueSecondHalf(); return; }
+            if (HasPendingDecision || (Restart != null && Restart.TakerId == controlledPlayerId)) return;
             if (session.State == MatchRunState.Paused) session.Resume();
             else session.Pause();
         }
