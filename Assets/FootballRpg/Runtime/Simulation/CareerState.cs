@@ -154,6 +154,7 @@ namespace FootballRpg.Simulation
         public CareerCoach Coach { get; }
         public CareerMeetings Meetings { get; }
         public CareerWeek Week { get; }
+        public CareerReports Reports { get; }
 
         private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules, TrainingRules trainingRules, SocialRules socialRules, CoachRules coachRules, ulong meetingSeed)
         {
@@ -173,6 +174,7 @@ namespace FootballRpg.Simulation
             Coach = new CareerCoach(this, definitions.positions, coachRules);
             Meetings = new CareerMeetings(this, definitions.meetings, meetingSeed);
             Week = new CareerWeek(this);
+            Reports = new CareerReports(this);
             if (Calendar != null)
             {
                 Calendar.ValidateChoice = choice => { if (Week.CalendarBlock != null) throw new InvalidOperationException(Week.CalendarBlock); Training.ValidateChoice(choice); };

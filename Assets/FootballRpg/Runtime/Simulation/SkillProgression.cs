@@ -69,10 +69,13 @@ namespace FootballRpg.Simulation
         public string ActionId { get; }
         public IReadOnlyDictionary<string, double> Deltas { get; }
         public bool Succeeded { get; }
-        internal SkillXpChange(string matchId, ActionResolved action, Dictionary<string, double> deltas)
+        public IReadOnlyDictionary<string, int> PreviousLevels { get; }
+        public IReadOnlyDictionary<string, int> NewLevels { get; }
+        internal SkillXpChange(string matchId, ActionResolved action, Dictionary<string, double> deltas, Dictionary<string, int> before, Dictionary<string, int> after)
         {
             MatchId = matchId; EventId = action.EventId; PlayerId = action.PlayerId; ActionId = action.ActionId;
             Succeeded = action.Succeeded; Deltas = new ReadOnlyDictionary<string, double>(deltas);
+            PreviousLevels = new ReadOnlyDictionary<string, int>(before); NewLevels = new ReadOnlyDictionary<string, int>(after);
         }
     }
 
@@ -134,6 +137,7 @@ namespace FootballRpg.Simulation
             if (action.Succeeded) amount *= Math.Max(0, 1 - count / (double)Rules.RewardedRepetitions);
             repetitions[repetitionKey] = count + 1;
             var deltas = new Dictionary<string, double>();
+            var beforeLevels = attribution.Keys.ToDictionary(id => id, id => playerSkills[id].Level);
             foreach (var share in attribution)
             {
                 var awardKey = (matchId, action.PlayerId, share.Key);
@@ -145,7 +149,7 @@ namespace FootballRpg.Simulation
                 career.Players[action.PlayerId].SetFootballLevel(share.Key, playerSkills[share.Key].Level);
                 deltas.Add(share.Key, actual);
             }
-            var change = new SkillXpChange(matchId, action, deltas);
+            var change = new SkillXpChange(matchId, action, deltas, beforeLevels, attribution.Keys.ToDictionary(id => id, id => playerSkills[id].Level));
             applied.Add(key, change); changes.Add(change); return change;
         }
     }

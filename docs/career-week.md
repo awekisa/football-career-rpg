@@ -24,7 +24,7 @@ Late arrival starts an otherwise-selected player on the bench. Skipping the fixt
 
 Only one fixture exists per active career week. Calendar progression and new social/coach requests stop once its attendance is resolved. Back to week/Escape pauses and detaches the pitch view, retaining the same world, clock, pending decision, randomness, score and progression. Resume fixture reattaches a view; Space resumes play. It cannot start another match or re-award outcomes. Full time or abandonment records a basic score/selection/participation summary and completes the week.
 
-This is in-memory continuity. Quitting the application loses it. Save/restore belongs to SME-135; detailed persistent match/week reports belong to SME-134. No season progression, transfers or financial economy is introduced.
+This is in-memory continuity. Quitting the application loses it. Save/restore belongs to SME-135; match/week reports are available through SME-134 and remain in memory with this career. No season progression, transfers or financial economy is introduced.
 
 ## Verification routes
 
@@ -35,3 +35,5 @@ This is in-memory continuity. Quitting the application loses it. Save/restore be
 5. In automated scenarios, injure or exhaust the player after the selection briefing; confirm kickoff updates selection and the week still completes. Guided-practice early exit and leaving a meeting also retain a path to full time.
 
 EditMode coverage includes the complete presentation handoff and resumed pitch ownership. Two contrasting routes run four-minute fixtures; short fixtures cover CM/GK/ST/CB, missed/late/injured/fatigued routes and guards. The packaged smoke check exercises real creation, calendar/meeting presentation commands, starting selection, leaving/resuming the pitch and full time (`FOOTBALL_RPG_CAREER_WEEK_PASSED`). These checks do not substitute for rendered layout or physical mouse testing.
+
+After returning from the completed fixture, the match aftermath opens automatically. Tab switches between match and whole-week scopes; P or the reports button reopens them from the week overview. See [reports](career-reports.md).

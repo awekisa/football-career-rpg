@@ -34,6 +34,7 @@ namespace FootballRpg.Simulation
                 career.Calendar.Commitments.Count(c => c.Activity.Id == "match") != 1)
                 throw new InvalidOperationException("Start a new career with one scheduled fixture.");
             Phase = CareerWeekPhase.ClubWeek;
+            career.Reports.BeginWeek();
         }
         internal void ApplyCalendar(CalendarDecision decision)
         {
@@ -48,6 +49,7 @@ namespace FootballRpg.Simulation
             if (World != null) return World;
             if (Phase != CareerWeekPhase.FixtureReady || career.Calendar.AwaitingMeeting || career.Calendar.AwaitingPractice)
                 throw new InvalidOperationException("Resolve the scheduled fixture attendance first.");
+            career.Reports.BeginMatch();
             Match = new MatchSession(career.Fixture.Id + "-career-week", 42);
             World = new OpenPlayWorld(career, Match, career.UserPlayerId);
             World.FixtureChanged += OnFixtureChanged;
@@ -61,6 +63,7 @@ namespace FootballRpg.Simulation
             if (fact.Kind != "FullTime" && fact.Kind != "Abandoned") return;
             HomeGoals = World.HomeGoals; AwayGoals = World.AwayGoals; Abandoned = World.Abandoned;
             Phase = CareerWeekPhase.Complete;
+            career.Reports.Complete();
         }
     }
 }
