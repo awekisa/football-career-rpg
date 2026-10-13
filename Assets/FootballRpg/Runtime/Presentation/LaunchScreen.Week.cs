@@ -13,7 +13,7 @@ namespace FootballRpg.Presentation
             var created = CharacterCreation.CreateCareer(creationContent, creationDraft, creationRules);
             created.Week.Begin(); Career?.Week.World?.Dispose(); Career = created; creationDraft = null;
             trainingFocus = null; showTrainingResults = false; returnToClub = false;
-            coachOpen = socialOpen = meetingsOpen = false;
+            reportsOpen = coachOpen = socialOpen = meetingsOpen = false;
             OpenCalendar();
         }
         public void ContinueWeek()
@@ -23,7 +23,7 @@ namespace FootballRpg.Presentation
             if (Career.Week.Phase != CareerWeekPhase.FixtureReady && Career.Week.Phase != CareerWeekPhase.Match) return;
             calendarOpen = false;
             preview = new GameObject("Career Fixture").AddComponent<PitchPreview>();
-            preview.Initialize(Career, () => preview = null, careerFixture: true, careerRules: new CompetitionRules(shortFixture ? 120 : 2700));
+            preview.Initialize(Career, () => { preview = null; if (Career.Week.Phase == CareerWeekPhase.Complete) OpenReports(); }, careerFixture: true, careerRules: new CompetitionRules(shortFixture ? 120 : 2700));
         }
         private void DrawWeek()
         {
@@ -46,6 +46,7 @@ namespace FootballRpg.Presentation
                 GUI.Label(new Rect(65, 585, 1230, 70), "Selection briefing: " + week.SelectionAnnouncement.Outcome + " · " + week.SelectionAnnouncement.Reason, small);
             if (week.Phase != CareerWeekPhase.Complete && GUI.Button(new Rect(65, 695, 430, 55),
                 (week.Phase == CareerWeekPhase.Match ? "RESUME FIXTURE" : week.Phase == CareerWeekPhase.FixtureReady ? "PLAY / WATCH FIXTURE" : "CONTINUE WEEK") + " [ENTER]", button)) ContinueWeek();
+            if (week.Phase == CareerWeekPhase.Complete && GUI.Button(new Rect(65, 695, 430, 55), "MATCH / WEEK REPORTS [P]", button)) OpenReports(true);
             if (week.Phase == CareerWeekPhase.FixtureReady && GUI.Button(new Rect(530, 695, 380, 55), shortFixture ? "4-MINUTE MATCH [L]" : "90-MINUTE MATCH [L]", button)) shortFixture = !shortFixture;
             if (GUI.Button(new Rect(965, 695, 380, 55), "NEW FOOTBALLER [C]", button)) BeginCreation();
             if (week.Phase == CareerWeekPhase.ClubWeek && GUI.Button(new Rect(65, 775, 360, 50), "EXPLORE CLUB [O]", button)) OpenClub();
@@ -81,7 +82,7 @@ namespace FootballRpg.Presentation
                 if (Career.Week.Phase != CareerWeekPhase.Complete) throw new InvalidOperationException("Career week did not finish.");
                 preview.Close(); Career.Week.World.Dispose(); Debug.Log("FOOTBALL_RPG_CAREER_WEEK_PASSED");
             }
-            finally { if (preview != null) preview.Close(); Career = original; creationDraft = null; calendarOpen = meetingsOpen = false; }
+            finally { if (preview != null) preview.Close(); Career = original; creationDraft = null; reportsOpen = calendarOpen = meetingsOpen = false; }
         }
     }
 }

@@ -28,7 +28,7 @@ namespace FootballRpg.Presentation
             {
                 Career = PrototypeContent.CreateCareer();
                 Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
-                if (smokeTest) { VerifyCareerWeek(); VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); VerifySocial(); VerifyCoach(); VerifyMeetings(); }
+                if (smokeTest) { VerifyCareerWeek(); VerifyReports(); VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); VerifySocial(); VerifyCoach(); VerifyMeetings(); }
             }
             catch (Exception error)
             {
@@ -391,11 +391,13 @@ namespace FootballRpg.Presentation
         {
             if (preview != null || practiceView != null || clubView != null) return;
             if (Career?.Meetings.Pending != null && !meetingsOpen) OpenMeetings();
+            if (reportsOpen) { UpdateReports(); return; }
             if (meetingsOpen) { UpdateMeetings(); return; }
             if (coachOpen) { UpdateCoach(); return; }
             if (socialOpen) { UpdateSocial(); return; }
             if (calendarOpen) { UpdateCalendar(); return; }
             if (creationDraft != null) { UpdateCreation(); return; }
+            if (preview == null && Input.GetKeyDown(KeyCode.P)) { OpenReports(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.N)) { OpenMeetings(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.T)) { OpenCoach(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.R)) { OpenSocial(); return; }
@@ -420,6 +422,7 @@ namespace FootballRpg.Presentation
                 Quaternion.identity, new Vector3(scale, scale, 1));
 
             Fill(new Rect(0, 0, 1440, 900), new Color(0.025f, 0.06f, 0.07f, 0.96f));
+            if (reportsOpen) { DrawReports(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             if (meetingsOpen) { DrawMeetings(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             if (coachOpen) { DrawCoach(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             if (socialOpen) { DrawSocial(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
