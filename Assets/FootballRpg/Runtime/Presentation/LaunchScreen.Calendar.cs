@@ -20,6 +20,7 @@ namespace FootballRpg.Presentation
         public void OpenCalendar()
         {
             if (Career?.Calendar == null) return;
+            if (Career.Week.CalendarBlock != null) { calendarOpen = false; return; }
             practiceFamily = GuidedPracticeSession.Recommended(Career.UserPlayer.PrimaryPositionId);
             calendarReadyFrame = Time.frameCount + 1;
             calendarOpen = true; calendarChoice = null; calendarError = null;
@@ -43,6 +44,7 @@ namespace FootballRpg.Presentation
             Career.Calendar.Commit(calendarChoice); calendarChoice = null;
             if (Career.Training.Results.Count > before) { showTrainingResults = true; trainingScroll = Vector2.zero; }
             calendarSelection = Career.Calendar.CurrentCommitments.FirstOrDefault()?.Id;
+            if (Career.Week.Phase == CareerWeekPhase.FixtureReady) { calendarOpen = false; returnToClub = false; }
             if (Career.Calendar.AwaitingMeeting) OpenMeetings();
             if (Career.Calendar.AwaitingPractice)
             {
@@ -92,7 +94,7 @@ namespace FootballRpg.Presentation
             GUI.Label(new Rect(50, 35, 900, 40), "YOUR WEEK  ·  " + calendar.TimeLabel(calendar.Minute), body);
             var player = Career.UserPlayer;
             GUI.Label(new Rect(50, 85, 1300, 30), $"Fatigue {player.Fatigue:P0}  ·  Confidence {player.Confidence:P0}  ·  Morale {player.Morale:P0}  ·  Injury: {player.InjuryDaysRemaining} day(s)  ·  Training yield {Career.Readiness.TrainingMultiplier(player.Id):P0}", calendarText);
-            GUI.Label(new Rect(50, 120, 1300, 25), "Inspect freely; confirm to spend time. Training now develops football skills. Scheduled match play is not connected yet.", small);
+            GUI.Label(new Rect(50, 120, 1300, 25), Career.Week.Active ? "Inspect freely; confirm to spend time. Attend Sunday’s fixture to play; skipped fixtures continue without you." : "Sample calendar. Start a new career to connect character creation, the week and Sunday’s fixture.", small);
             GUI.Label(new Rect(50, 155, 720, 30), "COMMITMENTS  ·  Select a row, or Tab between current commitments", eyebrow);
             calendarScroll = GUI.BeginScrollView(new Rect(50, 200, 725, 330), calendarScroll, new Rect(0, 0, 700, calendar.Commitments.Count * 78));
             for (int i = 0; i < calendar.Commitments.Count; i++)
@@ -140,6 +142,8 @@ namespace FootballRpg.Presentation
             if (GUI.Button(new Rect(830, 470, 330, 38), (interactiveTraining ? "GUIDED PRACTICE" : "SIMULATED TRAINING") + "  [I]", button)) ToggleTrainingMode();
             if (GUI.Button(new Rect(1170, 470, 190, 38), "COACH  [D]", button)) coachDiscussion = !coachDiscussion;
             string explanation = calendarError ?? (calendar.Finished ? "Week complete. All attendance decisions are recorded." : "Choose an activity to inspect its time cost and attendance consequences.");
+            if (calendarChoice == null && Career.Week.SelectionAnnouncement != null)
+                explanation += "\n\nSelection briefing: " + Career.Week.SelectionAnnouncement.Outcome + " · " + Career.Week.SelectionAnnouncement.Reason + "\n\n" + Career.Week.Preparation;
             if (calendarChoice != null)
             {
                 var p = calendarChoice;
@@ -164,6 +168,8 @@ namespace FootballRpg.Presentation
                     if (meeting != null) explanation += "\n\n" + meeting.Role + " meeting: " + EffectText(impact.Outcome == AttendanceOutcome.Skipped ? meeting.Skipped : impact.Outcome == AttendanceOutcome.Late ? meeting.Late : meeting.Attended) +
                         (impact.Outcome == AttendanceOutcome.Skipped ? ". Existing plans stay unchanged." : ". Attending opens a conversation after the slot is committed.");
                 }
+            if (calendarChoice?.Activity?.Id == "selection" || calendarChoice?.Activity?.Id == "match-preparation" || calendarChoice?.Activity?.Id == "match")
+                explanation += "\n\nMATCH PLAN\n" + Career.Week.Preparation;
             if (calendarChoice?.Focus != null)
                 explanation += "\n\nTRAINING PREVIEW\n" + TrainingExplanation(Career.Training.Preview(calendarChoice));
             if (interactiveTraining) explanation += "\n\nThree paused decisions replace the simulated reward. Only completed drills earn XP; failed drills earn 65%. The estimate assumes successful first-option actions. Ending early does not refund the slot.";

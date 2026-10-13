@@ -141,6 +141,7 @@ namespace FootballRpg.Simulation
         public string UnavailableReason(string personId)
         {
             if (!relationships.ContainsKey(personId)) return "Unknown contact.";
+            if (career.Week?.CalendarBlock != null) return career.Week.CalendarBlock;
             if (career.Calendar?.Finished == true) return "The prototype week is complete.";
             if (career.Calendar?.AwaitingMeeting == true) return "Finish or leave the current meeting first.";
             if (career.Calendar?.AwaitingPractice == true) return "Finish guided practice first.";

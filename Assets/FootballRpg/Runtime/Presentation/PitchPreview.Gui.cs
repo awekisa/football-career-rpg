@@ -97,7 +97,7 @@ namespace FootballRpg.Presentation
             if (Button(new Rect(left - 342, 848, 80, 32), "−")) AdjustCamera(0, 0, 0, 5);
             if (Button(new Rect(left - 252, 848, 80, 32), "+")) AdjustCamera(0, 0, 0, -5);
             if (Button(new Rect(left - 162, 848, 130, 32), "RESET VIEW")) ResetCamera();
-            if (Button(new Rect(left - 342, 796, 310, 30), "BACK TO MENU  [ESC]")) Close();
+            if (Button(new Rect(left - 342, 796, 310, 30), careerFixture ? "BACK TO WEEK [ESC]" : "BACK TO MENU [ESC]")) Close();
 
             GUI.matrix = original;
             GUI.color = originalColor;

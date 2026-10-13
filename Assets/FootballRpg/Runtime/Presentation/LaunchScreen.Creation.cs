@@ -31,7 +31,7 @@ namespace FootballRpg.Presentation
             if (Input.GetKeyDown(KeyCode.F4)) creationDraft.appearanceId = Cycle(new[] { "placeholder-1", "placeholder-2", "placeholder-3", "placeholder-4" }, creationDraft.appearanceId);
             if (Input.GetKeyDown(KeyCode.Return))
             {
-                try { Career = CharacterCreation.CreateCareer(creationContent, creationDraft, creationRules); creationDraft = null; }
+                try { JoinCreatedCareer(); }
                 catch (ArgumentException) { /* The screen explains the validation error. */ }
             }
         }
@@ -82,8 +82,7 @@ namespace FootballRpg.Presentation
             GUI.enabled = error == "";
             if (GUI.Button(new Rect(1020, 830, 350, 45), "JOIN CLUB  [ENTER]", button))
             {
-                Career = CharacterCreation.CreateCareer(creationContent, creationDraft, creationRules);
-                creationDraft = null;
+                JoinCreatedCareer();
             }
             GUI.enabled = true;
         }

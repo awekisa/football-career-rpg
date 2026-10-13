@@ -28,7 +28,7 @@ namespace FootballRpg.Presentation
             {
                 Career = PrototypeContent.CreateCareer();
                 Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
-                if (smokeTest) { VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); VerifySocial(); VerifyCoach(); VerifyMeetings(); }
+                if (smokeTest) { VerifyCareerWeek(); VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); VerifySocial(); VerifyCoach(); VerifyMeetings(); }
             }
             catch (Exception error)
             {
@@ -374,6 +374,7 @@ namespace FootballRpg.Presentation
 
         public void OpenPitch(bool interactive = true, bool goalkeeper = false, bool bench = false)
         {
+            if (Career?.Week.Active == true) { ContinueWeek(); return; }
             if (preview != null || practiceView != null || clubView != null || Career == null || (Career.Calendar.AwaitingPractice || Career.Calendar.AwaitingMeeting)) return;
             preview = new GameObject("Pitch Preview").AddComponent<PitchPreview>();
             var selectedCareer = Career;
@@ -388,7 +389,7 @@ namespace FootballRpg.Presentation
 
         private void Update()
         {
-            if (practiceView != null || clubView != null) return;
+            if (preview != null || practiceView != null || clubView != null) return;
             if (Career?.Meetings.Pending != null && !meetingsOpen) OpenMeetings();
             if (meetingsOpen) { UpdateMeetings(); return; }
             if (coachOpen) { UpdateCoach(); return; }
@@ -401,7 +402,7 @@ namespace FootballRpg.Presentation
             if (preview == null && Input.GetKeyDown(KeyCode.O)) { OpenClub(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.K)) { OpenCalendar(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.C)) BeginCreation();
-            if (preview == null && Input.GetKeyDown(KeyCode.Return)) OpenPitch();
+            if (preview == null && Input.GetKeyDown(KeyCode.Return)) { if (Career.Week.Active) ContinueWeek(); else BeginCreation(); }
             if (preview == null && Input.GetKeyDown(KeyCode.L)) shortFixture = !shortFixture;
             if (preview == null && Input.GetKeyDown(KeyCode.B)) OpenPitch(bench: true);
             if (preview == null && Input.GetKeyDown(KeyCode.G)) OpenPitch(goalkeeper: true);
@@ -424,16 +425,17 @@ namespace FootballRpg.Presentation
             if (socialOpen) { DrawSocial(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             if (calendarOpen) { DrawCalendar(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             if (creationDraft != null) { DrawCreation(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
+            if (Career.Week.Active) { DrawWeek(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             Fill(new Rect(68, 78, 42, 4), new Color(0.66f, 0.91f, 0.43f));
             GUI.Label(new Rect(68, 108, 620, 30), "ONE PLAYER. YOUR CAREER.", eyebrow);
             GUI.Label(new Rect(64, 172, 850, 180), "FOOTBALL\nCAREER RPG", title);
             GUI.Label(new Rect(70, 398, 580, 110),
                 "Read the game. Choose your moment.\nEarn your place, on and off the pitch.", body);
             GUI.Label(new Rect(70, 543, 550, 96),
-                Career.UserPlayer.Name + " · " + Career.UserPlayer.PrimaryPositionId.ToUpperInvariant() + "\nCreate your prospect, then play the fixture.", small);
+                Career.UserPlayer.Name + " · " + Career.UserPlayer.PrimaryPositionId.ToUpperInvariant() + "\nCreate your prospect, then play the club week.", small);
 
-            if (GUI.Button(new Rect(70, 683, 260, 58), "PLAY MATCH  [ENTER]", button))
-                OpenPitch();
+            if (GUI.Button(new Rect(70, 683, 260, 58), "START CAREER [ENTER]", button))
+                BeginCreation();
             if (GUI.Button(new Rect(346, 683, 125, 58), "QUIT", button))
                 Application.Quit();
 
@@ -443,13 +445,13 @@ namespace FootballRpg.Presentation
 
             if (GUI.Button(new Rect(490, 683, 310, 58), shortFixture ? "4-MINUTE MATCH  [L]" : "90-MINUTE MATCH  [L]", button)) shortFixture = !shortFixture;
             if (GUI.Button(new Rect(872, 730, 460, 58), "CREATE FOOTBALLER  [C]", button)) BeginCreation();
-            if (GUI.Button(new Rect(872, 805, 460, 50), "CAREER CALENDAR  [K]", button)) OpenCalendar();
+            if (GUI.Button(new Rect(872, 805, 460, 50), "SAMPLE CALENDAR [K]", button)) OpenCalendar();
             if (GUI.Button(new Rect(70, 850, 340, 40), "EXPLORE CLUB  [O]", button)) OpenClub();
             if (GUI.Button(new Rect(430, 850, 370, 40), "RELATIONSHIPS  [R]", button)) OpenSocial();
             if (GUI.Button(new Rect(872, 860, 180, 35), "COACH [T]", button)) OpenCoach();
             if (GUI.Button(new Rect(1065, 860, 267, 35), "CONVERSATIONS [N]", button)) OpenMeetings();
             DrawPitch(new Rect(872, 200, 460, 500));
-            GUI.Label(new Rect(70, 810, 1100, 30), "PROTOTYPE  /  FOUNDATION     •     SINGLE PLAYER", eyebrow);
+            GUI.Label(new Rect(70, 810, 1100, 30), "ONE-WEEK PROTOTYPE     •     SINGLE PLAYER", eyebrow);
             GUI.matrix = originalMatrix;
             GUI.color = originalColor;
         }

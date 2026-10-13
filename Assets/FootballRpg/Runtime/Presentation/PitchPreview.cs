@@ -38,6 +38,7 @@ namespace FootballRpg.Presentation
         private float yaw;
         private float zoom = 50;
         private Action onClose;
+        private bool careerFixture, closed;
         public Camera ViewCamera { get; private set; }
         public CareerState Career { get; private set; }
         public MatchSession Match { get; private set; }
@@ -49,7 +50,7 @@ namespace FootballRpg.Presentation
         private float UiScale => Mathf.Max(.5f, Screen.height / 900f);
         private float SidebarPixels => 360 * UiScale;
 
-        public void Initialize(CareerState career, Action close = null, bool interactive = true, double? openingArrivalHeight = null)
+        public void Initialize(CareerState career, Action close = null, bool interactive = true, double? openingArrivalHeight = null, bool careerFixture = false, CompetitionRules careerRules = null)
         {
             if (Career != null) throw new InvalidOperationException("Preview already initialized.");
             Career = career ?? throw new ArgumentNullException(nameof(career));
@@ -58,8 +59,9 @@ namespace FootballRpg.Presentation
             var content = PrototypeContent.Load();
             foreach (var position in content.positions) positions.Add(position.id, position);
             foreach (var attribute in content.footballAttributes) attributes.Add(attribute.id, attribute);
-            Match = new MatchSession(career.Fixture.Id + "-preview", 42);
-            Match.Pause();
+            this.careerFixture = careerFixture;
+            if (careerFixture) { World = career.Week.StartFixture(careerRules); Match = career.Week.Match; }
+            else { Match = new MatchSession(career.Fixture.Id + "-preview", 42); Match.Pause(); }
             gameObject.AddComponent<MatchDriver>().Initialize(Match);
             launchCamera = Camera.main;
             if (launchCamera != null)
@@ -84,7 +86,7 @@ namespace FootballRpg.Presentation
             light.transform.rotation = Quaternion.Euler(55, -35, 0);
             geometry = new PitchGeometry(transform);
             geometry.BuildField();
-            World = new OpenPlayWorld(career, Match, interactive ? career.UserPlayerId : null, interactive, openingArrivalHeight);
+            if (!careerFixture) World = new OpenPlayWorld(career, Match, interactive ? career.UserPlayerId : null, interactive, openingArrivalHeight);
             GetComponent<MatchDriver>().AttachWorld(World);
             BuildPlayers();
             ballView = geometry.Root.Find("Ball");
@@ -354,15 +356,19 @@ namespace FootballRpg.Presentation
 
         public void Close()
         {
+            if (closed) return;
+            closed = true;
+            if (ViewCamera != null) { ViewCamera.enabled = false; ViewCamera.tag = "Untagged"; }
             if (launchCamera != null) launchCamera.enabled = launchCameraEnabled;
+            if (careerFixture) Match.Pause();
             onClose?.Invoke();
             PitchGeometry.Release(gameObject);
         }
 
         private void OnDestroy()
         {
-            if (launchCamera != null) launchCamera.enabled = launchCameraEnabled;
-            World?.Dispose();
+            if (!closed && launchCamera != null) launchCamera.enabled = launchCameraEnabled;
+            if (!careerFixture) World?.Dispose();
             geometry?.Dispose();
         }
     }

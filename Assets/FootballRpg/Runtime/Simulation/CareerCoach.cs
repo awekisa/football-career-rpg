@@ -98,7 +98,7 @@ namespace FootballRpg.Simulation
             return new CoachSelection(start ? SelectionOutcome.Starter : SelectionOutcome.Substitute, AssignedRole, ability, score, required,
                 start ? "Selected to start: ability, readiness and trust meet this club's expectations." : "On the bench: develop role skills, recover or rebuild trust.");
         }
-        public string RequestUnavailable => career.Calendar?.AwaitingMeeting == true ? "Finish or leave the current meeting first." : MatchActive ? "Discuss requests before the match." : career.Calendar?.Finished == true ? "The week is complete." : career.Calendar?.AwaitingPractice == true ? "Finish guided practice first." : lastRequestSlot == Slot ? "One request per calendar slot; advance the calendar to discuss again." : null;
+        public string RequestUnavailable => career.Week?.CalendarBlock != null ? career.Week.CalendarBlock : career.Calendar?.AwaitingMeeting == true ? "Finish or leave the current meeting first." : MatchActive ? "Discuss requests before the match." : career.Calendar?.Finished == true ? "The week is complete." : career.Calendar?.AwaitingPractice == true ? "Finish guided practice first." : lastRequestSlot == Slot ? "One request per calendar slot; advance the calendar to discuss again." : null;
         private string Context => string.Join("/", revision, Slot, Relationship.Affinity, Relationship.ProfessionalTrust, Relationship.Standing,
             career.UserPlayer.Fatigue, career.UserPlayer.InjuryDaysRemaining, career.UserPlayer.PersonalityTraits["charisma"], career.UserPlayer.PersonalityTraits["leadership"], career.UserPlayer.FootballAttributes.Values.Sum());
         public CoachRequestPreview PreviewRequest(CoachRequest request, string role = null)
@@ -127,7 +127,7 @@ namespace FootballRpg.Simulation
         }
         internal void ApplyCalendar(CalendarDecision decision)
         {
-            foreach (var a in decision.Attendance.Where(a => a.Required && (a.Fact.ActivityId == "training" || a.Fact.ActivityId == "match" || a.Fact.ActivityId == "travel")))
+            foreach (var a in decision.Attendance.Where(a => a.Required && (a.Fact.ActivityId == "training" || a.Fact.ActivityId == "match" || a.Fact.ActivityId == "travel" || a.Fact.ActivityId == "selection" || a.Fact.ActivityId == "match-preparation")))
             {
                 int delta = a.Fact.Attendance == AttendanceOutcome.Attended ? 1 : a.Fact.Attendance == AttendanceOutcome.Late ? -(int)Math.Ceiling(2 + 3 * Profile.DisciplinePreference) : -(int)Math.Ceiling(4 + 6 * Profile.DisciplinePreference);
                 Record(a.Fact.EventId, a.Fact.Attendance + " " + a.Fact.ActivityId, delta, delta < 0 ? -2 : 0);
