@@ -84,6 +84,7 @@ namespace FootballRpg.Simulation
         private readonly Dictionary<(string match, string eventId), SkillXpChange> applied = new Dictionary<(string, string), SkillXpChange>();
         private readonly Dictionary<(string match, string player, string action), int> repetitions = new Dictionary<(string, string, string), int>();
         private readonly Dictionary<(string match, string player, string skill), double> awarded = new Dictionary<(string, string, string), double>();
+        private readonly Dictionary<(string player, string attendance), IReadOnlyDictionary<string, double>> trainingApplied = new Dictionary<(string, string), IReadOnlyDictionary<string, double>>();
         private readonly HashSet<string> matches = new HashSet<string>();
         private readonly List<SkillXpChange> changes = new List<SkillXpChange>();
         public ProgressionRules Rules { get; }
@@ -97,6 +98,21 @@ namespace FootballRpg.Simulation
                     d => new SkillExperience(player.FootballAttributes[d.id], d, rules))));
         }
         public IReadOnlyDictionary<string, SkillExperience> ForPlayer(string id) => skills[id];
+        internal IReadOnlyDictionary<string, double> ApplyTraining(string playerId, string attendanceId, IReadOnlyDictionary<string, double> awards)
+        {
+            var key = (playerId, attendanceId);
+            if (trainingApplied.TryGetValue(key, out var previous)) return previous;
+            if (string.IsNullOrWhiteSpace(attendanceId) || !skills.TryGetValue(playerId, out var playerSkills) || awards == null || awards.Count == 0 ||
+                awards.Any(a => !playerSkills.ContainsKey(a.Key) || double.IsNaN(a.Value) || double.IsInfinity(a.Value) || a.Value < 0))
+                throw new ArgumentException("Training awards must reference football skills with finite non-negative XP.");
+            var deltas = new Dictionary<string, double>();
+            foreach (var award in awards)
+            {
+                deltas.Add(award.Key, playerSkills[award.Key].Apply(award.Value));
+                career.Players[playerId].SetFootballLevel(award.Key, playerSkills[award.Key].Level);
+            }
+            var result = new ReadOnlyDictionary<string, double>(deltas); trainingApplied.Add(key, result); return result;
+        }
         public string BeginMatch()
         {
             string id = "career-match-" + (matches.Count + 1);

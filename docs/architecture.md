@@ -24,4 +24,6 @@ SME-108 provides shared data/events and a validated 36-player fixture (see [data
 
 `CareerCalendar` owns the career minute cursor, immutable schedule, confirmed choices and attendance facts. Only explicit choice commits advance it; Unity frames, navigation and match clocks do not. See [career calendar](career-calendar.md).
 
-`CareerReadiness` owns temporary-condition consequences and a reason ledger. Calendar confirmation invokes it once; match physics supplies live exertion, injuries, meaningful action results and final participant results. It never changes personality or awards skill XP. Training readiness records expose effective participation for the next training component. See [readiness](readiness.md).
+`CareerReadiness` owns temporary-condition consequences and a reason ledger. Calendar confirmation invokes it once; match physics supplies live exertion, injuries, meaningful action results and final participant results. It never changes personality or awards skill XP. Training readiness records expose effective participation for `CareerTraining`. See [readiness](readiness.md).
+
+`CareerTraining` consumes confirmed training after readiness has captured pre-workload state. It combines attendance duration, focus, club quality and skill levels, then requests exactly-once awards from `SkillProgression`. Preview reports are read-only. See [scheduled training](training.md).

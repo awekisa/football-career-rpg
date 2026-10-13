@@ -2132,7 +2132,8 @@
         "durationSlots": 1,
         "training": true,
         "fatiguePerSlot": 0.14,
-        "moralePerSlot": 0.01
+        "moralePerSlot": 0.01,
+        "trainingFocusId": "role"
       },
       {
         "id": "extra-practice",
@@ -2142,7 +2143,8 @@
         "extraPractice": true,
         "selectable": true,
         "fatiguePerSlot": 0.18,
-        "moralePerSlot": 0.01
+        "moralePerSlot": 0.01,
+        "trainingFocusId": "role"
       },
       {
         "id": "rest",
@@ -2201,7 +2203,8 @@
         "id": "tue-training",
         "activityId": "training",
         "startSlot": 4,
-        "required": true
+        "required": true,
+        "trainingFocusId": "passing"
       },
       {
         "id": "wed-travel",
@@ -2213,7 +2216,8 @@
         "id": "thu-training",
         "activityId": "training",
         "startSlot": 12,
-        "required": true
+        "required": true,
+        "trainingFocusId": "fitness"
       },
       {
         "id": "fri-training",
@@ -2231,13 +2235,77 @@
         "id": "sat-training",
         "activityId": "training",
         "startSlot": 20,
-        "required": true
+        "required": true,
+        "trainingFocusId": "set-pieces"
       },
       {
         "id": "sun-match",
         "activityId": "match",
         "startSlot": 25,
         "required": true
+      }
+    ],
+    "trainingFocuses": [
+      {
+        "id": "role",
+        "name": "Current position",
+        "usePosition": true
+      },
+      {
+        "id": "passing",
+        "name": "Passing and possession",
+        "attributeIds": [
+          "short-passing",
+          "long-passing",
+          "vision"
+        ]
+      },
+      {
+        "id": "attacking",
+        "name": "Attacking",
+        "attributeIds": [
+          "finishing",
+          "dribbling",
+          "off-ball-movement",
+          "heading"
+        ]
+      },
+      {
+        "id": "defending",
+        "name": "Defending",
+        "attributeIds": [
+          "tackling",
+          "marking",
+          "positioning"
+        ]
+      },
+      {
+        "id": "fitness",
+        "name": "Fitness",
+        "attributeIds": [
+          "pace",
+          "stamina",
+          "strength"
+        ]
+      },
+      {
+        "id": "goalkeeping",
+        "name": "Goalkeeping",
+        "attributeIds": [
+          "handling",
+          "reflexes",
+          "aerial-command",
+          "one-on-ones"
+        ]
+      },
+      {
+        "id": "set-pieces",
+        "name": "Set pieces",
+        "attributeIds": [
+          "penalties",
+          "corners",
+          "free-kicks"
+        ]
       }
     ]
   }

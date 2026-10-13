@@ -145,8 +145,9 @@ namespace FootballRpg.Simulation
         public SkillProgression Progression { get; }
         public CareerCalendar Calendar { get; }
         public CareerReadiness Readiness { get; }
+        public CareerTraining Training { get; }
 
-        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules)
+        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules, TrainingRules trainingRules)
         {
             UserPlayerId = definitions.userPlayerId;
             Players = new ReadOnlyDictionary<string, PlayerState>(
@@ -159,13 +160,18 @@ namespace FootballRpg.Simulation
             Progression = new SkillProgression(this, definitions.footballAttributes, progressionRules);
             Readiness = new CareerReadiness(this, readinessRules);
             Calendar = definitions.calendar == null ? null : new CareerCalendar(UserPlayerId, definitions.calendar);
-            if (Calendar != null) Calendar.Committed += Readiness.ApplyCalendar;
+            Training = new CareerTraining(this, definitions.positions, trainingRules);
+            if (Calendar != null)
+            {
+                Calendar.Committed += Readiness.ApplyCalendar;
+                Calendar.Committed += Training.ApplyCalendar;
+            }
         }
 
-        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null)
+        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null, TrainingRules trainingRules = null)
         {
             DefinitionValidator.Validate(definitions);
-            return new CareerState(definitions, progressionRules ?? new ProgressionRules(), readinessRules ?? new ReadinessRules());
+            return new CareerState(definitions, progressionRules ?? new ProgressionRules(), readinessRules ?? new ReadinessRules(), trainingRules ?? new TrainingRules());
         }
 
         public void SetPlayerCondition(string playerId, float confidence, float morale, float fatigue)

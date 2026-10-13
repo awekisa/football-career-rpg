@@ -11,6 +11,7 @@ namespace FootballRpg.Simulation
         public int minutesPerSlot;
         public CalendarActivityDefinition[] activities;
         public CalendarCommitmentDefinition[] commitments;
+        public TrainingFocusDefinition[] trainingFocuses;
     }
     [Serializable] public sealed class CalendarActivityDefinition
     {
@@ -21,12 +22,14 @@ namespace FootballRpg.Simulation
         public bool training;
         public bool extraPractice;
         public float fatiguePerSlot, moralePerSlot;
+        public string trainingFocusId;
     }
     [Serializable] public sealed class CalendarCommitmentDefinition
     {
         public string id, activityId;
         public int startSlot;
         public bool required;
+        public string trainingFocusId;
     }
     public sealed class CalendarActivity
     {
@@ -37,10 +40,11 @@ namespace FootballRpg.Simulation
         public bool Selectable { get; }
         public bool Training { get; }
         public bool ExtraPractice { get; }
+        public string TrainingFocusId { get; }
         public float FatiguePerSlot { get; }
         public float MoralePerSlot { get; }
         internal CalendarActivity(CalendarActivityDefinition d)
-        { Id = d.id; Name = d.name; DurationSlots = d.durationSlots; DelayMinutes = d.delayMinutes; Selectable = d.selectable; Training = d.training; ExtraPractice = d.extraPractice; FatiguePerSlot = d.fatiguePerSlot; MoralePerSlot = d.moralePerSlot; }
+        { Id = d.id; Name = d.name; DurationSlots = d.durationSlots; DelayMinutes = d.delayMinutes; Selectable = d.selectable; Training = d.training; ExtraPractice = d.extraPractice; TrainingFocusId = string.IsNullOrEmpty(d.trainingFocusId) ? null : d.trainingFocusId; FatiguePerSlot = d.fatiguePerSlot; MoralePerSlot = d.moralePerSlot; }
     }
     public sealed class CalendarCommitment
     {
@@ -49,8 +53,9 @@ namespace FootballRpg.Simulation
         public int StartMinute { get; }
         public int EndMinute { get; }
         public bool Required { get; }
+        public string TrainingFocusId { get; }
         internal CalendarCommitment(CalendarCommitmentDefinition d, CalendarActivity activity, int minutesPerSlot)
-        { Id = d.id; Activity = activity; StartMinute = d.startSlot * minutesPerSlot; EndMinute = StartMinute + activity.DurationSlots * minutesPerSlot; Required = d.required; }
+        { Id = d.id; Activity = activity; StartMinute = d.startSlot * minutesPerSlot; EndMinute = StartMinute + activity.DurationSlots * minutesPerSlot; Required = d.required; TrainingFocusId = string.IsNullOrEmpty(d.trainingFocusId) ? null : d.trainingFocusId; }
     }
     public enum CalendarChoiceKind { Attend, Skip, Replace, Wait, ExtraPractice }
     public sealed class CalendarImpact
@@ -66,6 +71,7 @@ namespace FootballRpg.Simulation
         internal CareerCalendar Owner { get; }
         internal int Revision { get; }
         public CalendarChoiceKind Kind { get; }
+        public TrainingFocus Focus { get; }
         public CalendarActivity Activity { get; }
         public CalendarCommitment Commitment { get; }
         public int StartMinute { get; }
@@ -74,9 +80,9 @@ namespace FootballRpg.Simulation
         public int CostMinutes => EndMinute - StartMinute;
         public IReadOnlyList<CalendarImpact> Impacts { get; }
         internal CalendarChoice(CareerCalendar owner, int revision, CalendarChoiceKind kind, CalendarActivity activity,
-            CalendarCommitment commitment, int start, int activityEnd, int end, List<CalendarImpact> impacts)
+            CalendarCommitment commitment, int start, int activityEnd, int end, List<CalendarImpact> impacts, TrainingFocus focus)
         { Owner = owner; Revision = revision; Kind = kind; Activity = activity; Commitment = commitment; StartMinute = start;
-            ActivityEndMinute = activityEnd; EndMinute = end; Impacts = impacts.AsReadOnly(); }
+            ActivityEndMinute = activityEnd; EndMinute = end; Impacts = impacts.AsReadOnly(); Focus = focus; }
     }
     public sealed class CalendarAttendance
     {
@@ -109,6 +115,7 @@ namespace FootballRpg.Simulation
         public IReadOnlyList<string> Days { get; }
         public IReadOnlyList<string> Slots { get; }
         public IReadOnlyList<CalendarActivity> Activities { get; }
+        public IReadOnlyList<TrainingFocus> TrainingFocuses { get; }
         public IReadOnlyList<CalendarCommitment> Commitments { get; }
         public IReadOnlyList<CalendarAttendance> Attendance { get; }
         public IReadOnlyList<CalendarDecision> History { get; }
@@ -120,6 +127,7 @@ namespace FootballRpg.Simulation
         {
             this.playerId = ActionRequest.Required(playerId); Validate(definition);
             Days = Array.AsReadOnly((string[])definition.days.Clone()); Slots = Array.AsReadOnly((string[])definition.slots.Clone()); MinutesPerSlot = definition.minutesPerSlot;
+            TrainingFocuses = Array.AsReadOnly((definition.trainingFocuses ?? Array.Empty<TrainingFocusDefinition>()).Select(d => new TrainingFocus(d)).ToArray());
             Activities = Array.AsReadOnly(definition.activities.Select(d => new CalendarActivity(d)).ToArray());
             Commitments = Array.AsReadOnly(definition.commitments.Select(d => new CalendarCommitment(d, Activities.Single(a => a.Id == d.activityId), MinutesPerSlot)).OrderBy(c => c.StartMinute).ToArray());
             Attendance = attendance.AsReadOnly(); History = history.AsReadOnly();
@@ -137,6 +145,7 @@ namespace FootballRpg.Simulation
             if (d.commitments.Any(c => c == null || string.IsNullOrWhiteSpace(c.id) || !d.activities.Any(a => a.id == c.activityId) || c.startSlot < 0 || c.startSlot >= count ||
                 c.startSlot + d.activities.Single(a => a.id == c.activityId).durationSlots > count) || d.commitments.Select(c => c.id).Distinct().Count() != d.commitments.Length)
                 throw new ArgumentException("Invalid or duplicate calendar commitment.");
+            CareerTraining.Validate(d);
         }
         public string TimeLabel(int minute)
         {
@@ -147,7 +156,7 @@ namespace FootballRpg.Simulation
         }
         public CalendarAttendance ResultFor(string commitmentId) => resolved.TryGetValue(commitmentId, out var value) ? value : null;
         public IReadOnlyList<CalendarCommitment> CurrentCommitments => Commitments.Where(c => !resolved.ContainsKey(c.Id) && c.StartMinute <= Minute && Minute < c.EndMinute).ToArray();
-        public CalendarChoice Preview(CalendarChoiceKind kind, string id = null)
+        public CalendarChoice Preview(CalendarChoiceKind kind, string id = null, string trainingFocusId = null)
         {
             if (Finished || !Enum.IsDefined(typeof(CalendarChoiceKind), kind)) throw new InvalidOperationException("No valid choice remains.");
             CalendarCommitment commitment = null; CalendarActivity activity = null;
@@ -172,6 +181,13 @@ namespace FootballRpg.Simulation
                         throw new InvalidOperationException("Extra practice needs the next free slot immediately after training.");
                 }
             }
+            TrainingFocus focus = null;
+            if (activity?.Training == true && TrainingFocuses.Count > 0)
+            {
+                string focusId = trainingFocusId ?? commitment?.TrainingFocusId ?? activity.TrainingFocusId;
+                focus = TrainingFocuses.SingleOrDefault(f => f.Id == focusId) ?? throw new ArgumentException("Choose a valid training focus.");
+            }
+            else if (trainingFocusId != null) throw new ArgumentException("This choice does not support a training focus.");
             end = activityEnd + (activity?.DelayMinutes ?? 0);
             if (end > TotalMinutes) throw new InvalidOperationException("This activity and its known delay do not fit in the remaining week.");
             var impacts = new List<CalendarImpact>();
@@ -182,7 +198,7 @@ namespace FootballRpg.Simulation
                         kind == CalendarChoiceKind.Skip ? 0 : Minute - c.StartMinute));
                 else impacts.Add(new CalendarImpact(c, c.EndMinute <= end ? AttendanceOutcome.Skipped : AttendanceOutcome.Late, c.EndMinute <= end ? 0 : end - c.StartMinute));
             }
-            return new CalendarChoice(this, revision, kind, activity, commitment, Minute, activityEnd, end, impacts);
+            return new CalendarChoice(this, revision, kind, activity, commitment, Minute, activityEnd, end, impacts, focus);
         }
         public CalendarDecision Commit(CalendarChoice choice)
         {

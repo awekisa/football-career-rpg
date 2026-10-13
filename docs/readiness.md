@@ -26,7 +26,7 @@ Before workload or mood effects, each attended training fact snapshots:
 
 `effectiveSlots = actualParticipatedMinutes / minutesPerSlot × multiplier`
 
-`TrainingReadiness` records the stable attendance ID, multiplier, actual slots and effective slots. Training while injured records zero yield and no physical workload or attendance morale boost; passing time still heals the injury. Skipped training never creates a yield record. The later scheduled-training ticket supplies base XP and coach/staff/facility modifiers; this ticket does not grant training XP.
+`TrainingReadiness` records the stable attendance ID, multiplier, actual slots and effective slots. Training while injured records zero yield and no physical workload or attendance morale boost; passing time still heals the injury. Skipped training never creates a yield record. `CareerTraining` now consumes these snapshots and awards XP using coach/staff/facility and current-level modifiers; see [scheduled training](training.md).
 
 ## Match effects
 

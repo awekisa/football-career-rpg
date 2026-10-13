@@ -35,6 +35,9 @@ namespace FootballRpg.Tests
             Assert.That(career.UserPlayer.Name, Is.EqualTo("Test Prospect"));
             Assert.That(career.Calendar, Is.Not.Null);
             Assert.That(career.Calendar.Minute, Is.Zero);
+            Assert.That(career.Training.Results, Is.Empty);
+            Assert.That(career.Training.Preview(career.Calendar.Preview(CalendarChoiceKind.Attend, "mon-training")).Gains.Select(g => g.SkillId),
+                Is.EquivalentTo(content.positions.Single(p => p.id == position).recommendedAttributeIds));
             Assert.That(career.UserPlayer.PrimaryPositionId, Is.EqualTo(position));
             Assert.That(career.UserPlayer.HeightCm, Is.EqualTo(196));
             Assert.That(career.UserPlayer.WeightKg, Is.EqualTo(89));
