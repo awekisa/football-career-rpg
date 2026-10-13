@@ -1,6 +1,6 @@
 # Scheduled training
 
-Training and extra practice now award football skill XP when confirmed in the calendar. All training is simulated in this component; guided interactive drills are the next component. No personality trait receives training XP.
+Training and extra practice now award football skill XP when confirmed in the calendar. Choose simulated attendance for broad development, or [guided practice](guided-practice.md) for coached match decisions and focused development. No personality trait receives training XP.
 
 ## Player flow
 

@@ -163,6 +163,7 @@ namespace FootballRpg.Simulation
             Training = new CareerTraining(this, definitions.positions, trainingRules);
             if (Calendar != null)
             {
+                Calendar.ValidateChoice = Training.ValidateChoice;
                 Calendar.Committed += Readiness.ApplyCalendar;
                 Calendar.Committed += Training.ApplyCalendar;
             }

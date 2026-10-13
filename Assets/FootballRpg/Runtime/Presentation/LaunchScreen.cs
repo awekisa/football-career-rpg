@@ -13,6 +13,7 @@ namespace FootballRpg.Presentation
     {
         public CareerState Career { get; private set; }
         private PitchPreview preview;
+        private GuidedPracticeView practiceView;
         private GUIStyle title;
         private GUIStyle eyebrow;
         private GUIStyle body;
@@ -27,7 +28,7 @@ namespace FootballRpg.Presentation
             {
                 Career = PrototypeContent.CreateCareer();
                 Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
-                if (smokeTest) { VerifyMatchFoundation(); VerifyCalendar(); }
+                if (smokeTest) { VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); }
             }
             catch (Exception error)
             {
@@ -373,7 +374,7 @@ namespace FootballRpg.Presentation
 
         public void OpenPitch(bool interactive = true, bool goalkeeper = false, bool bench = false)
         {
-            if (preview != null || Career == null) return;
+            if (preview != null || practiceView != null || Career == null || Career.Calendar.AwaitingPractice) return;
             preview = new GameObject("Pitch Preview").AddComponent<PitchPreview>();
             var selectedCareer = Career;
             if (goalkeeper || bench)
@@ -387,6 +388,7 @@ namespace FootballRpg.Presentation
 
         private void Update()
         {
+            if (practiceView != null) return;
             if (calendarOpen) { UpdateCalendar(); return; }
             if (creationDraft != null) { UpdateCreation(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.K)) { OpenCalendar(); return; }
@@ -399,7 +401,7 @@ namespace FootballRpg.Presentation
 
         private void OnGUI()
         {
-            if (preview != null) return;
+            if (preview != null || practiceView != null) return;
             EnsureStyles();
             var originalMatrix = GUI.matrix;
             var originalColor = GUI.color;
