@@ -2,7 +2,7 @@
 
 Open **Relationships [R]** from the launch screen. Choose the coach, a teammate or your agent from the contact list (**Tab** cycles contacts). Select an exchange with **1–4** or the mouse, inspect the actual success chance and both sets of consequences, then confirm with **Enter**. Inspection and reopening the screen never apply an outcome. The last exchange and its relationship/behaviour changes remain visible after returning to the screen.
 
-This component supplies brief prototype conversations/messages and the shared social state. Each contact has one exchange per calendar slot; these brief exchanges do not themselves consume a slot. The separate authored coach/teammate/agent meeting and dialogue flows remain SME-132. Venue availability and attendance commitments are unchanged. Finishing guided practice is required before another exchange; no new exchanges are allowed after the prototype week ends.
+This component supplies brief prototype conversations/messages and the shared social state. Each contact has one exchange per calendar slot; these brief exchanges do not themselves consume a slot. Scheduled coach/teammate/agent meetings use the separate [authored conversation flow](club-conversations.md), sharing this relationship ledger. Finishing guided practice or a pending meeting is required before another brief exchange; no new exchanges are allowed after the prototype week ends.
 
 ## Independent dimensions
 
@@ -33,7 +33,7 @@ The action selected supplies signed behaviour evidence whether its dialogue chec
 
 Every result records whether its behaviour counted, remaining evidence and the trait value before/after. Only this behaviour owner changes the underlying personality dictionary; callers retain read-only views. Ordinary simulated/guided training and competitive match XP have no personality hooks. Confidence, morale and fatigue remain separate temporary state.
 
-All social state currently persists for the lifetime of the career, including across UI reopening. Disk persistence, richer authored exchanges and long-term career integration remain subsequent tickets. Tuning values are prototype defaults.
+All social state currently persists for the lifetime of the career, including across UI reopening. Disk persistence and long-term career integration remain subsequent tickets. Tuning values are prototype defaults.
 
 ## Verification
 

@@ -115,6 +115,8 @@ namespace FootballRpg.Simulation
         internal event Action<CalendarDecision> Committed;
         internal Action<CalendarChoice> ValidateChoice;
         public bool AwaitingPractice { get; internal set; }
+        public bool AwaitingMeeting { get; internal set; }
+        public string PreferredTrainingFocusId { get; internal set; }
         public IReadOnlyList<string> Days { get; }
         public IReadOnlyList<string> Slots { get; }
         public IReadOnlyList<CalendarActivity> Activities { get; }
@@ -161,6 +163,7 @@ namespace FootballRpg.Simulation
         public IReadOnlyList<CalendarCommitment> CurrentCommitments => Commitments.Where(c => !resolved.ContainsKey(c.Id) && c.StartMinute <= Minute && Minute < c.EndMinute).ToArray();
         public CalendarChoice Preview(CalendarChoiceKind kind, string id = null, string trainingFocusId = null, PracticeFamily? practice = null)
         {
+            if (AwaitingMeeting) throw new InvalidOperationException("Finish or leave the current meeting first.");
             if (AwaitingPractice) throw new InvalidOperationException("Finish or end the current practice first.");
             if (Finished || !Enum.IsDefined(typeof(CalendarChoiceKind), kind)) throw new InvalidOperationException("No valid choice remains.");
             CalendarCommitment commitment = null; CalendarActivity activity = null;
@@ -188,7 +191,7 @@ namespace FootballRpg.Simulation
             TrainingFocus focus = null;
             if (activity?.Training == true && TrainingFocuses.Count > 0)
             {
-                string focusId = trainingFocusId ?? commitment?.TrainingFocusId ?? activity.TrainingFocusId;
+                string focusId = trainingFocusId ?? PreferredTrainingFocusId ?? commitment?.TrainingFocusId ?? activity.TrainingFocusId;
                 focus = TrainingFocuses.SingleOrDefault(f => f.Id == focusId) ?? throw new ArgumentException("Choose a valid training focus.");
             }
             else if (trainingFocusId != null) throw new ArgumentException("This choice does not support a training focus.");
@@ -210,6 +213,7 @@ namespace FootballRpg.Simulation
         {
             if (choice == null || choice.Owner != this) throw new ArgumentException("Use this calendar's preview.");
             if (committed.TryGetValue(choice, out var previous)) return previous;
+            if (AwaitingMeeting) throw new InvalidOperationException("Finish or leave the current meeting first.");
             if (AwaitingPractice) throw new InvalidOperationException("Finish or end the current practice first.");
             ValidateChoice?.Invoke(choice);
             if (choice.Revision != revision || choice.StartMinute != Minute) throw new InvalidOperationException("Calendar changed; inspect a new preview.");

@@ -2184,6 +2184,16 @@
         "id": "match",
         "name": "Match-day commitment",
         "durationSlots": 2
+      },
+      {
+        "id": "coach-meeting",
+        "name": "Coach development meeting",
+        "durationSlots": 1
+      },
+      {
+        "id": "teammate-meeting",
+        "name": "Teammate conversation",
+        "durationSlots": 1
       }
     ],
     "commitments": [
@@ -2207,6 +2217,12 @@
         "trainingFocusId": "passing"
       },
       {
+        "id": "tue-coach",
+        "activityId": "coach-meeting",
+        "startSlot": 6,
+        "required": true
+      },
+      {
         "id": "wed-travel",
         "activityId": "travel",
         "startSlot": 8,
@@ -2218,6 +2234,12 @@
         "startSlot": 12,
         "required": true,
         "trainingFocusId": "fitness"
+      },
+      {
+        "id": "thu-teammate",
+        "activityId": "teammate-meeting",
+        "startSlot": 14,
+        "required": false
       },
       {
         "id": "fri-training",
@@ -2308,5 +2330,258 @@
         ]
       }
     ]
-  }
+  },
+  "meetings": [
+    {
+      "id": "coach-plan",
+      "commitmentId": "tue-coach",
+      "role": "Coach",
+      "opening": "Your coach invites you to review your place in the team. What will you work on next? Your stated training focus is saved even if the coach doubts your argument; the check decides the response.",
+      "attended": {
+        "affinity": 1,
+        "trust": 2,
+        "standing": 0
+      },
+      "late": {
+        "affinity": -1,
+        "trust": -2,
+        "standing": 0
+      },
+      "skipped": {
+        "affinity": -5,
+        "trust": -6,
+        "standing": 0
+      },
+      "leave": {
+        "affinity": -2,
+        "trust": -3,
+        "standing": 0
+      },
+      "choices": [
+        {
+          "id": "role-plan",
+          "text": "Commit to the skills your assigned role needs",
+          "trait": "discipline",
+          "difficulty": 50,
+          "successText": "The coach appreciates a clear plan. Your default training focus now follows your assigned role.",
+          "failureText": "Your plan is recorded, but the coach wants to see reliable attendance before offering more trust.",
+          "success": {
+            "affinity": 2,
+            "trust": 6,
+            "standing": 1
+          },
+          "failure": {
+            "affinity": 0,
+            "trust": -1,
+            "standing": 0
+          },
+          "focus": "role"
+        },
+        {
+          "id": "tailored-plan",
+          "text": "Choose a personal training focus",
+          "trait": "charisma",
+          "difficulty": 50,
+          "successText": "The coach supports your tailored plan. Your selected focus will be the default for future training.",
+          "failureText": "Your focus is recorded. The coach is unconvinced and expects you to demonstrate its value.",
+          "success": {
+            "affinity": 3,
+            "trust": 4,
+            "standing": 1
+          },
+          "failure": {
+            "affinity": -2,
+            "trust": -2,
+            "standing": 0
+          },
+          "focus": "selected"
+        },
+        {
+          "id": "reject-plan",
+          "text": "Push back: judge me by results",
+          "trait": "leadership",
+          "difficulty": 60,
+          "successText": "The coach respects your confidence but dislikes your refusal to make a plan. Your training focus stays as it was.",
+          "failureText": "The challenge damages trust. Your training focus stays as it was.",
+          "success": {
+            "affinity": -5,
+            "trust": -2,
+            "standing": 4
+          },
+          "failure": {
+            "affinity": -8,
+            "trust": -6,
+            "standing": -2
+          }
+        }
+      ]
+    },
+    {
+      "id": "teammate-bond",
+      "commitmentId": "thu-teammate",
+      "role": "Teammate",
+      "opening": "After training, a teammate asks whether you see the squad as partners or competition. Your answer can create a friendship, a rivalry, or a professional understanding.",
+      "attended": {
+        "affinity": 1,
+        "trust": 2,
+        "standing": 0
+      },
+      "late": {
+        "affinity": -1,
+        "trust": -2,
+        "standing": 0
+      },
+      "skipped": {
+        "affinity": -5,
+        "trust": -6,
+        "standing": 0
+      },
+      "leave": {
+        "affinity": -2,
+        "trust": -3,
+        "standing": 0
+      },
+      "choices": [
+        {
+          "id": "support",
+          "text": "Offer to help each other improve",
+          "trait": "charisma",
+          "difficulty": 45,
+          "successText": "You agree to support each other. A friendship begins.",
+          "failureText": "They appreciate the gesture but remain cautious. There is room to build a friendship.",
+          "success": {
+            "affinity": 35,
+            "trust": 3,
+            "standing": 0
+          },
+          "failure": {
+            "affinity": 12,
+            "trust": 0,
+            "standing": 0
+          }
+        },
+        {
+          "id": "rival",
+          "text": "Make it clear you want their place",
+          "trait": "leadership",
+          "difficulty": 50,
+          "successText": "They respect your ambition but take the challenge personally. A rivalry begins.",
+          "failureText": "The confrontation lands badly. You have made a rival and lost professional trust.",
+          "success": {
+            "affinity": -35,
+            "trust": 2,
+            "standing": 3
+          },
+          "failure": {
+            "affinity": -40,
+            "trust": -4,
+            "standing": -1
+          }
+        },
+        {
+          "id": "professional",
+          "text": "Keep the competition respectful",
+          "trait": "discipline",
+          "difficulty": 45,
+          "successText": "You agree to compete fairly and work together on the pitch.",
+          "failureText": "They accept your boundaries, but want to see how you behave.",
+          "success": {
+            "affinity": 6,
+            "trust": 6,
+            "standing": 1
+          },
+          "failure": {
+            "affinity": 2,
+            "trust": 0,
+            "standing": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "agent-brief",
+      "commitmentId": "fri-agent",
+      "role": "Agent",
+      "opening": "Your agent asks what matters most in your next career step. The preference you state is always recorded; the check determines how convincingly you communicate it. Future opportunities will primarily come through your agent. No transfer or contract negotiation takes place in this prototype.",
+      "attended": {
+        "affinity": 1,
+        "trust": 2,
+        "standing": 0
+      },
+      "late": {
+        "affinity": -1,
+        "trust": -2,
+        "standing": 0
+      },
+      "skipped": {
+        "affinity": -5,
+        "trust": -6,
+        "standing": 0
+      },
+      "leave": {
+        "affinity": -2,
+        "trust": -3,
+        "standing": 0
+      },
+      "choices": [
+        {
+          "id": "minutes",
+          "text": "Prioritize regular playing time",
+          "trait": "charisma",
+          "difficulty": 45,
+          "successText": "Your agent agrees to prioritize meaningful minutes over club prestige.",
+          "failureText": "Your priority is recorded, but your agent asks you to communicate more clearly next time.",
+          "success": {
+            "affinity": 3,
+            "trust": 6,
+            "standing": 0
+          },
+          "failure": {
+            "affinity": -2,
+            "trust": -2,
+            "standing": 0
+          },
+          "preference": "PlayingTime"
+        },
+        {
+          "id": "development",
+          "text": "Prioritize coaching and facilities",
+          "trait": "discipline",
+          "difficulty": 50,
+          "successText": "Your agent understands: strong development conditions matter, even if minutes are harder to earn.",
+          "failureText": "Your development priority is recorded. Your agent wants evidence that you will commit to the work.",
+          "success": {
+            "affinity": 2,
+            "trust": 6,
+            "standing": 1
+          },
+          "failure": {
+            "affinity": -1,
+            "trust": -2,
+            "standing": 0
+          },
+          "preference": "Development"
+        },
+        {
+          "id": "challenge",
+          "text": "Seek the strongest competition",
+          "trait": "leadership",
+          "difficulty": 60,
+          "successText": "Your agent respects your ambition and records a preference for the highest challenge.",
+          "failureText": "Your ambition is recorded, but the agent doubts your current readiness. No opportunity is promised.",
+          "success": {
+            "affinity": 1,
+            "trust": 3,
+            "standing": 3
+          },
+          "failure": {
+            "affinity": -3,
+            "trust": -3,
+            "standing": 0
+          },
+          "preference": "Challenge"
+        }
+      ]
+    }
+  ]
 }

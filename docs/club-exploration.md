@@ -32,3 +32,5 @@ The map, walking speed and office-hour convention (final slot of the day is nigh
 ## Verification
 
 Tests cover every destination, continuous movement, redirects, blocked/disconnected points, furniture avoidance, frame splitting, unchanged career state, arrival-only interaction, calendar confirmation and exactly-once rewards, extra practice, travel, scheduled media/agent meetings, coach/squad availability, injury/pending-practice/week-end states, content copying/validation, all destination selection rays and camera restoration. Built-player smoke visits every destination through its screen ray and confirms training only after arriving and explicitly committing its calendar choice; it logs `FOOTBALL_RPG_CLUB_EXPLORATION_PASSED`.
+
+Scheduled coach and teammate conversations now appear as calendar attendance previews at their respective destinations. The agent appointment opens its authored conversation on confirmed attendance. Pending conversations must be resolved or explicitly left before another activity; see [club conversations](club-conversations.md).

@@ -33,3 +33,5 @@ SME-108 provides shared data/events and a validated 36-player fixture (see [data
 `CareerSocial` owns affinity, professional trust, standing, seeded dialogue outcomes and bounded repeated-behaviour evidence. Personality changes flow through its explicit operation; training and temporary condition systems have no personality hook. See [relationships](relationships.md).
 
 `CareerCoach` owns selection policy, persuasion and reaction history while sharing relationship dimensions with `CareerSocial`. Career fixtures opt into coach selection, role-aware movement and committed-action reactions. Lower-level authored scenarios retain their fixed line-ups. See [coach behavior](coach.md).
+
+`CareerMeetings` owns authored appointment outcomes and agent preferences, while calendar time/default focus and social relationship values remain with their existing owners. Attendance opens a pending conversation; explicit resolution/leave releases the calendar. See [club conversations](club-conversations.md).
