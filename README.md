@@ -92,3 +92,5 @@ Open the **Career Calendar [K]** from launch to preview and confirm attendance, 
 Training workloads, rest, match performance and injuries now update shared temporary readiness. Calendar inspection shows the reasons and training-yield multiplier. See [readiness](docs/readiness.md).
 
 Scheduled training now awards broad football XP. In the calendar, **F** cycles focus, **T** shows the training breakdown and **R** shows readiness changes. See [scheduled training](docs/training.md).
+
+Use **Save / Load** in the top-right corner, **F5** to save, or **F9** to load your career. Pause a match or wait for a decision before saving; finish/end guided practice first. One local slot keeps a previous-valid-save backup. See [career saves](docs/career-saves.md).

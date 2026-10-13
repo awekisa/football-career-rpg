@@ -20,6 +20,7 @@ namespace FootballRpg.Simulation
         private long sequence;
         private bool advancing;
 
+        public bool CanSave => !advancing && State == MatchRunState.Paused && resumeState != MatchRunState.Resolving;
         public string SessionId { get; }
         public ulong Seed { get; }
         public ulong RandomState => random.State;

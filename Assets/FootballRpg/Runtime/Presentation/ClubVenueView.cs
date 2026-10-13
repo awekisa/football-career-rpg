@@ -116,7 +116,7 @@ namespace FootballRpg.Presentation
             if (Input.GetKeyDown(KeyCode.Escape)) { Close(); return; }
             for (int i = 0; i < Exploration.Venue.Destinations.Count; i++)
                 if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i))) Navigate(Exploration.Venue.Destinations[i].Id);
-            if (Input.GetMouseButtonDown(0)) SelectAtScreenPoint(Input.mousePosition);
+            if (!CareerSaveControls.Covers(Input.mousePosition) && Input.GetMouseButtonDown(0)) SelectAtScreenPoint(Input.mousePosition);
             if (Input.GetKeyDown(KeyCode.Return)) Interact();
         }
         private void OnGUI()

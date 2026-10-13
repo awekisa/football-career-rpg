@@ -408,6 +408,8 @@ namespace FootballRpg.Simulation
             BallState = BallPhase.Loose;
             RefreshIntent();
         }
+        internal void ReconnectAfterLoad()
+        { session.TickAdvanced -= Step; session.TickAdvanced += Step; }
         public void Dispose()
         { session.TickAdvanced -= Step; readiness.FlushExertion(progressionMatchId); if (CoachEnabled) { FinishCoachDeviation(false); careerCoach.MatchActive = false; } }
     }
