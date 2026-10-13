@@ -20,6 +20,7 @@ namespace FootballRpg.Simulation
         public bool selectable;
         public bool training;
         public bool extraPractice;
+        public float fatiguePerSlot, moralePerSlot;
     }
     [Serializable] public sealed class CalendarCommitmentDefinition
     {
@@ -36,8 +37,10 @@ namespace FootballRpg.Simulation
         public bool Selectable { get; }
         public bool Training { get; }
         public bool ExtraPractice { get; }
+        public float FatiguePerSlot { get; }
+        public float MoralePerSlot { get; }
         internal CalendarActivity(CalendarActivityDefinition d)
-        { Id = d.id; Name = d.name; DurationSlots = d.durationSlots; DelayMinutes = d.delayMinutes; Selectable = d.selectable; Training = d.training; ExtraPractice = d.extraPractice; }
+        { Id = d.id; Name = d.name; DurationSlots = d.durationSlots; DelayMinutes = d.delayMinutes; Selectable = d.selectable; Training = d.training; ExtraPractice = d.extraPractice; FatiguePerSlot = d.fatiguePerSlot; MoralePerSlot = d.moralePerSlot; }
     }
     public sealed class CalendarCommitment
     {
@@ -102,6 +105,7 @@ namespace FootballRpg.Simulation
         private readonly Dictionary<string, CalendarAttendance> resolved = new Dictionary<string, CalendarAttendance>();
         private readonly Dictionary<CalendarChoice, CalendarDecision> committed = new Dictionary<CalendarChoice, CalendarDecision>();
         private int revision;
+        internal event Action<CalendarDecision> Committed;
         public IReadOnlyList<string> Days { get; }
         public IReadOnlyList<string> Slots { get; }
         public IReadOnlyList<CalendarActivity> Activities { get; }
@@ -127,7 +131,7 @@ namespace FootballRpg.Simulation
                 throw new ArgumentException("Invalid calendar shape.");
             int count = d.days.Length * d.slots.Length;
             if (d.activities.Any(a => a == null || string.IsNullOrWhiteSpace(a.id) || string.IsNullOrWhiteSpace(a.name) || a.durationSlots < 1 || a.durationSlots > count ||
-                    a.delayMinutes < 0 || a.delayMinutes > count * d.minutesPerSlot || (a.extraPractice && (!a.training || !a.selectable))) ||
+                    float.IsNaN(a.fatiguePerSlot) || Math.Abs(a.fatiguePerSlot) > 1 || float.IsNaN(a.moralePerSlot) || Math.Abs(a.moralePerSlot) > 1 || a.delayMinutes < 0 || a.delayMinutes > count * d.minutesPerSlot || (a.extraPractice && (!a.training || !a.selectable))) ||
                 d.activities.Select(a => a.id).Distinct().Count() != d.activities.Length)
                 throw new ArgumentException("Invalid or duplicate calendar activity.");
             if (d.commitments.Any(c => c == null || string.IsNullOrWhiteSpace(c.id) || !d.activities.Any(a => a.id == c.activityId) || c.startSlot < 0 || c.startSlot >= count ||
@@ -198,7 +202,7 @@ namespace FootballRpg.Simulation
             if (choice.Activity != null && choice.Commitment == null)
                 records.Add(Record(choice.Activity.Id, null, false, Minute, AttendanceOutcome.Attended, choice.ActivityEndMinute - Minute, 0));
             Minute = choice.EndMinute; revision++;
-            var result = new CalendarDecision(choice, records); history.Add(result); committed.Add(choice, result); return result;
+            var result = new CalendarDecision(choice, records); history.Add(result); committed.Add(choice, result); Committed?.Invoke(result); return result;
         }
         private CalendarAttendance Record(string activityId, string commitmentId, bool required, int start, AttendanceOutcome outcome, int participated, int late)
         {

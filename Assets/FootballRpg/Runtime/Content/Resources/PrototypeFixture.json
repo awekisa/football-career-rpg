@@ -2130,7 +2130,9 @@
         "id": "training",
         "name": "Team training",
         "durationSlots": 1,
-        "training": true
+        "training": true,
+        "fatiguePerSlot": 0.14,
+        "moralePerSlot": 0.01
       },
       {
         "id": "extra-practice",
@@ -2138,25 +2140,33 @@
         "durationSlots": 1,
         "training": true,
         "extraPractice": true,
-        "selectable": true
+        "selectable": true,
+        "fatiguePerSlot": 0.18,
+        "moralePerSlot": 0.01
       },
       {
         "id": "rest",
         "name": "Rest",
         "durationSlots": 1,
-        "selectable": true
+        "selectable": true,
+        "fatiguePerSlot": -0.22,
+        "moralePerSlot": 0.025
       },
       {
         "id": "party",
         "name": "Party (60-minute oversleep)",
         "durationSlots": 1,
         "delayMinutes": 60,
-        "selectable": true
+        "selectable": true,
+        "fatiguePerSlot": 0.15,
+        "moralePerSlot": 0.03
       },
       {
         "id": "travel",
         "name": "Team travel",
-        "durationSlots": 2
+        "durationSlots": 2,
+        "fatiguePerSlot": 0.04,
+        "moralePerSlot": -0.01
       },
       {
         "id": "media",

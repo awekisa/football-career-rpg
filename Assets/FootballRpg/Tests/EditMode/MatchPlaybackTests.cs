@@ -61,7 +61,10 @@ namespace FootballRpg.Tests
             result.AddRange(w.ParticipationEvents.Select(e => e.Kind + e.PlayerId + e.ReplacementId + e.Severity + e.Tick));
             result.AddRange(w.SetPieceRecords.Select(e => e.RestartId + e.PlayerId + e.Kind + e.Choice + e.Succeeded + e.Tick));
             result.AddRange(w.Players.OrderBy(p => p.Player.Id).Select(p => p.Player.Id + ":" + p.Position.X.ToString("R", CultureInfo.InvariantCulture) + ":" + p.Position.Z.ToString("R", CultureInfo.InvariantCulture)));
-            result.AddRange(c.Players.Values.Select(p => p.Id + ":" + p.Fatigue.ToString("R", CultureInfo.InvariantCulture) + ":" + p.InjuryDaysRemaining));
+            result.AddRange(c.Players.Values.Select(p => p.Id + ":" + p.Fatigue.ToString("R", CultureInfo.InvariantCulture) + ":" + p.Confidence.ToString("R", CultureInfo.InvariantCulture) + ":" + p.Morale.ToString("R", CultureInfo.InvariantCulture) + ":" + p.InjuryDaysRemaining));
+            result.AddRange(c.Readiness.Changes.Select(e => e.PlayerId + ":" + e.CauseId + ":" + e.Reason + ":" +
+                e.FatigueDelta.ToString("R", CultureInfo.InvariantCulture) + ":" + e.ConfidenceDelta.ToString("R", CultureInfo.InvariantCulture) + ":" +
+                e.MoraleDelta.ToString("R", CultureInfo.InvariantCulture) + ":" + e.InjuryDaysDelta));
             Assert.That(c.Progression.Changes.Count, Is.GreaterThan(0));
             Assert.That(c.Progression.Changes.Count, Is.EqualTo(m.Diagnostics.Count), "Every committed football action is attributed once.");
             Assert.That(c.Progression.Changes.Select(e => e.EventId).Distinct().Count(), Is.EqualTo(c.Progression.Changes.Count));

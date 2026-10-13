@@ -72,7 +72,7 @@ namespace FootballRpg.Simulation
         public OpenPlayWorld(CareerState career, MatchSession match, string controlledPlayerId = null, bool startWithControlledPlayer = false, double? openingArrivalHeight = null)
         {
             if (career == null) throw new ArgumentNullException(nameof(career));
-            progression = career.Progression;
+            progression = career.Progression; readiness = career.Readiness;
             session = match ?? throw new ArgumentNullException(nameof(match));
             this.controlledPlayerId = controlledPlayerId;
             foreach (var club in career.Clubs.Values) setPieceClubs.Add(club.Id, club);
@@ -405,6 +405,7 @@ namespace FootballRpg.Simulation
             BallState = BallPhase.Loose;
             RefreshIntent();
         }
-        public void Dispose() => session.TickAdvanced -= Step;
+        public void Dispose()
+        { session.TickAdvanced -= Step; readiness.FlushExertion(progressionMatchId); }
     }
 }

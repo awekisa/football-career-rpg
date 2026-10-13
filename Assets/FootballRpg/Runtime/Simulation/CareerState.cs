@@ -144,8 +144,9 @@ namespace FootballRpg.Simulation
 
         public SkillProgression Progression { get; }
         public CareerCalendar Calendar { get; }
+        public CareerReadiness Readiness { get; }
 
-        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules)
+        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules)
         {
             UserPlayerId = definitions.userPlayerId;
             Players = new ReadOnlyDictionary<string, PlayerState>(
@@ -156,13 +157,15 @@ namespace FootballRpg.Simulation
                 definitions.coaches.ToDictionary(c => c.id, c => new CoachState(c), StringComparer.Ordinal));
             Fixture = new FixtureState(definitions.fixture);
             Progression = new SkillProgression(this, definitions.footballAttributes, progressionRules);
+            Readiness = new CareerReadiness(this, readinessRules);
             Calendar = definitions.calendar == null ? null : new CareerCalendar(UserPlayerId, definitions.calendar);
+            if (Calendar != null) Calendar.Committed += Readiness.ApplyCalendar;
         }
 
-        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null)
+        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null)
         {
             DefinitionValidator.Validate(definitions);
-            return new CareerState(definitions, progressionRules ?? new ProgressionRules());
+            return new CareerState(definitions, progressionRules ?? new ProgressionRules(), readinessRules ?? new ReadinessRules());
         }
 
         public void SetPlayerCondition(string playerId, float confidence, float morale, float fatigue)

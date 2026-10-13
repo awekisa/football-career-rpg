@@ -10,7 +10,7 @@ namespace FootballRpg.Presentation
         private bool calendarOpen;
         private string calendarSelection, calendarError;
         private CalendarChoice calendarChoice;
-        private Vector2 calendarScroll, impactScroll, activityScroll;
+        private Vector2 calendarScroll, impactScroll, activityScroll, readinessScroll;
         private GUIStyle calendarText;
         public void OpenCalendar()
         {
@@ -55,9 +55,11 @@ namespace FootballRpg.Presentation
             var calendar = Career.Calendar;
             if (calendarText == null) calendarText = new GUIStyle(GUI.skin.label) { fontSize = 18, wordWrap = true };
             GUI.Label(new Rect(50, 35, 900, 40), "YOUR WEEK  ·  " + calendar.TimeLabel(calendar.Minute), body);
-            GUI.Label(new Rect(50, 90, 1300, 55), "Inspect freely; confirm to spend time and record attendance. Training rewards and match-day play are not connected yet.", small);
+            var player = Career.UserPlayer;
+            GUI.Label(new Rect(50, 85, 1300, 30), $"Fatigue {player.Fatigue:P0}  ·  Confidence {player.Confidence:P0}  ·  Morale {player.Morale:P0}  ·  Injury: {player.InjuryDaysRemaining} day(s)  ·  Training yield {Career.Readiness.TrainingMultiplier(player.Id):P0}", calendarText);
+            GUI.Label(new Rect(50, 120, 1300, 25), "Inspect freely; confirm to spend time. Training XP and scheduled match play are not available in this prototype yet.", small);
             GUI.Label(new Rect(50, 155, 720, 30), "COMMITMENTS  ·  Select a row, or Tab between current commitments", eyebrow);
-            calendarScroll = GUI.BeginScrollView(new Rect(50, 200, 725, 440), calendarScroll, new Rect(0, 0, 700, calendar.Commitments.Count * 78));
+            calendarScroll = GUI.BeginScrollView(new Rect(50, 200, 725, 330), calendarScroll, new Rect(0, 0, 700, calendar.Commitments.Count * 78));
             for (int i = 0; i < calendar.Commitments.Count; i++)
             {
                 var c = calendar.Commitments[i]; var result = calendar.ResultFor(c.Id);
@@ -67,14 +69,13 @@ namespace FootballRpg.Presentation
                 { calendarSelection = c.Id; calendarChoice = null; calendarError = null; }
             }
             GUI.EndScrollView();
-            GUI.Label(new Rect(50, 665, 700, 30), "RECENT ATTENDANCE", eyebrow);
-            var recent = calendar.Attendance.Reverse().Take(3).ToArray();
+            GUI.Label(new Rect(50, 550, 700, 30), "WHY YOUR READINESS CHANGED", eyebrow);
+            var recent = Career.Readiness.Changes.Where(c => c.PlayerId == player.Id).Reverse().Take(100).ToArray();
+            readinessScroll = GUI.BeginScrollView(new Rect(50, 590, 725, 220), readinessScroll, new Rect(0, 0, 700, Math.Max(50, recent.Length * 60)));
+            if (recent.Length == 0) GUI.Label(new Rect(0, 0, 690, 50), "No changes yet. Inspecting the schedule never changes readiness.", calendarText);
             for (int i = 0; i < recent.Length; i++)
-            {
-                var r = recent[i];
-                GUI.Label(new Rect(50, 705 + i * 30, 715, 30), calendar.Activities.Single(a => a.Id == r.Fact.ActivityId).Name + ": " + r.Fact.Attendance +
-                    (r.LateMinutes > 0 ? " (" + r.LateMinutes + " min late)" : "") + (r.Required ? " · required" : ""), calendarText);
-            }
+                GUI.Label(new Rect(0, i * 60, 690, 58), ReadinessExplanation(recent[i]), calendarText);
+            GUI.EndScrollView();
             var alternatives = calendar.Activities.Where(a => a.Selectable).ToArray();
             activityScroll = GUI.BeginScrollView(new Rect(830, 155, 565, 260), activityScroll, new Rect(0, 0, 540, (3 + alternatives.Length) * 44));
             GUI.enabled = !calendar.Finished;
@@ -97,6 +98,16 @@ namespace FootballRpg.Presentation
                     "Ends: " + calendar.TimeLabel(p.EndMinute) + "\nKnown delay: " + (p.EndMinute - p.ActivityEndMinute) + " minutes\n\n" +
                     (p.Impacts.Count == 0 ? "No scheduled commitments affected." : string.Join("\n", p.Impacts.Select(i => i.Commitment.Activity.Name + " (" + (i.Commitment.Required ? "required" : "optional") + "): " + i.Outcome + (i.LateMinutes > 0 ? " by " + i.LateMinutes + " min" : ""))));
             }
+            if (calendarChoice != null)
+            {
+                var a = calendarChoice.Activity;
+                double slots = (calendarChoice.ActivityEndMinute - calendarChoice.StartMinute) / (double)calendar.MinutesPerSlot;
+                double fatigue = a == null ? -Career.Readiness.Rules.IdleRecoveryPerSlot * slots : a.Training && player.InjuryDaysRemaining > 0 ? 0 : a.FatiguePerSlot * slots;
+                explanation += $"\n\nWorkload: fatigue {fatigue * 100:+0.#;-0.#;0} points (clamped to 0–100).";
+                if (a?.Training == true) explanation += $"\nTraining yield at current readiness: {Career.Readiness.TrainingMultiplier(player.Id):P0} × {slots:0.##} slot(s).";
+                if (a != null && !(a.Training && player.InjuryDaysRemaining > 0)) explanation += $"\nActivity morale: {a.MoralePerSlot * slots * 100:+0.#;-0.#;0} points.";
+                explanation += "\nMissed required commitments reduce morale; late attendance reduces it less. Injury recovery follows elapsed career days.";
+            }
             float textHeight = Mathf.Max(260, calendarText.CalcHeight(new GUIContent(explanation), 520));
             impactScroll = GUI.BeginScrollView(new Rect(830, 480, 565, 280), impactScroll, new Rect(0, 0, 535, textHeight));
             GUI.Label(new Rect(0, 0, 520, textHeight), explanation, calendarText); GUI.EndScrollView();
@@ -105,6 +116,7 @@ namespace FootballRpg.Presentation
             if (GUI.Button(new Rect(990, 800, 380, 60), "CONFIRM CHOICE  [ENTER]", button)) ConfirmCalendar();
             GUI.enabled = true;
         }
+        private static string ReadinessExplanation(ReadinessChange c) => c.Reason + $"\nFatigue {c.FatigueDelta * 100:+0.#;-0.#;0} · Confidence {c.ConfidenceDelta * 100:+0.#;-0.#;0} · Morale {c.MoraleDelta * 100:+0.#;-0.#;0}" + (c.InjuryDaysDelta == 0 ? "" : $" · Injury days {c.InjuryDaysDelta:+0;-0}");
         private void VerifyCalendar()
         {
             var original = Career;
@@ -115,7 +127,9 @@ namespace FootballRpg.Presentation
                 if (Career.Calendar.Minute != 0) throw new InvalidOperationException("Calendar navigation advanced time.");
                 PreviewCalendar(CalendarChoiceKind.Attend, "mon-training");
                 if (calendarChoice?.CostMinutes != 360 || Career.Calendar.Minute != 0) throw new InvalidOperationException("Calendar preview failed.");
+                float initialFatigue = Career.UserPlayer.Fatigue;
                 ConfirmCalendar(); ConfirmCalendar();
+                if (Career.UserPlayer.Fatigue <= initialFatigue || Career.Readiness.Training.Count != 1) throw new InvalidOperationException("Training readiness not connected.");
                 PreviewCalendar(CalendarChoiceKind.ExtraPractice, "extra-practice"); ConfirmCalendar();
                 if (Career.Calendar.Minute != 720 || Career.Calendar.Attendance.Count != 2) throw new InvalidOperationException("Extra practice timing failed.");
                 PreviewCalendar(CalendarChoiceKind.Skip, "mon-media"); ConfirmCalendar();
@@ -125,6 +139,11 @@ namespace FootballRpg.Presentation
                 var result = Career.Calendar.ResultFor("tue-training");
                 if (result.Fact.Attendance != AttendanceOutcome.Late || result.LateMinutes != 60 || result.ParticipatedMinutes != 300)
                     throw new InvalidOperationException("Calendar late attendance failed.");
+                float tired = Career.UserPlayer.Fatigue;
+                PreviewCalendar(CalendarChoiceKind.Replace, "rest"); ConfirmCalendar();
+                if (Career.UserPlayer.Fatigue >= tired || Career.Readiness.Changes.Count == 0 || Career.Readiness.Training.Count != 3)
+                    throw new InvalidOperationException("Recovery/readiness recording failed.");
+                Debug.Log("FOOTBALL_RPG_READINESS_PASSED");
                 Debug.Log("FOOTBALL_RPG_CALENDAR_PASSED");
             }
             finally { Career = original; calendarOpen = false; calendarChoice = null; }

@@ -40,7 +40,12 @@ namespace FootballRpg.Simulation
         private void RecordFixture(string kind, bool? home = null, RestartKind? restart = null)
         {
             var fact = new FixtureEvent(session.SessionId + ":fixture-" + (++fixtureSequence), kind, session.Tick, home, restart);
-            fixtureEvents.Add(fact); RememberViewingEvent(kind); FixtureChanged?.Invoke(fact);
+            fixtureEvents.Add(fact); RememberViewingEvent(kind);
+            if (kind == "HalfTime" || kind == "FullTime" || kind == "Abandoned") readiness.FlushExertion(progressionMatchId);
+            if (kind == "FullTime" && !Abandoned)
+                foreach (var id in matchParticipants)
+                    readiness.MatchResult(progressionMatchId, id, (namedPlayers[id].ClubId == homeClubId ? 1 : -1) * Math.Sign(HomeGoals - AwayGoals));
+            FixtureChanged?.Invoke(fact);
         }
         private void ClearPlay()
         {
