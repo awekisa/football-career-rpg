@@ -27,3 +27,5 @@ SME-108 provides shared data/events and a validated 36-player fixture (see [data
 `CareerReadiness` owns temporary-condition consequences and a reason ledger. Calendar confirmation invokes it once; match physics supplies live exertion, injuries, meaningful action results and final participant results. It never changes personality or awards skill XP. Training readiness records expose effective participation for `CareerTraining`. See [readiness](readiness.md).
 
 `CareerTraining` consumes confirmed training after readiness has captured pre-workload state. It combines attendance duration, focus, club quality and skill levels, then requests exactly-once awards from `SkillProgression`. Preview reports are read-only. See [scheduled training](training.md).
+
+`ClubVenue` owns an immutable navigation grid. `ClubExploration` owns the current walking route and contextual availability without mutating career time. The presentation hands an arrived-at activity back to the existing calendar for explicit confirmation. See [club exploration](club-exploration.md).
