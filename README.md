@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** coach selection and tactical reactions (SME-131). Your coach responds to readiness, conduct, relationship and match choices, assigns your role and set-piece responsibilities, and considers persuasion. Character creation, club exploration, training and match demos are available; authored interactions and the integrated week come next.
+**Current milestone:** authored club conversations (SME-132). Scheduled coach, teammate and agent meetings connect attendance to relationships, save training focus and career priorities, and display your basic contract. Character creation, club exploration, training and match demos are available; the integrated week comes next.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
@@ -22,6 +22,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 - [Fatigue, injuries, bench entry and substitutions](docs/injuries-and-substitutions.md)
 - [Full-match and highlight viewing](docs/match-viewing.md)
 - [Relationships and personality checks](docs/relationships.md)
+- [Authored club conversations and career preferences](docs/club-conversations.md)
 - [Coach selection, requests and tactical reactions](docs/coach.md)
 - [Club exploration and contextual availability](docs/club-exploration.md)
 - [Guided practice and focused rewards](docs/guided-practice.md)

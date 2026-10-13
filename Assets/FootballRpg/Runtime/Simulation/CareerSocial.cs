@@ -102,6 +102,7 @@ namespace FootballRpg.Simulation
         private readonly List<RelationshipChanged> changes = new List<RelationshipChanged>();
         private readonly Dictionary<string, RelationshipState> relationships;
         private int revision;
+        internal int Revision => revision;
         public SocialRules Rules { get; }
         public IReadOnlyDictionary<string, RelationshipState> Relationships { get; }
         public IReadOnlyList<DialogueOption> Options { get; }
@@ -141,6 +142,7 @@ namespace FootballRpg.Simulation
         {
             if (!relationships.ContainsKey(personId)) return "Unknown contact.";
             if (career.Calendar?.Finished == true) return "The prototype week is complete.";
+            if (career.Calendar?.AwaitingMeeting == true) return "Finish or leave the current meeting first.";
             if (career.Calendar?.AwaitingPractice == true) return "Finish guided practice first.";
             if (committed.ContainsKey(ExchangeId(personId))) return "This contact's exchange is complete for this slot. Advance the calendar before another exchange.";
             return null;
@@ -179,15 +181,16 @@ namespace FootballRpg.Simulation
             int after = Math.Max(minimum, Math.Min(100, before + delta)); set(after);
             if (before != after) applied.Add(new RelationshipChanged(preview.Id + ":" + dimension, career.UserPlayerId, results.Count + 1, preview.PersonId, dimension, preview.Id, before, after));
         }
-        internal void ApplyCoachEffect(string cause, SocialEffect effect)
+        internal void ApplyCoachEffect(string cause, SocialEffect effect) => ApplyRelationshipEffect(cause, relationships.Values.Single(r => r.Role == SocialRole.Coach).PersonId, effect);
+        internal IReadOnlyList<RelationshipChanged> ApplyRelationshipEffect(string cause, string contactId, SocialEffect effect)
         {
-            var contact = relationships.Values.Single(r => r.Role == SocialRole.Coach);
+            var contact = relationships[contactId];
             var applied = new List<RelationshipChanged>();
             var preview = new DialoguePreview(this, revision, Slot, cause, contact.PersonId, null, 0, 0);
             Apply("affinity", contact.Affinity, effect.Affinity, -100, value => contact.Affinity = value, preview, applied);
             Apply("professional-trust", contact.ProfessionalTrust, effect.Trust, 0, value => contact.ProfessionalTrust = value, preview, applied);
             Apply("standing", contact.Standing, effect.Standing, 0, value => contact.Standing = value, preview, applied);
-            changes.AddRange(applied); revision++;
+            changes.AddRange(applied); revision++; return applied.AsReadOnly();
         }
         private BehaviorObservation Observe(DialoguePreview preview)
         {

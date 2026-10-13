@@ -148,7 +148,8 @@ namespace FootballRpg.Simulation
         {
             var player = career.UserPlayer; var club = career.Clubs[player.ClubId]; var coach = career.Coaches[club.CoachId];
             double coachFactor = Rules.Quality(coach.CoachingQuality), staffFactor = Rules.Quality(club.StaffQuality), facilityFactor = Rules.Quality(club.FacilityQuality);
-            var role = roleSkills[player.PrimaryPositionId]; var chosen = focus.UsePosition ? role : focus.AttributeIds.ToArray();
+            var trainingRole = career.Meetings?.PreferredTrainingFocusId == "role" ? career.Coach.AssignedRole : player.PrimaryPositionId;
+            var role = roleSkills[trainingRole]; var chosen = focus.UsePosition ? role : focus.AttributeIds.ToArray();
             var shares = new Dictionary<string, double>();
             foreach (var id in role) shares[id] = (1 - Rules.FocusShare) / role.Length;
             foreach (var id in chosen) { shares.TryGetValue(id, out double value); shares[id] = value + Rules.FocusShare / chosen.Length; }

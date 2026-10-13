@@ -43,6 +43,7 @@ namespace FootballRpg.Presentation
             Career.Calendar.Commit(calendarChoice); calendarChoice = null;
             if (Career.Training.Results.Count > before) { showTrainingResults = true; trainingScroll = Vector2.zero; }
             calendarSelection = Career.Calendar.CurrentCommitments.FirstOrDefault()?.Id;
+            if (Career.Calendar.AwaitingMeeting) OpenMeetings();
             if (Career.Calendar.AwaitingPractice)
             {
                 practiceView = new GameObject("Guided Practice").AddComponent<GuidedPracticeView>();
@@ -134,7 +135,7 @@ namespace FootballRpg.Presentation
                     PreviewCalendar(activity.ExtraPractice ? CalendarChoiceKind.ExtraPractice : CalendarChoiceKind.Replace, activity.Id);
             }
             GUI.enabled = true; GUI.EndScrollView();
-            string focusName = Career.Calendar.TrainingFocuses.SingleOrDefault(f => f.Id == trainingFocus)?.Name ?? "Scheduled focus";
+            string focusName = Career.Calendar.TrainingFocuses.SingleOrDefault(f => f.Id == trainingFocus)?.Name ?? (Career.Calendar.TrainingFocuses.SingleOrDefault(f => f.Id == Career.Meetings.PreferredTrainingFocusId)?.Name + (Career.Meetings.PreferredTrainingFocusId == null ? "Scheduled focus" : " (career plan)"));
             if (GUI.Button(new Rect(830, 425, 530, 38), "FOCUS: " + (interactiveTraining ? practiceFamily.ToString() : focusName) + "  [F]", button)) CycleTrainingFocus();
             if (GUI.Button(new Rect(830, 470, 330, 38), (interactiveTraining ? "GUIDED PRACTICE" : "SIMULATED TRAINING") + "  [I]", button)) ToggleTrainingMode();
             if (GUI.Button(new Rect(1170, 470, 190, 38), "COACH  [D]", button)) coachDiscussion = !coachDiscussion;
@@ -156,6 +157,13 @@ namespace FootballRpg.Presentation
                 if (a != null && !(a.Training && player.InjuryDaysRemaining > 0)) explanation += $"\nActivity morale: {a.MoralePerSlot * slots * 100:+0.#;-0.#;0} points.";
                 explanation += "\nMissed required commitments reduce morale; late attendance reduces it less. Injury recovery follows elapsed career days.";
             }
+            if (calendarChoice != null)
+                foreach (var impact in calendarChoice.Impacts)
+                {
+                    var meeting = Career.Meetings.Meetings.SingleOrDefault(m => m.CommitmentId == impact.Commitment.Id);
+                    if (meeting != null) explanation += "\n\n" + meeting.Role + " meeting: " + EffectText(impact.Outcome == AttendanceOutcome.Skipped ? meeting.Skipped : impact.Outcome == AttendanceOutcome.Late ? meeting.Late : meeting.Attended) +
+                        (impact.Outcome == AttendanceOutcome.Skipped ? ". Existing plans stay unchanged." : ". Attending opens a conversation after the slot is committed.");
+                }
             if (calendarChoice?.Focus != null)
                 explanation += "\n\nTRAINING PREVIEW\n" + TrainingExplanation(Career.Training.Preview(calendarChoice));
             if (interactiveTraining) explanation += "\n\nThree paused decisions replace the simulated reward. Only completed drills earn XP; failed drills earn 65%. The estimate assumes successful first-option actions. Ending early does not refund the slot.";

@@ -118,6 +118,7 @@ namespace FootballRpg.Simulation
             }
             Require(players[data.userPlayerId].clubId == fixture.homeClubId || players[data.userPlayerId].clubId == fixture.awayClubId,
                 "User club must participate in fixture.");
+            CareerMeetings.Validate(data);
         }
 
         private static Dictionary<string, T> Index<T>(T[] entries, Func<T, string> key, string label) where T : class

@@ -139,6 +139,7 @@ namespace FootballRpg.Simulation
         {
             var d = Venue.Destinations.SingleOrDefault(p => p.Id == id) ?? throw new ArgumentException("Unknown club destination.");
             var calendar = Career.Calendar;
+            if (calendar.AwaitingMeeting) return Unavailable("Finish or leave your current conversation before starting another activity.");
             if (calendar.AwaitingPractice) return Unavailable("Finish the current guided practice before starting another activity.");
             if (calendar.Finished) return Unavailable("The prototype week is complete. You can still explore the club.");
             var current = calendar.CurrentCommitments;
@@ -149,10 +150,14 @@ namespace FootballRpg.Simulation
                 var travel = current.FirstOrDefault(c => c.Activity.Id == "travel");
                 return travel == null ? new ClubInteraction("Review your week", "Your car is parked here. Check commitments, rest or plan the next activity. Opening the calendar costs no time.", true, ClubInteractionKind.Calendar) : Attend(travel);
             }
+            var meeting = Career.Meetings.Meetings.FirstOrDefault(m =>
+                (d.Id == "coach" && m.Role == SocialRole.Coach || d.Id == "teammates" && m.Role == SocialRole.Teammate || d.Id == "agent" && m.Role == SocialRole.Agent) &&
+                current.Any(c => c.Id == m.CommitmentId));
+            if (meeting != null) return Attend(current.Single(c => c.Id == meeting.CommitmentId));
             if (d.Id == "coach") return squadBusy || night ? Unavailable(squadBusy ? "The coach is with the squad. Return during a free daytime slot, or go to training." : "The coach's office is closed for the night.") :
                 new ClubInteraction("Discuss training direction", "The coach can explain development options for your role. Advice and inspection cost no time; attending training uses its scheduled slot.", true, ClubInteractionKind.TrainingGuidance);
             if (d.Id == "teammates") return squadBusy || night ? Unavailable(squadBusy ? "The squad is at its scheduled activity. The teammate area is empty." : "The squad has gone home for the night.") :
-                new ClubInteraction("Inspect your teammates", "Meet the squad and inspect positions and skills. Friendship and rivalry conversations arrive in the next club-life components.", true, ClubInteractionKind.Squad);
+                new ClubInteraction("Inspect your teammates", "Review squad relationships. Attend the scheduled teammate conversation to build friendship or rivalry.", true, ClubInteractionKind.Squad);
             string activity = d.Id == "agent" ? "agent" : d.Id == "media" ? "media" : "training";
             var appointment = current.FirstOrDefault(c => c.Activity.Id == activity);
             if (appointment != null)

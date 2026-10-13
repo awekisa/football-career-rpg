@@ -98,7 +98,7 @@ namespace FootballRpg.Simulation
             return new CoachSelection(start ? SelectionOutcome.Starter : SelectionOutcome.Substitute, AssignedRole, ability, score, required,
                 start ? "Selected to start: ability, readiness and trust meet this club's expectations." : "On the bench: develop role skills, recover or rebuild trust.");
         }
-        public string RequestUnavailable => MatchActive ? "Discuss requests before the match." : career.Calendar?.Finished == true ? "The week is complete." : career.Calendar?.AwaitingPractice == true ? "Finish guided practice first." : lastRequestSlot == Slot ? "One request per calendar slot; advance the calendar to discuss again." : null;
+        public string RequestUnavailable => career.Calendar?.AwaitingMeeting == true ? "Finish or leave the current meeting first." : MatchActive ? "Discuss requests before the match." : career.Calendar?.Finished == true ? "The week is complete." : career.Calendar?.AwaitingPractice == true ? "Finish guided practice first." : lastRequestSlot == Slot ? "One request per calendar slot; advance the calendar to discuss again." : null;
         private string Context => string.Join("/", revision, Slot, Relationship.Affinity, Relationship.ProfessionalTrust, Relationship.Standing,
             career.UserPlayer.Fatigue, career.UserPlayer.InjuryDaysRemaining, career.UserPlayer.PersonalityTraits["charisma"], career.UserPlayer.PersonalityTraits["leadership"], career.UserPlayer.FootballAttributes.Values.Sum());
         public CoachRequestPreview PreviewRequest(CoachRequest request, string role = null)
