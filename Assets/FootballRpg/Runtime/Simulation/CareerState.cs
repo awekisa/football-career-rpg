@@ -151,8 +151,9 @@ namespace FootballRpg.Simulation
         public CareerReadiness Readiness { get; }
         public CareerTraining Training { get; }
         public CareerSocial Social { get; }
+        public CareerCoach Coach { get; }
 
-        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules, TrainingRules trainingRules, SocialRules socialRules)
+        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules, TrainingRules trainingRules, SocialRules socialRules, CoachRules coachRules)
         {
             UserPlayerId = definitions.userPlayerId;
             Players = new ReadOnlyDictionary<string, PlayerState>(
@@ -167,18 +168,23 @@ namespace FootballRpg.Simulation
             Calendar = definitions.calendar == null ? null : new CareerCalendar(UserPlayerId, definitions.calendar);
             Training = new CareerTraining(this, definitions.positions, trainingRules);
             Social = new CareerSocial(this, definitions.personalityTraits, socialRules);
+            Coach = new CareerCoach(this, definitions.positions, coachRules);
             if (Calendar != null)
             {
                 Calendar.ValidateChoice = Training.ValidateChoice;
                 Calendar.Committed += Readiness.ApplyCalendar;
                 Calendar.Committed += Training.ApplyCalendar;
+                Calendar.Committed += Coach.ApplyCalendar;
             }
         }
 
-        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null, TrainingRules trainingRules = null, SocialRules socialRules = null)
+        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null, TrainingRules trainingRules = null, SocialRules socialRules = null, CoachRules coachRules = null)
         {
             DefinitionValidator.Validate(definitions);
-            return new CareerState(definitions, progressionRules ?? new ProgressionRules(), readinessRules ?? new ReadinessRules(), trainingRules ?? new TrainingRules(), socialRules ?? new SocialRules());
+            var user = definitions.players.Single(p => p.id == definitions.userPlayerId);
+            var club = definitions.clubs.Single(c => c.id == user.clubId);
+            return new CareerState(definitions, progressionRules ?? new ProgressionRules(), readinessRules ?? new ReadinessRules(),
+                trainingRules ?? new TrainingRules(), socialRules ?? new SocialRules(), coachRules ?? new CoachRules(club.staffQuality));
         }
 
         public void SetPlayerCondition(string playerId, float confidence, float morale, float fatigue)

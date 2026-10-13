@@ -42,8 +42,8 @@ namespace FootballRpg.Tests
         [Test] public void FriendshipAndRivalryDoNotAutomaticallyGrantTrust()
         {
             var friend = Create(100); var rival = Create(100);
-            for (int i = 0; i < 12; i++) { Choose(friend, "connect"); Choose(rival, "challenge"); Wait(friend); Wait(rival); }
-            var f = friend.Social.Relationships[Contact(friend)]; var r = rival.Social.Relationships[Contact(rival)];
+            for (int i = 0; i < 12; i++) { Choose(friend, "connect", SocialRole.Teammate); Choose(rival, "challenge", SocialRole.Teammate); Wait(friend); Wait(rival); }
+            var f = friend.Social.Relationships[Contact(friend, SocialRole.Teammate)]; var r = rival.Social.Relationships[Contact(rival, SocialRole.Teammate)];
             Assert.That(friend.Social.Bond(f.PersonId), Is.EqualTo("Friendship")); Assert.That(f.ProfessionalTrust, Is.EqualTo(50)); Assert.That(f.Standing, Is.EqualTo(50));
             Assert.That(rival.Social.Bond(r.PersonId), Is.EqualTo("Rivalry")); Assert.That(r.Affinity, Is.GreaterThanOrEqualTo(-100));
         }

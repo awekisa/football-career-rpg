@@ -86,6 +86,7 @@ namespace FootballRpg.Simulation
             }
         }
         private PlayerState BestReserve(FootballerMotion outgoing) => Bench(outgoing.IsHome)
+            .Where(p => !CoachEnabled || p.Id != controlledPlayerId || careerCoach.CanEnterFromBench)
             .OrderByDescending(p => outgoing.IsGoalkeeper ? p.PrimaryPositionId == "gk" ? 3 : 0 : p.PrimaryPositionId == outgoing.PositionRoleId ? 3 : p.PrimaryPositionId != "gk" ? 1 : 0)
             .ThenBy(p => p.Fatigue).FirstOrDefault();
         private bool CanReplace(bool home)
@@ -98,7 +99,7 @@ namespace FootballRpg.Simulation
             var motion = new FootballerMotion(incoming, outgoing.IsHome, outgoing.Anchor)
             { Direction = outgoing.Direction, IsGoalkeeper = outgoing.IsGoalkeeper, PositionRoleId = outgoing.PositionRoleId, Position = outgoing.Position, Target = outgoing.Target, Facing = outgoing.Facing };
             players.Add(motion); participation[incoming.Id] = ParticipationState.Playing;
-            if (incoming.Id == controlledPlayerId) { ActiveIntent = null; IntentStatus = "On the pitch — following team tactics"; }
+            if (incoming.Id == controlledPlayerId) { if (CoachEnabled) AssignCoachRole(motion); ActiveIntent = null; IntentStatus = "On the pitch — following team tactics"; }
         }
         private void Replace(FootballerMotion outgoing, PlayerState incoming, bool injured)
         {
@@ -132,13 +133,13 @@ namespace FootballRpg.Simulation
                     }
                 }
                 string requested; coachRequests.TryGetValue(p.Player.Id, out requested);
-                bool coachChange = FitnessRules.CoachChanges && (p.Player.Fatigue >= FitnessRules.CoachFatigueThreshold ||
+                bool coachChange = FitnessRules.CoachChanges && ((CoachEnabled && p.Player.Id == controlledPlayerId ? careerCoach.ShouldRemoveUser : p.Player.Fatigue >= FitnessRules.CoachFatigueThreshold) ||
                     (FixturePhase == FixturePhase.HalfTime && controlledPlayerId != null && Participation(controlledPlayerId) == ParticipationState.Bench &&
-                     namedPlayers[controlledPlayerId].ClubId == p.Player.ClubId && namedPlayers[controlledPlayerId].PrimaryPositionId == p.PositionRoleId));
+                     namedPlayers[controlledPlayerId].ClubId == p.Player.ClubId && (CoachEnabled ? careerCoach.AssignedRole : namedPlayers[controlledPlayerId].PrimaryPositionId) == p.PositionRoleId && (!CoachEnabled || careerCoach.CanEnterFromBench)));
                 PlayerState reserve = requested != null && Participation(requested) == ParticipationState.Bench ? namedPlayers[requested] : null;
                 if (reserve == null && (injuredOut || coachChange))
                     reserve = FixturePhase == FixturePhase.HalfTime && controlledPlayerId != null && Participation(controlledPlayerId) == ParticipationState.Bench &&
-                        namedPlayers[controlledPlayerId].ClubId == p.Player.ClubId && namedPlayers[controlledPlayerId].PrimaryPositionId == p.PositionRoleId
+                        namedPlayers[controlledPlayerId].ClubId == p.Player.ClubId && (CoachEnabled ? careerCoach.AssignedRole : namedPlayers[controlledPlayerId].PrimaryPositionId) == p.PositionRoleId && (!CoachEnabled || careerCoach.CanEnterFromBench)
                         ? namedPlayers[controlledPlayerId] : BestReserve(p);
                 if (reserve != null && CanReplace(p.IsHome)) Replace(p, reserve, injuredOut);
                 else if (injuredOut) { players.Remove(p); participation[p.Player.Id] = ParticipationState.InjuredOut; }

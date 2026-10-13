@@ -105,6 +105,7 @@ namespace FootballRpg.Simulation
             if (!CanSetIntent(kind, targetId)) throw new ArgumentException("Intent requires a valid phase and, for marking/tracking, an opposing starter.");
             if (kind == OffBallIntent.Automatic) { ClearIntent("Following team tactics"); return; }
             var user = Controlled;
+            if (CoachEnabled && kind != CoachInstruction && kind != ActiveIntent?.Kind) BeginCoachDeviation(kind.ToString());
             if (setPieceReleased && setPieceChoices.Remove(user.Player.Id))
                 setPieceRecords.Add(new SetPieceRecord(SetPieceRestartId, setPieceClubs[user.Player.ClubId].CoachId, user.Player.Id,
                     "DutyOverridden", kind.ToString(), true, null, null, session.Tick));

@@ -72,7 +72,7 @@ namespace FootballRpg.Simulation
         public OpenPlayWorld(CareerState career, MatchSession match, string controlledPlayerId = null, bool startWithControlledPlayer = false, double? openingArrivalHeight = null)
         {
             if (career == null) throw new ArgumentNullException(nameof(career));
-            progression = career.Progression; readiness = career.Readiness;
+            progression = career.Progression; readiness = career.Readiness; careerCoach = career.Coach; careerUserId = career.UserPlayerId;
             session = match ?? throw new ArgumentNullException(nameof(match));
             this.controlledPlayerId = controlledPlayerId;
             foreach (var club in career.Clubs.Values) setPieceClubs.Add(club.Id, club);
@@ -136,6 +136,7 @@ namespace FootballRpg.Simulation
         {
             // Defend against direct clock resume: a pending user choice may never be delegated to AI.
             if (HasPendingDecision || OffsideNoticePending || RefereeNoticePending) { session.Pause(); return; }
+            StepCoach();
             if (StepReferee() || StepFixture()) return;
             if (CheckOffsideInterference()) return;
             RefreshIntent();
@@ -237,6 +238,8 @@ namespace FootballRpg.Simulation
                 return new PitchPoint(player.Position.X + 8 * player.Direction, player.Position.Z * .9).Bounded();
             if (player.IsGoalkeeper)
                 return new PitchPoint((-48 + (attacking ? 3 : 0)) * player.Direction, ball.Z * .13);
+            var coachTarget = CoachTarget(player);
+            if (coachTarget.HasValue) return coachTarget.Value;
             if (!attacking && owner != null)
             {
                 var presser = players.Where(p => p.IsHome == player.IsHome && !p.IsGoalkeeper)
@@ -406,6 +409,6 @@ namespace FootballRpg.Simulation
             RefreshIntent();
         }
         public void Dispose()
-        { session.TickAdvanced -= Step; readiness.FlushExertion(progressionMatchId); }
+        { session.TickAdvanced -= Step; readiness.FlushExertion(progressionMatchId); if (CoachEnabled) { FinishCoachDeviation(false); careerCoach.MatchActive = false; } }
     }
 }

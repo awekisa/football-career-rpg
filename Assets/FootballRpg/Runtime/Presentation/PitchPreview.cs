@@ -302,6 +302,8 @@ namespace FootballRpg.Presentation
         private void Update()
         {
             if (Career == null || Time.frameCount <= inputReadyFrame) return;
+            if (coachPanel) { if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(KeyCode.Escape)) coachPanel = false; return; }
+            if (World.CoachEnabled && Input.GetKeyDown(KeyCode.T)) { OpenMatchCoach(); return; }
             EnsureDecisionSelection();
             if (Input.GetKeyDown(KeyCode.H)) ToggleViewingMode();
             if (Input.GetKeyDown(KeyCode.M)) CycleViewingSpeed();
