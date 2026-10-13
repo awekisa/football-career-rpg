@@ -213,11 +213,15 @@ namespace FootballRpg.Simulation
             var challenger = players.Where(p => p.IsHome != owner.IsHome).OrderBy(p => p.Position.Distance(BallPosition)).First();
             if (HoldingKeeperId != owner.Player.Id && challenger.Player.Id != controlledPlayerId && challenger.Position.Distance(BallPosition) < 2 && challengeSeconds <= 0)
             {
-                challengeSeconds = 1.2;
+                // Pressure is continuous; a lunge is a considered choice, not a roll every second.
+                challengeSeconds = DefenseResolver.AiChallengeIntervalSeconds;
                 var preview = DefenseResolver.Preview(Snapshot(challenger), Snapshot(owner), challenger.Direction, DefensiveAction.Tackle);
-                var result = DefenseResolver.Commit(session, "open-play-" + (++actionSequence), preview, true);
-                if (JudgeChallenge(result, challenger, owner)) return;
-                if (result.Action.Succeeded) { GiveBall(challenger); return; }
+                if (DefenseResolver.AiShouldTackle(preview.Percent, Discipline.Yellows(challenger.Player.Id) > 0))
+                {
+                    var result = DefenseResolver.Commit(session, "open-play-" + (++actionSequence), preview, true);
+                    if (JudgeChallenge(result, challenger, owner)) return;
+                    if (result.Action.Succeeded) { GiveBall(challenger); return; }
+                }
             }
             if (session.Tick < containedUntilTick && owner.Player.Id == containedPlayerId) return;
             if (heldSeconds >= 2.5 && !ChooseAiAction(owner)) Pass(owner);

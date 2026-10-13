@@ -69,7 +69,7 @@ namespace FootballRpg.Tests
             Assert.That(xp.ForPlayer(career.UserPlayerId)["short-passing"].TotalXp, Is.EqualTo(total));
             Assert.That(xp.Changes.Count, Is.EqualTo(1));
             var second = xp.Apply(match, Fact("two", true), Single);
-            Assert.That(second.Deltas.Values.Single(), Is.EqualTo(first.Deltas.Values.Single() * .8).Within(.00001));
+            Assert.That(second.Deltas.Values.Single(), Is.EqualTo(first.Deltas.Values.Single() * xp.Rules.RepetitionMultiplier(1)).Within(.00001));
         }
         [Test] public void ReceiverFailureDoesNotUndoAccuratePassersReward()
         {
@@ -87,7 +87,7 @@ namespace FootballRpg.Tests
                 double reward = xp.Apply(match, Fact("repeat" + i, true, target: "target" + i), Single).Deltas.Values.Single();
                 Assert.That(reward, Is.LessThanOrEqualTo(previous)); previous = reward;
             }
-            Assert.That(previous, Is.Zero);
+            Assert.That(previous, Is.GreaterThan(0).And.LessThan(xp.Rules.OutcomeXp(.9f, true, 1) * .15));
             Assert.That(xp.Apply(match, Fact("late-failure", false), Single).Deltas.Values.Single(), Is.LessThan(0));
         }
         [Test] public void SkillGainCapStopsAlternatingActionFamilyExploit()

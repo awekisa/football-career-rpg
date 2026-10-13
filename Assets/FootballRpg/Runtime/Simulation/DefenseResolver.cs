@@ -41,6 +41,9 @@ namespace FootballRpg.Simulation
     }
     public static class DefenseResolver
     {
+        public const double AiChallengeIntervalSeconds = 8;
+        public const double UserDecisionIntervalSeconds = 5;
+        public static bool AiShouldTackle(int percent, bool booked) => percent >= (booked ? 55 : 45);
         public static bool IsAvailable(PassActor defender, PassActor attacker, int direction, DefensiveAction kind)
         {
             if (defender == null || attacker == null || defender.ClubId == attacker.ClubId || Math.Abs(direction) != 1 || !Enum.IsDefined(typeof(DefensiveAction), kind)) return false;

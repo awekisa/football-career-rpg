@@ -62,8 +62,8 @@ namespace FootballRpg.Simulation
             var result = DefenseResolver.Commit(session, decision.Id, preview, false);
             PendingDefense = null;
             committedDefense.Add(decisionId, result); LastDefense = result;
-            defenseCooldownTick = session.Tick + Ticks(2.5);
-            challengeSeconds = 1.2;
+            defenseCooldownTick = session.Tick + Ticks(DefenseResolver.UserDecisionIntervalSeconds);
+            challengeSeconds = Math.Max(challengeSeconds, DefenseResolver.AiChallengeIntervalSeconds);
             // Finish the defensive fact before opening any new possession choice.
             session.CompleteResolution(result.EventId);
             if (JudgeChallenge(result, defender, attacker)) { DefenseCommitted?.Invoke(result); return result; }

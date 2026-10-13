@@ -85,9 +85,10 @@ namespace FootballRpg.Content
             {
                 if (value == null) return 0;
                 var scalarType = value.GetType();
+                // Mono can round a short "R" double to a neighbour on parse; retain all 17 digits.
                 string scalarValue = Scalar(scalarType) ? scalarType == typeof(TimeSpan) ? ((TimeSpan)value).Ticks.ToString(CultureInfo.InvariantCulture) :
                     scalarType.IsEnum ? Convert.ToInt64(value).ToString(CultureInfo.InvariantCulture) : scalarType == typeof(float) ? ((float)value).ToString("R", CultureInfo.InvariantCulture) :
-                    scalarType == typeof(double) ? ((double)value).ToString("R", CultureInfo.InvariantCulture) : Convert.ToString(value, CultureInfo.InvariantCulture) : null;
+                    scalarType == typeof(double) ? ((double)value).ToString("G17", CultureInfo.InvariantCulture) : Convert.ToString(value, CultureInfo.InvariantCulture) : null;
                 if (scalarValue != null && scalars.TryGetValue((scalarType, scalarValue), out int scalarId)) return scalarId;
                 if (ids.TryGetValue(value, out int existing)) return existing;
                 if (nodes.Count >= MaxNodes) throw new InvalidOperationException("Career is too large to save.");
