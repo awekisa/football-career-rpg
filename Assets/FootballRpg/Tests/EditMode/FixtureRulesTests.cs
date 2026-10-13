@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class FixtureRulesTests
     {
         private static void Call(OpenPlayWorld w, string name, params object[] args) => GoalkeeperTests.Call(w, name, args);

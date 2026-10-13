@@ -7,6 +7,7 @@ using NUnit.Framework;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class GoalkeeperTests
     {
         internal static readonly BindingFlags Hidden = BindingFlags.Instance | BindingFlags.NonPublic;

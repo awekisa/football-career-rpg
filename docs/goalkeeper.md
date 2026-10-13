@@ -34,7 +34,7 @@ Successful distribution guarantees teammate control at the frozen destination. T
 
 The current action gate rejects handling outside the keeper's own penalty area, after a teammate's deliberate kick to the keeper or direct throw-in, and after releasing the ball before another player touches it. Ordinary feet actions remain available. This follows the handling provisions of [IFAB Law 12](https://www.theifab.com/laws/latest/fouls-and-misconduct/) (accessed 12 October 2026). The ball's position determines the area check; both attacking directions and boundary lines are tested.
 
-Illegal hand choices are prevented, rather than simulated as offences. Awarding infringement restarts, disciplinary outcomes, deliberate trickery, referee signals and the hand-possession time limit belong to the upcoming rules tickets. Current hand possession immediately prompts distribution (AI releases promptly), so paused decision time cannot cause a time-limit offence. Rule eligibility is integrated now; full infringement/restart scenarios must be verified when those systems land, as specified by the ticket.
+SME-119 now offers an explicit illegal-handling choice and applies the modeled sanctions, referee notices and eight-second hold rule; see [referee decisions](referee.md). Current hand possession immediately prompts distribution (AI releases promptly), so paused decision time cannot cause a time-limit offence. Deliberate trickery and all repeated-offence sanctions remain outside the implemented model; see the [verification limits](football-verification.md).
 
 ## Verification
 

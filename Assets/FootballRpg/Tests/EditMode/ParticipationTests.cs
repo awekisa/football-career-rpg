@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class ParticipationTests
     {
         private static void Call(OpenPlayWorld w, string method, params object[] args) => GoalkeeperTests.Call(w, method, args);

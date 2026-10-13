@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class FoulRulesTests
     {
         [TestCase(ContactSeverity.Fair, CardKind.None, false)]

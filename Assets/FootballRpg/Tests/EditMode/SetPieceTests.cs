@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class SetPieceTests
     {
         private static readonly TimeSpan Step = TimeSpan.FromMilliseconds(50);
