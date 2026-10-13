@@ -6,7 +6,7 @@ RB,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
 LWB,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
 RWB,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
 DM,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
-CM,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
+CM,c81da0fb61a331aa25242bad5cb38b25e3c31693,Codex UI; user mouse confirmation,2026-10-13,pass,partial: keyboard inspection and frozen pause,partial: user confirmed mouse restart works,pending,not applicable,partial: full/highlight toggle while paused,partial: referee and restart; fixture return/resume,partial,"Normal balanced CM creation; attended week; starter. Training XP/rest and three meetings observed. Free-kick 73% preview and failed pass -22.1 XP observed. User confirmed clicking Take restart works; automated mouse activation unreliable. Opponent mouse inspection, off-ball choice and final report remain unverified. No complete role pass claimed."
 AM,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
 LM,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
 RM,,,,pending,pending,pending,pending,not applicable,pending,pending,pending,
