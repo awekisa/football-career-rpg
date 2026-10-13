@@ -58,6 +58,20 @@ namespace FootballRpg.Tests
             Assert.That(penalty, Is.GreaterThan(CareerCoach.DeviationPenalty(strict.Coach.Profile, 90, false, false, .8)));
             Assert.That(penalty, Is.GreaterThan(CareerCoach.DeviationPenalty(strict.Coach.Profile, 50, true, true, .8)));
         }
+        [Test] public void TrustAndAffinitySoftenOtherwiseIdenticalCoachReactions()
+        {
+            var trusted = Create(); var distrusted = Create();
+            Set(trusted.Coach.Relationship, "ProfessionalTrust", 90); Set(distrusted.Coach.Relationship, "ProfessionalTrust", 10);
+            Call(trusted.Coach, "Deviation", "trust-test", false, false, 1.0, "Counterattack");
+            Call(distrusted.Coach, "Deviation", "trust-test", false, false, 1.0, "Counterattack");
+            Assert.That(trusted.Coach.Reactions.Single().TrustDelta, Is.GreaterThan(distrusted.Coach.Reactions.Single().TrustDelta));
+            var friend = Create(); var rival = Create();
+            Set(friend.Coach.Relationship, "Affinity", 100); Set(rival.Coach.Relationship, "Affinity", -100);
+            Call(friend.Coach, "Deviation", "affinity-test", false, false, 1.0, "Counterattack");
+            Call(rival.Coach, "Deviation", "affinity-test", false, false, 1.0, "Counterattack");
+            Assert.That(friend.Coach.Reactions.Single().TrustDelta, Is.GreaterThan(rival.Coach.Reactions.Single().TrustDelta));
+            Assert.That(friend.Coach.Relationship.Standing, Is.EqualTo(rival.Coach.Relationship.Standing));
+        }
         [Test] public void DeviationEffectsAreIdempotentClampedAndDoNotChangeAffinity()
         {
             var c = Create(); Call(c.Coach, "Deviation", "deviation-1", false, false, 1.0, "Counterattack");

@@ -133,16 +133,16 @@ namespace FootballRpg.Simulation
                 Record(a.Fact.EventId, a.Fact.Attendance + " " + a.Fact.ActivityId, delta, delta < 0 ? -2 : 0);
             }
         }
-        public static int DeviationPenalty(CoachState profile, int standing, bool succeeded, bool justified, double danger, int starStanding = 80)
+        public static int DeviationPenalty(CoachState profile, int standing, bool succeeded, bool justified, double danger, int starStanding = 80, int professionalTrust = 50, int affinity = 0)
         {
-            if (profile == null || standing < 0 || standing > 100 || double.IsNaN(danger) || danger < 0 || danger > 1) throw new ArgumentOutOfRangeException();
+            if (profile == null || standing < 0 || standing > 100 || double.IsNaN(danger) || danger < 0 || danger > 1 || professionalTrust < 0 || professionalTrust > 100 || affinity < -100 || affinity > 100) throw new ArgumentOutOfRangeException();
             double cost = (2 + profile.DisciplinePreference * 5 - profile.CreativityPreference * 2) * (standing >= starStanding ? .3 : 1)
-                * (succeeded ? .35 : 1) * (justified ? .25 : 1) * (1 + danger);
+                * (succeeded ? .35 : 1) * (justified ? .25 : 1) * (1 + danger) * (1 - (professionalTrust - 50) / 200.0) * (1 - affinity / 1000.0);
             return Math.Max(0, (int)Math.Round(cost, MidpointRounding.AwayFromZero));
         }
         internal CoachReaction Deviation(string cause, bool succeeded, bool justified, double danger, string choice)
         {
-            int penalty = DeviationPenalty(Profile, Relationship.Standing, succeeded, justified, danger, Rules.StarStanding);
+            int penalty = DeviationPenalty(Profile, Relationship.Standing, succeeded, justified, danger, Rules.StarStanding, Relationship.ProfessionalTrust, Relationship.Affinity);
             return Record(cause, choice + (succeeded ? ": successful" : ": unsuccessful") + (justified ? " in a justified attacking context" : " outside the plan"), -penalty, succeeded ? 1 : -1);
         }
         private CoachReaction Record(string cause, string reason, int trust, int standing)
