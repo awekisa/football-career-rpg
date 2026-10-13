@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class CareerWeekTests
     {
         private static CareerState Create(string role = "cm")

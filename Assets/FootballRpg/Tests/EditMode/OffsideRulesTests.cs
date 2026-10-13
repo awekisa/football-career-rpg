@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class OffsideRulesTests
     {
         private static OffsidePhase Phase(double attacker = 40, double ball = 20, double second = 30, double last = 50, int direction = 1, RestartKind? restart = null, long tick = 10, string toucherClub = "A", double radius = 0)

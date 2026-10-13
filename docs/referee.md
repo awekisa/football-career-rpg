@@ -16,7 +16,7 @@ A realised advantage defers any required reckless caution until the next stoppag
 
 ## Dismissals
 
-The discipline ledger applies each incident once, counts yellows, and turns the second caution into a dismissal. Sent-off players are removed from the active roster, targets, movement and pitch markers. The ledger persists after halftime and exposes `CanParticipate` for future substitution logic. There is currently no substitution/reinsertion route.
+The discipline ledger applies each incident once, counts yellows, and turns the second caution into a dismissal. Sent-off players are removed from the active roster, targets, movement and pitch markers. The ledger persists after halftime and exposes `CanParticipate` for future substitution logic. Dismissed players cannot return or be replaced; legal substitutions for other players are implemented in SME-121 (see [participation](injuries-and-substitutions.md)).
 
 If the goalkeeper is dismissed, an existing teammate assumes the match goalkeeper role using their own attributes; no additional player enters. The user's career position is unchanged. A dismissed user may inspect and watch the remaining fixture. Fewer than seven players ends the match as abandoned rather than leaving an invalid simulation running.
 

@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class CharacterCreationTests
     {
         private GameDefinitions content;

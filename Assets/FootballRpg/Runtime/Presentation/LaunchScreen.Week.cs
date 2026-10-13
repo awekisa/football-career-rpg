@@ -52,7 +52,7 @@ namespace FootballRpg.Presentation
             if (week.Phase == CareerWeekPhase.ClubWeek && GUI.Button(new Rect(65, 775, 360, 50), "EXPLORE CLUB [O]", button)) OpenClub();
             if (GUI.Button(new Rect(450, 775, 360, 50), "CONVERSATIONS [N]", button)) OpenMeetings();
             if (GUI.Button(new Rect(840, 775, 360, 50), "COACH [T]", button)) OpenCoach();
-            GUI.Label(new Rect(65, 850, 1260, 30), "Returning from the pitch pauses and keeps the same fixture. Use Space to resume. Saving to disk arrives in a later ticket.", small);
+            GUI.Label(new Rect(65, 850, 1260, 30), "Returning from the pitch pauses and keeps the same fixture. Use Space to resume. Save / Load is available at the top right (F5 / F9).", small);
         }
         private void VerifyCareerWeek()
         {

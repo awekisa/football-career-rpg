@@ -99,7 +99,7 @@ namespace FootballRpg.Presentation
                 " · Weekly wage " + Money(r.WageBefore) + " → " + Money(r.WageAfter) +
                 "\nNo payments or spending occur in this prototype; the contract wage is not automatically credited.", reportText);
             if (GUI.Button(new Rect(50, 835, 350, 45), "BACK TO WEEK [ESC]", button)) reportsOpen = false;
-            GUI.Label(new Rect(440, 835, 920, 50), "Reports stay available during this career session. Disk saves are not implemented yet.", small);
+            GUI.Label(new Rect(440, 835, 920, 50), "Use Save / Load to keep your career and reports between sessions.", small);
         }
         private void VerifyReports()
         {

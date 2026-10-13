@@ -27,7 +27,9 @@ namespace FootballRpg.Presentation
         private void OnGUI()
         {
             if (ScreenOwner == null) return;
-            int depth = GUI.depth; GUI.depth = -100;
+            // Depth belongs to this MonoBehaviour's GUI layer. Keep it in front
+            // across events; restoring zero lets the launch screen cover it.
+            GUI.depth = -100;
             if (messageStyle == null) messageStyle = new GUIStyle(GUI.skin.label) { wordWrap = true };
             if (GUI.Button(new Rect(Screen.width - 145, 2, 140, 25), "SAVE / LOAD")) open = !open;
             if (open)
@@ -37,7 +39,6 @@ namespace FootballRpg.Presentation
                 if (GUI.Button(new Rect(Screen.width - 200, 62, 180, 30), "Load [F9]")) message = ScreenOwner.LoadCareer().Message;
                 GUI.Label(new Rect(Screen.width - 390, 100, 370, 85), message ?? "One career slot with a previous-save backup.\nPause the match before saving. Loading replaces\nthe current session with your saved career.", messageStyle);
             }
-            GUI.depth = depth;
         }
     }
 }

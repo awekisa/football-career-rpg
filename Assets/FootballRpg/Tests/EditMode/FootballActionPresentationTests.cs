@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace FootballRpg.Tests
 {
+    [Category("FootballVerification")]
     public sealed class FootballActionPresentationTests
     {
         [TestCase(false)] [TestCase(true)]
