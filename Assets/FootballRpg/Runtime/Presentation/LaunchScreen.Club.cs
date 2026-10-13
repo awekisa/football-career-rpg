@@ -13,6 +13,7 @@ namespace FootballRpg.Presentation
         private bool returnToClub;
         public void OpenClub()
         {
+            if (Career?.Week.CalendarBlock != null) return;
             if (Career == null || preview != null || practiceView != null || clubView != null || (Career.Calendar.AwaitingPractice || Career.Calendar.AwaitingMeeting)) return;
             if (clubExploration == null || clubExploration.Career != Career) clubExploration = new ClubExploration(Career, PrototypeContent.LoadClubVenue());
             clubView = new GameObject("Club Exploration").AddComponent<ClubVenueView>();

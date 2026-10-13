@@ -19,10 +19,13 @@ namespace FootballRpg.Simulation
             careerCoach.Instruction(PossessionClubId == Controlled.Player.ClubId, LateChase, Controlled.PositionRoleId);
         public string CoachMessage => !CoachEnabled ? "Scenario line-up" : Controlled == null ? "Watch the match — " + UserParticipation :
             "Coach: " + CoachInstruction + " · Role " + Controlled.PositionRoleId.ToUpperInvariant() + (LateChase ? " · Chase a late goal" : "");
-        private void InitializeCoachSelection()
+        private void InitializeCoachSelection(bool absent, bool late)
         {
             if (controlledPlayerId == null || controlledPlayerId != careerUserId) throw new InvalidOperationException("Career selection requires the career player.");
             CoachEnabled = true; careerCoach.MatchActive = true; CoachSelection = careerCoach.Select();
+            if (absent || late && CoachSelection.Outcome == SelectionOutcome.Starter)
+                CoachSelection = new CoachSelection(absent ? SelectionOutcome.NotSelected : SelectionOutcome.Substitute, CoachSelection.Role, CoachSelection.Ability, CoachSelection.Score, CoachSelection.RequiredScore,
+                    absent ? "Missed the fixture: not available for selection." : "Late arrival: start on the bench.");
             var user = Controlled;
             if (CoachSelection.Outcome != SelectionOutcome.Starter && user != null)
             {
@@ -32,6 +35,7 @@ namespace FootballRpg.Simulation
                 {
                     players.Remove(user); participation[user.Player.Id] = ParticipationState.Bench; AddReplacement(user, reserve);
                 }
+                else if (absent) players.Remove(user);
                 else CoachSelection = new CoachSelection(SelectionOutcome.Starter, CoachSelection.Role, CoachSelection.Ability, CoachSelection.Score, CoachSelection.RequiredScore, "Required to start: no fit replacement available.");
             }
             else if (CoachSelection.Outcome == SelectionOutcome.Starter && user == null && Participation(controlledPlayerId) == ParticipationState.Bench)
@@ -41,6 +45,7 @@ namespace FootballRpg.Simulation
                     .OrderByDescending(p => p.PositionRoleId == CoachSelection.Role).ThenBy(p => careerCoach.Ability(p.Player, CoachSelection.Role)).First();
                 players.Remove(outgoing); participation[outgoing.Player.Id] = ParticipationState.Bench; AddReplacement(outgoing, incoming);
             }
+            if (absent) participation[controlledPlayerId] = ParticipationState.NotSelected;
             user = Controlled;
             if (user != null) AssignCoachRole(user);
             ParticipationMessage = CoachSelection.Reason;

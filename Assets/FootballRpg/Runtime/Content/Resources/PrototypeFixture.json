@@ -2194,6 +2194,16 @@
         "id": "teammate-meeting",
         "name": "Teammate conversation",
         "durationSlots": 1
+      },
+      {
+        "id": "selection",
+        "name": "Squad selection briefing",
+        "durationSlots": 1
+      },
+      {
+        "id": "match-preparation",
+        "name": "Match preparation and tactical plan",
+        "durationSlots": 1
       }
     ],
     "commitments": [
@@ -2259,6 +2269,18 @@
         "startSlot": 20,
         "required": true,
         "trainingFocusId": "set-pieces"
+      },
+      {
+        "id": "sat-selection",
+        "activityId": "selection",
+        "startSlot": 23,
+        "required": true
+      },
+      {
+        "id": "sun-preparation",
+        "activityId": "match-preparation",
+        "startSlot": 24,
+        "required": true
       },
       {
         "id": "sun-match",

@@ -25,14 +25,14 @@ namespace FootballRpg.Simulation
         private RestartKind? directRestart;
         private bool directRestartHome;
 
-        public void StartFixture(CompetitionRules rules = null, MatchFitnessRules fitnessRules = null, bool applyCoachSelection = false)
+        public void StartFixture(CompetitionRules rules = null, MatchFitnessRules fitnessRules = null, bool applyCoachSelection = false, bool userAbsent = false, bool userLate = false)
         {
             if (Rules != null || session.Tick != 0 || session.DrawCount != 0) throw new InvalidOperationException("Start a fixture once, before advancing the practice clock.");
             Rules = rules ?? new CompetitionRules();
             FitnessRules = fitnessRules ?? new MatchFitnessRules();
             progressionMatchId = progression.BeginMatch();
             ClearPlay(); DecisionCount = 0;
-            if (applyCoachSelection) InitializeCoachSelection();
+            if (applyCoachSelection) InitializeCoachSelection(userAbsent, userLate);
             session.Resume();
             FixturePhase = FixturePhase.FirstHalf;
             AddedSeconds = Rules.MinimumAddedSeconds;

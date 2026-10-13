@@ -14,7 +14,9 @@ Dependency direction is Presentation → Content → Simulation, with Presentati
 
 ## Current state
 
-Launch.unity is a committed, editable scene with a camera and a foundation screen. Its Play match button creates a temporary PitchPreview using the same canonical career state. The preview owns procedural geometry, camera, inspection UI and a paused MatchSession driven by MatchDriver. OpenPlayWorld owns role targets, positions and ball state for the active players (22 at kickoff), driven only by MatchSession ticks. PitchPreview copies that state into transforms and the user tactical marker; it does not start a playable career. Closing it restores the launch camera and releases owned objects/materials.
+Launch.unity is a committed, editable scene with a camera and a career entry screen. Start career opens character creation and enters the calendar. CareerWeek coordinates the authored week and owns its one MatchSession/OpenPlayWorld across pitch view lifetimes. PitchPreview owns geometry, camera and inspection controls; its driver advances the shared match while visible. Returning to the week pauses the same fixture, so resuming cannot reroll or reset it. Separate launch demos still own and dispose their temporary worlds.
+
+OpenPlayWorld owns role targets, positions and ball state for the active players (22 at normal kickoff), driven only by MatchSession ticks. PitchPreview copies that state into transforms and the tactical marker. Calendar and football clocks remain independent; finishing or abandonment completes the prototype week.
 
 `--smoke-test` runs the built scene for two frames, loads and validates the fixture, checks its camera/controller, logs a result and exits. This verifies lifecycle, not visuals or gameplay. The scene generator is explicit and only runs if the scene is absent; normal imports/builds never regenerate authored scenes.
 
@@ -35,3 +37,5 @@ SME-108 provides shared data/events and a validated 36-player fixture (see [data
 `CareerCoach` owns selection policy, persuasion and reaction history while sharing relationship dimensions with `CareerSocial`. Career fixtures opt into coach selection, role-aware movement and committed-action reactions. Lower-level authored scenarios retain their fixed line-ups. See [coach behavior](coach.md).
 
 `CareerMeetings` owns authored appointment outcomes and agent preferences, while calendar time/default focus and social relationship values remain with their existing owners. Attendance opens a pending conversation; explicit resolution/leave releases the calendar. See [club conversations](club-conversations.md).
+
+`CareerWeek` subscribes after readiness, training, coach and meeting consequences. It records selection briefings, routes attended/late/missed fixture attendance into one coach-selected world, blocks further calendar choices while it is pending/active/complete, and records a basic final score. Character creation copies meeting content into the new career. See [career week](career-week.md).
