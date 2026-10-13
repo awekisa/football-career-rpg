@@ -27,8 +27,9 @@ namespace FootballRpg.Presentation
             try
             {
                 Career = PrototypeContent.CreateCareer();
+                gameObject.AddComponent<CareerSaveControls>().ScreenOwner = this;
                 Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
-                if (smokeTest) { VerifyCareerWeek(); VerifyReports(); VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); VerifySocial(); VerifyCoach(); VerifyMeetings(); }
+                if (smokeTest) { VerifyCareerWeek(); VerifyReports(); VerifySaveRestore(); VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); VerifySocial(); VerifyCoach(); VerifyMeetings(); }
             }
             catch (Exception error)
             {

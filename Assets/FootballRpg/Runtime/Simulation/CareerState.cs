@@ -175,15 +175,20 @@ namespace FootballRpg.Simulation
             Meetings = new CareerMeetings(this, definitions.meetings, meetingSeed);
             Week = new CareerWeek(this);
             Reports = new CareerReports(this);
+            ReconnectAfterLoad();
+        }
+        public void ReconnectAfterLoad()
+        {
             if (Calendar != null)
             {
                 Calendar.ValidateChoice = choice => { if (Week.CalendarBlock != null) throw new InvalidOperationException(Week.CalendarBlock); Training.ValidateChoice(choice); };
-                Calendar.Committed += Readiness.ApplyCalendar;
-                Calendar.Committed += Training.ApplyCalendar;
-                Calendar.Committed += Coach.ApplyCalendar;
-                Calendar.Committed += Meetings.ApplyCalendar;
-                Calendar.Committed += Week.ApplyCalendar;
+                Calendar.Committed -= Readiness.ApplyCalendar; Calendar.Committed += Readiness.ApplyCalendar;
+                Calendar.Committed -= Training.ApplyCalendar; Calendar.Committed += Training.ApplyCalendar;
+                Calendar.Committed -= Coach.ApplyCalendar; Calendar.Committed += Coach.ApplyCalendar;
+                Calendar.Committed -= Meetings.ApplyCalendar; Calendar.Committed += Meetings.ApplyCalendar;
+                Calendar.Committed -= Week.ApplyCalendar; Calendar.Committed += Week.ApplyCalendar;
             }
+            Week.ReconnectAfterLoad();
         }
 
         public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null, TrainingRules trainingRules = null, SocialRules socialRules = null, CoachRules coachRules = null, ulong meetingSeed = 7132)

@@ -27,6 +27,12 @@ namespace FootballRpg.Simulation
             " · Defending: " + career.Coach.Instruction(false, false, career.Coach.AssignedRole) +
             "\nSelection is confirmed at kickoff using your current readiness and relationship. Late arrival means the bench; missing the fixture means you cannot play.";
         internal CareerWeek(CareerState career) { this.career = career; }
+        internal void ReconnectAfterLoad()
+        {
+            if (World == null) return;
+            World.ReconnectAfterLoad();
+            World.FixtureChanged -= OnFixtureChanged; World.FixtureChanged += OnFixtureChanged;
+        }
         public void Begin()
         {
             if (Active) return;

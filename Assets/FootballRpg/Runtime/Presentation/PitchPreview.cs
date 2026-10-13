@@ -343,7 +343,7 @@ namespace FootballRpg.Presentation
             float z = (Input.GetKey(KeyCode.W) ? 1 : 0) - (Input.GetKey(KeyCode.S) ? 1 : 0);
             float rotation = (Input.GetKey(KeyCode.E) ? 1 : 0) - (Input.GetKey(KeyCode.Q) ? 1 : 0);
             var mouse = Input.mousePosition;
-            bool overPitch = mouse.x < Screen.width - SidebarPixels && mouse.y > (showIntentMenu && World.PendingDecision == null ? 300 : 190) * UiScale && mouse.y < Screen.height - (World.OffsideNoticePending || World.RefereeNoticePending || World.PendingSetPiece != null || UserRestart ? 300 : World.HasPendingDecision || UserRestart ? 250 : 105) * UiScale;
+            bool overPitch = !CareerSaveControls.Covers(mouse) && mouse.x < Screen.width - SidebarPixels && mouse.y > (showIntentMenu && World.PendingDecision == null ? 300 : 190) * UiScale && mouse.y < Screen.height - (World.OffsideNoticePending || World.RefereeNoticePending || World.PendingSetPiece != null || UserRestart ? 300 : World.HasPendingDecision || UserRestart ? 250 : 105) * UiScale;
             float scroll = overPitch ? Input.mouseScrollDelta.y : 0;
             if (overPitch && Input.GetMouseButton(1))
             {
