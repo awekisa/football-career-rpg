@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** club exploration (SME-129). Walk through the 3D training base to reach the coach, teammates, agent, media room and training entrance. Walking is free; activities use the calendar. Character creation, simulated/guided training and match demos are available. Relationships and the integrated week come next.
+**Current milestone:** relationships and personality checks (SME-130). Personal affinity, professional trust and standing develop independently through attribute-based choices. Repeated behaviour can slowly change personality. Character creation, club exploration, training and match demos are available; coach reactions and the integrated week come next.
 
 - [Prototype specification](docs/prototype-spec.md)
 - [Architecture](docs/architecture.md)
@@ -21,6 +21,7 @@ A single-player Unity football career RPG: one footballer, meaningful match deci
 - [Set-piece duties, deliveries and records](docs/set-pieces.md)
 - [Fatigue, injuries, bench entry and substitutions](docs/injuries-and-substitutions.md)
 - [Full-match and highlight viewing](docs/match-viewing.md)
+- [Relationships and personality checks](docs/relationships.md)
 - [Club exploration and contextual availability](docs/club-exploration.md)
 - [Guided practice and focused rewards](docs/guided-practice.md)
 - [Linear project](https://linear.app/smeagol-hermes/project/football-career-rpg-54f8537541e7)

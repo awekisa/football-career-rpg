@@ -33,7 +33,7 @@ Money uses signed integer minor units (EUR cents) plus a currency code. Wages ar
 | Career | One `CareerState` per session, owning canonical players, clubs, coaches and fixture. No static singleton. |
 | Runtime snapshots | Copy scalars and nested arrays/maps; expose read-only collections and getter-only properties. Independent sessions share no mutable player or roster state. |
 | Temporary condition | Change through `CareerState.SetPlayerCondition`. Validate all values before mutation; never modify traits or other players. |
-| XP and personality development | Starting values are present. Future progression/behaviour systems add explicit owner operations. Do not cast away read-only views. |
+| XP and personality development | `SkillProgression` owns football XP; `CareerSocial` owns slow behaviour-driven personality changes and independent relationship dimensions. Both publish read-only state and cause records. Do not cast away read-only views. |
 | Membership and finances | Initial records only. Future transfers/transactions must update the career owner atomically instead of maintaining separate squad copies. |
 | Launch lifecycle | The launch controller currently creates and holds one career. Future orchestration should retain/pass it across scenes instead of reloading the seed at each venue. |
 

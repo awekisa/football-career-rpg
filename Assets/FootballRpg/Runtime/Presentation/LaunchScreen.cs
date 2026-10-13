@@ -28,7 +28,7 @@ namespace FootballRpg.Presentation
             {
                 Career = PrototypeContent.CreateCareer();
                 Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
-                if (smokeTest) { VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); }
+                if (smokeTest) { VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); VerifySocial(); }
             }
             catch (Exception error)
             {
@@ -389,8 +389,10 @@ namespace FootballRpg.Presentation
         private void Update()
         {
             if (practiceView != null || clubView != null) return;
+            if (socialOpen) { UpdateSocial(); return; }
             if (calendarOpen) { UpdateCalendar(); return; }
             if (creationDraft != null) { UpdateCreation(); return; }
+            if (preview == null && Input.GetKeyDown(KeyCode.R)) { OpenSocial(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.O)) { OpenClub(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.K)) { OpenCalendar(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.C)) BeginCreation();
@@ -412,6 +414,7 @@ namespace FootballRpg.Presentation
                 Quaternion.identity, new Vector3(scale, scale, 1));
 
             Fill(new Rect(0, 0, 1440, 900), new Color(0.025f, 0.06f, 0.07f, 0.96f));
+            if (socialOpen) { DrawSocial(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             if (calendarOpen) { DrawCalendar(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             if (creationDraft != null) { DrawCreation(); GUI.matrix = originalMatrix; GUI.color = originalColor; return; }
             Fill(new Rect(68, 78, 42, 4), new Color(0.66f, 0.91f, 0.43f));
@@ -434,7 +437,8 @@ namespace FootballRpg.Presentation
             if (GUI.Button(new Rect(490, 683, 310, 58), shortFixture ? "4-MINUTE MATCH  [L]" : "90-MINUTE MATCH  [L]", button)) shortFixture = !shortFixture;
             if (GUI.Button(new Rect(872, 730, 460, 58), "CREATE FOOTBALLER  [C]", button)) BeginCreation();
             if (GUI.Button(new Rect(872, 805, 460, 50), "CAREER CALENDAR  [K]", button)) OpenCalendar();
-            if (GUI.Button(new Rect(70, 850, 730, 40), "EXPLORE CLUB  [O]", button)) OpenClub();
+            if (GUI.Button(new Rect(70, 850, 340, 40), "EXPLORE CLUB  [O]", button)) OpenClub();
+            if (GUI.Button(new Rect(430, 850, 370, 40), "RELATIONSHIPS  [R]", button)) OpenSocial();
             DrawPitch(new Rect(872, 200, 460, 500));
             GUI.Label(new Rect(70, 810, 1100, 30), "PROTOTYPE  /  FOUNDATION     •     SINGLE PLAYER", eyebrow);
             GUI.matrix = originalMatrix;

@@ -20,6 +20,7 @@ namespace FootballRpg.Simulation
         public long BalanceMinor { get; }
         public long WeeklyWageMinor { get; }
         private readonly Dictionary<string, int> footballLevels;
+        private readonly Dictionary<string, int> personalityLevels;
         public IReadOnlyDictionary<string, int> FootballAttributes { get; }
         public IReadOnlyDictionary<string, int> PersonalityTraits { get; }
         public float Confidence { get; private set; }
@@ -43,9 +44,12 @@ namespace FootballRpg.Simulation
             WeeklyWageMinor = source.weeklyWageMinor;
             footballLevels = Values(definitions.footballAttributes, source.attributes).ToDictionary(p => p.Key, p => p.Value);
             FootballAttributes = new ReadOnlyDictionary<string, int>(footballLevels);
-            PersonalityTraits = Values(definitions.personalityTraits, source.traits);
+            personalityLevels = Values(definitions.personalityTraits, source.traits).ToDictionary(p => p.Key, p => p.Value);
+            PersonalityTraits = new ReadOnlyDictionary<string, int>(personalityLevels);
             SetCondition(source.confidence, source.morale, source.fatigue);
         }
+
+        internal void SetPersonalityTrait(string id, int value) => personalityLevels[id] = value;
 
         internal void SetFootballLevel(string id, int value) => footballLevels[id] = value;
 
@@ -146,8 +150,9 @@ namespace FootballRpg.Simulation
         public CareerCalendar Calendar { get; }
         public CareerReadiness Readiness { get; }
         public CareerTraining Training { get; }
+        public CareerSocial Social { get; }
 
-        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules, TrainingRules trainingRules)
+        private CareerState(GameDefinitions definitions, ProgressionRules progressionRules, ReadinessRules readinessRules, TrainingRules trainingRules, SocialRules socialRules)
         {
             UserPlayerId = definitions.userPlayerId;
             Players = new ReadOnlyDictionary<string, PlayerState>(
@@ -161,6 +166,7 @@ namespace FootballRpg.Simulation
             Readiness = new CareerReadiness(this, readinessRules);
             Calendar = definitions.calendar == null ? null : new CareerCalendar(UserPlayerId, definitions.calendar);
             Training = new CareerTraining(this, definitions.positions, trainingRules);
+            Social = new CareerSocial(this, definitions.personalityTraits, socialRules);
             if (Calendar != null)
             {
                 Calendar.ValidateChoice = Training.ValidateChoice;
@@ -169,10 +175,10 @@ namespace FootballRpg.Simulation
             }
         }
 
-        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null, TrainingRules trainingRules = null)
+        public static CareerState Create(GameDefinitions definitions, ProgressionRules progressionRules = null, ReadinessRules readinessRules = null, TrainingRules trainingRules = null, SocialRules socialRules = null)
         {
             DefinitionValidator.Validate(definitions);
-            return new CareerState(definitions, progressionRules ?? new ProgressionRules(), readinessRules ?? new ReadinessRules(), trainingRules ?? new TrainingRules());
+            return new CareerState(definitions, progressionRules ?? new ProgressionRules(), readinessRules ?? new ReadinessRules(), trainingRules ?? new TrainingRules(), socialRules ?? new SocialRules());
         }
 
         public void SetPlayerCondition(string playerId, float confidence, float morale, float fatigue)
