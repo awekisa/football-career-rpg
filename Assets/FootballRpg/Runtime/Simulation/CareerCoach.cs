@@ -143,7 +143,11 @@ namespace FootballRpg.Simulation
         internal CoachReaction Deviation(string cause, bool succeeded, bool justified, double danger, string choice)
         {
             int penalty = DeviationPenalty(Profile, Relationship.Standing, succeeded, justified, danger, Rules.StarStanding, Relationship.ProfessionalTrust, Relationship.Affinity);
-            return Record(cause, choice + (succeeded ? ": successful" : ": unsuccessful") + (justified ? " in a justified attacking context" : " outside the plan"), -penalty, succeeded ? 1 : -1);
+            string context = (justified ? " in a justified attacking context" : " outside the plan")
+                + (danger >= .5 ? "; high defensive danger" : "; lower defensive danger")
+                + (EstablishedStar ? "; established-star latitude" : "; developing-player responsibility")
+                + (Profile.DisciplinePreference >= Profile.CreativityPreference ? "; discipline-minded coach" : "; creativity-minded coach");
+            return Record(cause, choice + (succeeded ? ": successful" : ": unsuccessful") + context, -penalty, succeeded ? 1 : -1);
         }
         private CoachReaction Record(string cause, string reason, int trust, int standing)
         {

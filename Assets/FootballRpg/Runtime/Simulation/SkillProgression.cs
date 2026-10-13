@@ -22,6 +22,9 @@ namespace FootballRpg.Simulation
             BaseThreshold = baseThreshold; ThresholdIncrease = thresholdIncrease; SuccessXp = successXp;
             FailureXp = failureXp; RewardedRepetitions = rewardedRepetitions; SkillGainCapPerMatch = skillGainCapPerMatch;
         }
+        // The shared decay bounds total exposure without making late failures cost full XP
+        // after the corresponding success reward has vanished. Targets do not reset it.
+        public double RepetitionMultiplier(int priorAttempts) => Math.Pow(RewardedRepetitions / (RewardedRepetitions + 1d), priorAttempts);
         public double Cost(int level, int floor) => BaseThreshold + (level - floor) * ThresholdIncrease;
         public double Threshold(int level, int floor)
         {
@@ -133,8 +136,8 @@ namespace FootballRpg.Simulation
             double amount = Rules.OutcomeXp(action.SuccessProbability, action.Succeeded, significance);
             var repetitionKey = (matchId, action.PlayerId, action.ActionId);
             repetitions.TryGetValue(repetitionKey, out int count);
-            // Failures retain their full cost; changing target/variant cannot reset a repeated action family.
-            if (action.Succeeded) amount *= Math.Max(0, 1 - count / (double)Rules.RewardedRepetitions);
+            // Both outcomes retain their sign and share the same diminishing exposure.
+            amount *= Rules.RepetitionMultiplier(count);
             repetitions[repetitionKey] = count + 1;
             var deltas = new Dictionary<string, double>();
             var beforeLevels = attribution.Keys.ToDictionary(id => id, id => playerSkills[id].Level);

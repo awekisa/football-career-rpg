@@ -96,3 +96,5 @@ Scheduled training now awards broad football XP. In the calendar, **F** cycles f
 Use **Save / Load** in the top-right corner, **F5** to save, or **F9** to load your career. Pause a match or wait for a decision before saving; finish/end guided practice first. One local slot keeps a previous-valid-save backup. See [career saves](docs/career-saves.md).
 
 Run `./scripts/verify-football.sh` for the focused football rules and all-position replay suite. It produces readable and JSON evidence under `TestResults/`; automated success never marks the manual play matrix complete. See [football verification](docs/football-verification.md).
+
+Run `./scripts/unity.sh verify-balance` for seeded risk comparisons, complete-week strategies and full-length pacing checks. See [balance values and findings](docs/balance.md).
