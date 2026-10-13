@@ -76,6 +76,9 @@ namespace FootballRpg.Simulation
         private readonly HashSet<string> applied = new HashSet<string>();
         public TrainingRules Rules { get; }
         public IReadOnlyList<TrainingReport> Results { get; }
+        public GuidedPracticeSession ActivePractice { get; private set; }
+        private CalendarDecision practiceDecision;
+        private TrainingReadiness practiceReadiness;
         internal CareerTraining(CareerState career, PositionDefinition[] positions, TrainingRules rules)
         {
             this.career = career; Rules = rules; Results = results.AsReadOnly();
@@ -95,12 +98,18 @@ namespace FootballRpg.Simulation
                 if (!calendar.activities.Single(a => a.id == c.activityId).training || !focuses.Any(f => f.id == c.trainingFocusId))
                     throw new ArgumentException("Scheduled training focus is invalid.");
         }
+        internal void ValidateChoice(CalendarChoice choice)
+        {
+            if (choice.Practice.HasValue && career.UserPlayer.InjuryDaysRemaining > 0)
+                throw new InvalidOperationException("Recover from injury before interactive practice; simulated attendance remains available.");
+        }
         public TrainingReport Preview(CalendarChoice choice)
         {
             if (choice == null || choice.Owner != career.Calendar) throw new ArgumentException("Use this career's calendar preview.");
             if (choice.Focus == null) return null;
             return Calculate(choice.Focus, null, career.Readiness.TrainingMultiplier(career.UserPlayerId),
-                (choice.ActivityEndMinute - choice.StartMinute) / (double)career.Calendar.MinutesPerSlot);
+                (choice.ActivityEndMinute - choice.StartMinute) / (double)career.Calendar.MinutesPerSlot,
+                choice.Practice.HasValue ? GuidedPracticeSession.PlannedShares(choice.Practice.Value) : null, choice.Practice.HasValue ? choice.Practice + " guided practice (successful target estimate)" : null);
         }
         internal void ApplyCalendar(CalendarDecision decision)
         {
@@ -108,11 +117,34 @@ namespace FootballRpg.Simulation
             var attendance = decision.Attendance.Single(r => r.ParticipatedMinutes > 0 && r.Fact.ActivityId == decision.Choice.Activity.Id);
             if (applied.Contains(attendance.Fact.EventId)) return;
             var readiness = career.Readiness.Training.Single(t => t.AttendanceId == attendance.Fact.EventId);
+            if (decision.Choice.Practice.HasValue)
+            {
+                practiceDecision = decision; practiceReadiness = readiness;
+                ActivePractice = new GuidedPracticeSession(career, attendance.Fact.EventId, decision.Choice.Practice.Value, (ulong)attendance.Fact.Sequence + 8128);
+                return;
+            }
             var report = Calculate(decision.Choice.Focus, attendance.Fact.EventId, readiness.Multiplier, readiness.ParticipatedSlots);
             career.Progression.ApplyTraining(career.UserPlayerId, attendance.Fact.EventId, report.Gains.ToDictionary(g => g.SkillId, g => g.Xp));
             applied.Add(attendance.Fact.EventId); results.Add(report);
         }
-        private TrainingReport Calculate(TrainingFocus focus, string attendanceId, double readiness, double slots)
+        public ActionResolved ChoosePractice(string decisionId, string optionId)
+        {
+            if (ActivePractice == null) throw new InvalidOperationException("Start an interactive attendance first.");
+            var result = ActivePractice.Choose(decisionId, optionId);
+            if (ActivePractice.Finished) FinishPractice();
+            return result;
+        }
+        public void FinishPractice()
+        {
+            if (ActivePractice == null || applied.Contains(ActivePractice.Id)) return;
+            ActivePractice.End();
+            var report = Calculate(practiceDecision.Choice.Focus, ActivePractice.Id, practiceReadiness.Multiplier, practiceReadiness.ParticipatedSlots,
+                ActivePractice.RewardShares(), ActivePractice.Family + " guided practice (" + ActivePractice.Results.Count + "/" + ActivePractice.AttemptLimit + ")");
+            career.Progression.ApplyTraining(career.UserPlayerId, ActivePractice.Id, report.Gains.ToDictionary(g => g.SkillId, g => g.Xp));
+            applied.Add(ActivePractice.Id); results.Add(report); career.Calendar.AwaitingPractice = false;
+        }
+        private TrainingReport Calculate(TrainingFocus focus, string attendanceId, double readiness, double slots,
+            IReadOnlyDictionary<string, double> focusedShares = null, string reportName = null)
         {
             var player = career.UserPlayer; var club = career.Clubs[player.ClubId]; var coach = career.Coaches[club.CoachId];
             double coachFactor = Rules.Quality(coach.CoachingQuality), staffFactor = Rules.Quality(club.StaffQuality), facilityFactor = Rules.Quality(club.FacilityQuality);
@@ -120,9 +152,10 @@ namespace FootballRpg.Simulation
             var shares = new Dictionary<string, double>();
             foreach (var id in role) shares[id] = (1 - Rules.FocusShare) / role.Length;
             foreach (var id in chosen) { shares.TryGetValue(id, out double value); shares[id] = value + Rules.FocusShare / chosen.Length; }
+            if (focusedShares != null) shares = focusedShares.ToDictionary(p => p.Key, p => p.Value);
             double amount = Rules.BaseXpPerSlot * slots * readiness * coachFactor * staffFactor * facilityFactor;
             var gains = new List<TrainingSkillGain>();
-            foreach (var share in shares.Where(p => p.Value > 0))
+            foreach (var share in shares.Where(p => p.Value > 0 || focusedShares != null))
             {
                 var skill = career.Progression.ForPlayer(player.Id)[share.Key]; double levelFactor = Rules.Level(skill);
                 double xp = Math.Min(amount * share.Value * levelFactor, career.Progression.Rules.Threshold(skill.Cap, skill.Floor) - skill.TotalXp);
@@ -130,7 +163,7 @@ namespace FootballRpg.Simulation
                 while (level < skill.Cap && skill.TotalXp + xp >= career.Progression.Rules.Threshold(level + 1, skill.Floor)) level++;
                 gains.Add(new TrainingSkillGain(share.Key, share.Value, levelFactor, xp, skill.Level, level));
             }
-            return new TrainingReport(attendanceId, focus.Name, Rules.BaseXpPerSlot, coachFactor, staffFactor, facilityFactor, readiness, slots, gains);
+            return new TrainingReport(attendanceId, reportName ?? focus.Name, Rules.BaseXpPerSlot, coachFactor, staffFactor, facilityFactor, readiness, slots, gains);
         }
     }
 }

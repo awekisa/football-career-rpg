@@ -72,6 +72,7 @@ namespace FootballRpg.Simulation
         internal int Revision { get; }
         public CalendarChoiceKind Kind { get; }
         public TrainingFocus Focus { get; }
+        public PracticeFamily? Practice { get; }
         public CalendarActivity Activity { get; }
         public CalendarCommitment Commitment { get; }
         public int StartMinute { get; }
@@ -80,9 +81,9 @@ namespace FootballRpg.Simulation
         public int CostMinutes => EndMinute - StartMinute;
         public IReadOnlyList<CalendarImpact> Impacts { get; }
         internal CalendarChoice(CareerCalendar owner, int revision, CalendarChoiceKind kind, CalendarActivity activity,
-            CalendarCommitment commitment, int start, int activityEnd, int end, List<CalendarImpact> impacts, TrainingFocus focus)
+            CalendarCommitment commitment, int start, int activityEnd, int end, List<CalendarImpact> impacts, TrainingFocus focus, PracticeFamily? practice)
         { Owner = owner; Revision = revision; Kind = kind; Activity = activity; Commitment = commitment; StartMinute = start;
-            ActivityEndMinute = activityEnd; EndMinute = end; Impacts = impacts.AsReadOnly(); Focus = focus; }
+            ActivityEndMinute = activityEnd; EndMinute = end; Impacts = impacts.AsReadOnly(); Focus = focus; Practice = practice; }
     }
     public sealed class CalendarAttendance
     {
@@ -112,6 +113,8 @@ namespace FootballRpg.Simulation
         private readonly Dictionary<CalendarChoice, CalendarDecision> committed = new Dictionary<CalendarChoice, CalendarDecision>();
         private int revision;
         internal event Action<CalendarDecision> Committed;
+        internal Action<CalendarChoice> ValidateChoice;
+        public bool AwaitingPractice { get; internal set; }
         public IReadOnlyList<string> Days { get; }
         public IReadOnlyList<string> Slots { get; }
         public IReadOnlyList<CalendarActivity> Activities { get; }
@@ -156,8 +159,9 @@ namespace FootballRpg.Simulation
         }
         public CalendarAttendance ResultFor(string commitmentId) => resolved.TryGetValue(commitmentId, out var value) ? value : null;
         public IReadOnlyList<CalendarCommitment> CurrentCommitments => Commitments.Where(c => !resolved.ContainsKey(c.Id) && c.StartMinute <= Minute && Minute < c.EndMinute).ToArray();
-        public CalendarChoice Preview(CalendarChoiceKind kind, string id = null, string trainingFocusId = null)
+        public CalendarChoice Preview(CalendarChoiceKind kind, string id = null, string trainingFocusId = null, PracticeFamily? practice = null)
         {
+            if (AwaitingPractice) throw new InvalidOperationException("Finish or end the current practice first.");
             if (Finished || !Enum.IsDefined(typeof(CalendarChoiceKind), kind)) throw new InvalidOperationException("No valid choice remains.");
             CalendarCommitment commitment = null; CalendarActivity activity = null;
             int activityEnd, end;
@@ -188,6 +192,7 @@ namespace FootballRpg.Simulation
                 focus = TrainingFocuses.SingleOrDefault(f => f.Id == focusId) ?? throw new ArgumentException("Choose a valid training focus.");
             }
             else if (trainingFocusId != null) throw new ArgumentException("This choice does not support a training focus.");
+            if (practice.HasValue && (focus == null || !Enum.IsDefined(typeof(PracticeFamily), practice.Value))) throw new ArgumentException("Choose an available training scenario.");
             end = activityEnd + (activity?.DelayMinutes ?? 0);
             if (end > TotalMinutes) throw new InvalidOperationException("This activity and its known delay do not fit in the remaining week.");
             var impacts = new List<CalendarImpact>();
@@ -198,12 +203,15 @@ namespace FootballRpg.Simulation
                         kind == CalendarChoiceKind.Skip ? 0 : Minute - c.StartMinute));
                 else impacts.Add(new CalendarImpact(c, c.EndMinute <= end ? AttendanceOutcome.Skipped : AttendanceOutcome.Late, c.EndMinute <= end ? 0 : end - c.StartMinute));
             }
-            return new CalendarChoice(this, revision, kind, activity, commitment, Minute, activityEnd, end, impacts, focus);
+            var choice = new CalendarChoice(this, revision, kind, activity, commitment, Minute, activityEnd, end, impacts, focus, practice);
+            ValidateChoice?.Invoke(choice); return choice;
         }
         public CalendarDecision Commit(CalendarChoice choice)
         {
             if (choice == null || choice.Owner != this) throw new ArgumentException("Use this calendar's preview.");
             if (committed.TryGetValue(choice, out var previous)) return previous;
+            if (AwaitingPractice) throw new InvalidOperationException("Finish or end the current practice first.");
+            ValidateChoice?.Invoke(choice);
             if (choice.Revision != revision || choice.StartMinute != Minute) throw new InvalidOperationException("Calendar changed; inspect a new preview.");
             var records = new List<CalendarAttendance>();
             foreach (var impact in choice.Impacts)
@@ -217,7 +225,7 @@ namespace FootballRpg.Simulation
             }
             if (choice.Activity != null && choice.Commitment == null)
                 records.Add(Record(choice.Activity.Id, null, false, Minute, AttendanceOutcome.Attended, choice.ActivityEndMinute - Minute, 0));
-            Minute = choice.EndMinute; revision++;
+            Minute = choice.EndMinute; revision++; AwaitingPractice = choice.Practice.HasValue;
             var result = new CalendarDecision(choice, records); history.Add(result); committed.Add(choice, result); Committed?.Invoke(result); return result;
         }
         private CalendarAttendance Record(string activityId, string commitmentId, bool required, int start, AttendanceOutcome outcome, int participated, int late)
