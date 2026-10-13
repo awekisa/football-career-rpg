@@ -29,3 +29,5 @@ SME-108 provides shared data/events and a validated 36-player fixture (see [data
 `CareerTraining` consumes confirmed training after readiness has captured pre-workload state. It combines attendance duration, focus, club quality and skill levels, then requests exactly-once awards from `SkillProgression`. Preview reports are read-only. See [scheduled training](training.md).
 
 `ClubVenue` owns an immutable navigation grid. `ClubExploration` owns the current walking route and contextual availability without mutating career time. The presentation hands an arrived-at activity back to the existing calendar for explicit confirmation. See [club exploration](club-exploration.md).
+
+`CareerSocial` owns affinity, professional trust, standing, seeded dialogue outcomes and bounded repeated-behaviour evidence. Personality changes flow through its explicit operation; training and temporary condition systems have no personality hook. See [relationships](relationships.md).
