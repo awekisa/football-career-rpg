@@ -22,7 +22,7 @@ The prototype Party choice has a known 60-minute oversleep delay. Choosing it on
 
 A preview is bound to one calendar revision. Confirming that same preview again returns its original decision without spending time or publishing attendance twice. A different stale preview or another calendar's preview is rejected. Sequential time intervals prevent overlapping activity participation. Attendance facts have stable event IDs, player/activity/slot references, commitment ID, required status, lateness and participation duration. Skipped records are consequences, not reward eligibility.
 
-The calendar retains its history when closed and reopened, and newly created characters receive their own fresh week. The readiness and scheduled-training systems now consume confirmed decisions and attendance facts with exactly-once effects and actual participation duration. Relationship/coach penalties, calendar fixture launch, exploration venues and disk saving remain future components. Existing launch-screen match demos remain separate from the schedule until the integrated-week ticket.
+The calendar retains its history when closed and reopened, and newly created characters receive their own fresh week. The readiness and scheduled-training systems now consume confirmed decisions and attendance facts with exactly-once effects and actual participation duration. Relationship and coach consequences, club venues, Sunday fixture routing and manual disk saves are integrated. Original launch-screen match demos remain independent inspection tools.
 
 ## Verification
 

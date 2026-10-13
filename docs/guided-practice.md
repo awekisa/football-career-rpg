@@ -23,7 +23,7 @@ For example, three short passes concentrate the reward in short passing and deci
 
 `GuidedPracticeSession` freezes actors and calls the existing `PassResolver`, `DefenseResolver`, `FootballActionResolver` and `GoalkeeperResolver` previews and commits. It owns a seeded `MatchSession` independent of the career fixture, with exactly one random draw per committed choice. Repeating the identical decision returns its existing result; switching an already committed choice or submitting a stale one is rejected. `Next` requires a completed drill and cannot extend the three-attempt cap.
 
-`CareerCalendar` binds the attendance mode and family to the immutable preview, reserves the slot and rejects competing/stale attendance. `CareerReadiness` captures readiness and applies workload once. `CareerTraining` suppresses the general reward for guided attendance and applies the final focused award once through the existing attendance ledger. A zero-attempt exit records a zero-XP report. Extra practice is a new attendance in its own subsequent slot. These in-memory sessions/reports need persistence in the future save/load component.
+`CareerCalendar` binds the attendance mode and family to the immutable preview, reserves the slot and rejects competing/stale attendance. `CareerReadiness` captures readiness and applies workload once. `CareerTraining` suppresses the general reward for guided attendance and applies the final focused award once through the existing attendance ledger. A zero-attempt exit records a zero-XP report. Extra practice is a new attendance in its own subsequent slot. Finish or end an active guided session before saving. Completed training results are included in career saves.
 
 ## Verification
 

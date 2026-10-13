@@ -2,7 +2,7 @@
 
 A single-player Unity football career RPG: one footballer, meaningful match decisions, training and relationships.
 
-**Current milestone:** match and week reports (SME-134). The playable career week now ends with frozen aftermath reports explaining action results, XP gains/losses, levels, readiness and relationship changes. Reopen them without replaying the match or applying rewards. Disk save/restore is next.
+**Current milestone:** integrated one-week desktop prototype (SME-138), including character creation, club exploration, training, relationships, an 11v11 fixture, reports and local save/load. See the [player guide](docs/player-guide.md), [delivery instructions](docs/prototype-delivery.md) and [known limitations](docs/known-limitations.md).
 
 - [Match and week reports](docs/career-reports.md)
 - [Playable week and walkthrough](docs/career-week.md)

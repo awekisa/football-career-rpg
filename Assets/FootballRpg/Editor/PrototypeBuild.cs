@@ -50,7 +50,16 @@ namespace FootballRpg.Editor
             Build(BuildTarget.StandaloneWindows64, "Builds/Windows/Football Career RPG.exe");
         }
 
-        private static void Build(BuildTarget target, string output)
+        public static void BuildMacDelivery()
+        {
+            var output = Environment.GetEnvironmentVariable("FOOTBALL_RPG_BUILD_OUTPUT");
+            if (string.IsNullOrWhiteSpace(output) || !Path.IsPathRooted(output) ||
+                !output.EndsWith(".app", StringComparison.Ordinal) || Directory.Exists(output) || File.Exists(output))
+                throw new InvalidOperationException("Delivery output must be a new absolute .app path.");
+            Build(BuildTarget.StandaloneOSX, output, BuildOptions.None);
+        }
+
+        private static void Build(BuildTarget target, string output, BuildOptions options = BuildOptions.Development)
         {
             if (!File.Exists(LaunchScene)) throw new InvalidOperationException("Committed launch scene is missing.");
             if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone, target))
@@ -61,7 +70,7 @@ namespace FootballRpg.Editor
                 scenes = new[] { LaunchScene },
                 locationPathName = output,
                 target = target,
-                options = BuildOptions.Development
+                options = options
             });
             if (report.summary.result != BuildResult.Succeeded)
                 throw new InvalidOperationException($"Build failed: {report.summary.result}, {report.summary.totalErrors} errors.");

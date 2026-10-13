@@ -24,7 +24,7 @@ Late arrival starts an otherwise-selected player on the bench. Skipping the fixt
 
 Only one fixture exists per active career week. Calendar progression and new social/coach requests stop once its attendance is resolved. Back to week/Escape pauses and detaches the pitch view, retaining the same world, clock, pending decision, randomness, score and progression. Resume fixture reattaches a view; Space resumes play. It cannot start another match or re-award outcomes. Full time or abandonment records a basic score/selection/participation summary and completes the week.
 
-This is in-memory continuity. Quitting the application loses it. Save/restore belongs to SME-135; match/week reports are available through SME-134 and remain in memory with this career. No season progression, transfers or financial economy is introduced.
+Use F5 to save and F9 to load the career, including the active paused fixture or completed reports. Quitting discards changes made since the last manual save. See [career saves](career-saves.md). No season progression, transfers or financial economy is introduced.
 
 ## Verification routes
 

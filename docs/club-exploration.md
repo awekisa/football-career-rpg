@@ -27,7 +27,7 @@ Availability is re-evaluated from the current calendar and character state. Pend
 
 `ClubExploration` owns position, route and contextual interaction descriptions. `ClubVenueView` supplies 3D placeholders, angled overhead camera, destination picking and inspection. `LaunchScreen` retains the exploration instance for the current career, transfers activity previews to the existing calendar, and restores the club on return. The scene renders people only while their interaction is available. No new social rewards, transfer negotiations or dialogue checks are introduced here.
 
-The map, walking speed and office-hour convention (final slot of the day is night) are prototype tuning choices. Venue state is in memory; disk persistence remains the save/load ticket. The match demo and the integrated calendar fixture remain separate until the playable-week component.
+The map, walking speed and office-hour convention (final slot of the day is night) are prototype tuning choices. The integrated week connects calendar attendance to Sunday’s fixture. Career progress can be saved manually; the current venue position is not retained on load. Original launch-screen match demos remain independent.
 
 ## Verification
 
