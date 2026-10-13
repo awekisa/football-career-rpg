@@ -179,6 +179,16 @@ namespace FootballRpg.Simulation
             int after = Math.Max(minimum, Math.Min(100, before + delta)); set(after);
             if (before != after) applied.Add(new RelationshipChanged(preview.Id + ":" + dimension, career.UserPlayerId, results.Count + 1, preview.PersonId, dimension, preview.Id, before, after));
         }
+        internal void ApplyCoachEffect(string cause, SocialEffect effect)
+        {
+            var contact = relationships.Values.Single(r => r.Role == SocialRole.Coach);
+            var applied = new List<RelationshipChanged>();
+            var preview = new DialoguePreview(this, revision, Slot, cause, contact.PersonId, null, 0, 0);
+            Apply("affinity", contact.Affinity, effect.Affinity, -100, value => contact.Affinity = value, preview, applied);
+            Apply("professional-trust", contact.ProfessionalTrust, effect.Trust, 0, value => contact.ProfessionalTrust = value, preview, applied);
+            Apply("standing", contact.Standing, effect.Standing, 0, value => contact.Standing = value, preview, applied);
+            changes.AddRange(applied); revision++;
+        }
         private BehaviorObservation Observe(DialoguePreview preview)
         {
             string trait = preview.Option.BehaviorTrait; int before = career.UserPlayer.PersonalityTraits[trait], after = before;

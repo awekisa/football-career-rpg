@@ -25,6 +25,8 @@ namespace FootballRpg.Simulation
         {
             if (kind != RestartKind.Penalty && kind != RestartKind.Corner && kind != RestartKind.DirectFreeKick && kind != RestartKind.IndirectFreeKick) return null;
             var team = players.Where(p => p.IsHome == home).ToArray();
+            if (CoachEnabled && team[0].Player.ClubId == namedPlayers[controlledPlayerId].ClubId)
+            { var id = careerCoach.ChooseTaker(kind, team.Select(p => p.Player)); return team.FirstOrDefault(p => p.Player.Id == id); }
             return setPieceClubs[team[0].Player.ClubId].SetPieces.Takers(kind)
                 .Select(id => team.FirstOrDefault(p => p.Player.Id == id)).FirstOrDefault(p => p != null);
         }
@@ -108,6 +110,7 @@ namespace FootballRpg.Simulation
             setPieceChoices[user.Player.Id] = choice; committedDuties.Add(key, choiceKey);
             user.Position = user.Target = LegalSetPiecePosition(user, DutyTarget(user, choice));
             setPieceRecords.Add(new SetPieceRecord(restartId, assigned.CoachId, user.Player.Id, "DutyChosen", duty + (markId == null ? "" : ":" + markId), deviated, null, null, session.Tick));
+            if (deviated) BeginCoachDeviation("Set piece: " + duty);
             PendingSetPiece = null; session.Resume();
         }
         private PitchPoint? SetPieceMovementTarget(FootballerMotion p)

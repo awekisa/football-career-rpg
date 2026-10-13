@@ -16,6 +16,7 @@ namespace FootballRpg.Simulation
             if (restart == RestartKind.Penalty) significance = 3;
             else if (restart == RestartKind.Corner || specialist == "free-kicks") significance = 1.5;
             else if (restart.HasValue) significance = .5;
+            CoachAction(action, restart);
             progression.Apply(progressionMatchId, action, skills, significance);
             readiness.ApplyPerformance(progressionMatchId, action, significance);
         }

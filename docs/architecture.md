@@ -31,3 +31,5 @@ SME-108 provides shared data/events and a validated 36-player fixture (see [data
 `ClubVenue` owns an immutable navigation grid. `ClubExploration` owns the current walking route and contextual availability without mutating career time. The presentation hands an arrived-at activity back to the existing calendar for explicit confirmation. See [club exploration](club-exploration.md).
 
 `CareerSocial` owns affinity, professional trust, standing, seeded dialogue outcomes and bounded repeated-behaviour evidence. Personality changes flow through its explicit operation; training and temporary condition systems have no personality hook. See [relationships](relationships.md).
+
+`CareerCoach` owns selection policy, persuasion and reaction history while sharing relationship dimensions with `CareerSocial`. Career fixtures opt into coach selection, role-aware movement and committed-action reactions. Lower-level authored scenarios retain their fixed line-ups. See [coach behavior](coach.md).

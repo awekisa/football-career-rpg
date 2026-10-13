@@ -25,13 +25,15 @@ namespace FootballRpg.Simulation
         private RestartKind? directRestart;
         private bool directRestartHome;
 
-        public void StartFixture(CompetitionRules rules = null, MatchFitnessRules fitnessRules = null)
+        public void StartFixture(CompetitionRules rules = null, MatchFitnessRules fitnessRules = null, bool applyCoachSelection = false)
         {
             if (Rules != null || session.Tick != 0 || session.DrawCount != 0) throw new InvalidOperationException("Start a fixture once, before advancing the practice clock.");
             Rules = rules ?? new CompetitionRules();
             FitnessRules = fitnessRules ?? new MatchFitnessRules();
             progressionMatchId = progression.BeginMatch();
-            ClearPlay(); DecisionCount = 0; session.Resume();
+            ClearPlay(); DecisionCount = 0;
+            if (applyCoachSelection) InitializeCoachSelection();
+            session.Resume();
             FixturePhase = FixturePhase.FirstHalf;
             AddedSeconds = Rules.MinimumAddedSeconds;
             RecordFixture("FirstHalf");
@@ -45,6 +47,8 @@ namespace FootballRpg.Simulation
             if (kind == "FullTime" && !Abandoned)
                 foreach (var id in matchParticipants)
                     readiness.MatchResult(progressionMatchId, id, (namedPlayers[id].ClubId == homeClubId ? 1 : -1) * Math.Sign(HomeGoals - AwayGoals));
+            if (CoachEnabled && kind == "Goal" && home.HasValue) FinishCoachDeviation(home.Value == (namedPlayers[controlledPlayerId].ClubId == homeClubId));
+            if (CoachEnabled && (kind == "FullTime" || kind == "Abandoned")) { FinishCoachDeviation(false); careerCoach.MatchActive = false; }
             FixtureChanged?.Invoke(fact);
         }
         private void ClearPlay()

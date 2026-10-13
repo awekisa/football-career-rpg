@@ -32,17 +32,19 @@ namespace FootballRpg.Presentation
             }
             GUI.matrix = Matrix4x4.Scale(new Vector3(UiScale, UiScale, 1));
             float width = Screen.width / UiScale;
+            if (coachPanel) { DrawMatchCoach(width); GUI.matrix = original; GUI.color = originalColor; GUI.backgroundColor = originalBackground; return; }
             float left = width - 360;
             Panel(new Rect(left, 0, 360, 900), Ink);
             Panel(new Rect(0, 0, left, 106), new Color(.03f, .065f, .075f, .97f));
             Panel(new Rect(0, 832, left, 68), new Color(.03f, .065f, .075f, .97f));
             Text(new Rect(28, 22, 300, 25), (World.Rules == null ? "PRACTICE" : FixturePhaseLabel + (World.AnnouncedAddedSeconds > 0 ? " +" + World.AnnouncedAddedSeconds.ToString("0.#") + "s" : "")) + "  /  " + World.HomeGoals + " – " + World.AwayGoals, small, Lime);
-            Text(new Rect(28, 58, left - 220, 35), (Career.Clubs[Career.Fixture.HomeClubId].Name + "  /  " + Career.Clubs[Career.Fixture.AwayClubId].Name).ToUpperInvariant(), label, Color.white);
+            Text(new Rect(28, 58, World.CoachEnabled ? left - 530 : left - 220, 35), (Career.Clubs[Career.Fixture.HomeClubId].Name + "  /  " + Career.Clubs[Career.Fixture.AwayClubId].Name).ToUpperInvariant(), label, Color.white);
             Text(new Rect(left - 192, 18, 155, 27), MatchClockText, label, Color.white);
             GUI.enabled = !World.HasPendingDecision && !World.OffsideNoticePending && !World.RefereeNoticePending && !UserRestart && World.FixturePhase != Simulation.FixturePhase.FullTime;
             if (Button(new Rect(left - 192, 54, 160, 34), World.FixturePhase == Simulation.FixturePhase.FullTime ? "MATCH FINISHED" : World.FixturePhase == Simulation.FixturePhase.HalfTime ? "2ND HALF [SPACE]" : World.HasPendingDecision || UserRestart ? "CHOOSE ACTION" : Match.State == Simulation.MatchRunState.Paused ? "RESUME  [SPACE]" : "PAUSE  [SPACE]"))
                 TogglePause();
             GUI.enabled = true;
+            if (World.CoachEnabled && Button(new Rect(left - 492, 54, 280, 34), "COACH: " + World.CoachInstruction + " [T]")) OpenMatchCoach();
             DrawDecisionPanel(left);
             DrawFootballActions(left);
             DrawKeeperPanel(left);
