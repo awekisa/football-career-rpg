@@ -28,7 +28,7 @@ namespace FootballRpg.Presentation
             {
                 Career = PrototypeContent.CreateCareer();
                 Debug.Log($"FOOTBALL_RPG_DATA_READY: {Career.Players.Count} players, {Career.Clubs.Count} clubs");
-                if (smokeTest) { VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); }
+                if (smokeTest) { VerifyMatchFoundation(); VerifyCalendar(); VerifyPractice(); VerifyClub(); }
             }
             catch (Exception error)
             {
@@ -374,7 +374,7 @@ namespace FootballRpg.Presentation
 
         public void OpenPitch(bool interactive = true, bool goalkeeper = false, bool bench = false)
         {
-            if (preview != null || practiceView != null || Career == null || Career.Calendar.AwaitingPractice) return;
+            if (preview != null || practiceView != null || clubView != null || Career == null || Career.Calendar.AwaitingPractice) return;
             preview = new GameObject("Pitch Preview").AddComponent<PitchPreview>();
             var selectedCareer = Career;
             if (goalkeeper || bench)
@@ -388,9 +388,10 @@ namespace FootballRpg.Presentation
 
         private void Update()
         {
-            if (practiceView != null) return;
+            if (practiceView != null || clubView != null) return;
             if (calendarOpen) { UpdateCalendar(); return; }
             if (creationDraft != null) { UpdateCreation(); return; }
+            if (preview == null && Input.GetKeyDown(KeyCode.O)) { OpenClub(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.K)) { OpenCalendar(); return; }
             if (preview == null && Input.GetKeyDown(KeyCode.C)) BeginCreation();
             if (preview == null && Input.GetKeyDown(KeyCode.Return)) OpenPitch();
@@ -401,7 +402,7 @@ namespace FootballRpg.Presentation
 
         private void OnGUI()
         {
-            if (preview != null || practiceView != null) return;
+            if (preview != null || practiceView != null || clubView != null) return;
             EnsureStyles();
             var originalMatrix = GUI.matrix;
             var originalColor = GUI.color;
@@ -433,6 +434,7 @@ namespace FootballRpg.Presentation
             if (GUI.Button(new Rect(490, 683, 310, 58), shortFixture ? "4-MINUTE MATCH  [L]" : "90-MINUTE MATCH  [L]", button)) shortFixture = !shortFixture;
             if (GUI.Button(new Rect(872, 730, 460, 58), "CREATE FOOTBALLER  [C]", button)) BeginCreation();
             if (GUI.Button(new Rect(872, 805, 460, 50), "CAREER CALENDAR  [K]", button)) OpenCalendar();
+            if (GUI.Button(new Rect(70, 850, 730, 40), "EXPLORE CLUB  [O]", button)) OpenClub();
             DrawPitch(new Rect(872, 200, 460, 500));
             GUI.Label(new Rect(70, 810, 1100, 30), "PROTOTYPE  /  FOUNDATION     •     SINGLE PLAYER", eyebrow);
             GUI.matrix = originalMatrix;

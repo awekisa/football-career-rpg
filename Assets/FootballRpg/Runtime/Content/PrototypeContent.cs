@@ -23,6 +23,13 @@ namespace FootballRpg.Content
             return definitions;
         }
 
+        public static ClubVenue LoadClubVenue()
+        {
+            var asset = Resources.Load<TextAsset>("ClubVenue");
+            if (asset == null) throw new InvalidOperationException("Missing club venue content.");
+            return new ClubVenue(JsonUtility.FromJson<ClubVenueDefinition>(asset.text));
+        }
+
         public static CareerState CreateCareer() => CareerState.Create(Load());
     }
 }

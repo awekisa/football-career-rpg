@@ -8,6 +8,7 @@ namespace FootballRpg.Presentation
     public sealed partial class LaunchScreen
     {
         private bool calendarOpen, showTrainingResults;
+        private int calendarReadyFrame;
         private string trainingFocus;
         private bool interactiveTraining, coachDiscussion;
         private PracticeFamily practiceFamily;
@@ -20,6 +21,7 @@ namespace FootballRpg.Presentation
         {
             if (Career?.Calendar == null) return;
             practiceFamily = GuidedPracticeSession.Recommended(Career.UserPlayer.PrimaryPositionId);
+            calendarReadyFrame = Time.frameCount + 1;
             calendarOpen = true; calendarChoice = null; calendarError = null;
             calendarSelection = Career.Calendar.CurrentCommitments.FirstOrDefault()?.Id;
         }
@@ -57,8 +59,9 @@ namespace FootballRpg.Presentation
         }
         private void UpdateCalendar()
         {
+            if (Time.frameCount <= calendarReadyFrame) return;
             var previouslyShown = calendarChoice;
-            if (Input.GetKeyDown(KeyCode.Escape)) { calendarOpen = false; calendarChoice = null; return; }
+            if (Input.GetKeyDown(KeyCode.Escape)) { CloseCalendar(); return; }
             if (Input.GetKeyDown(KeyCode.F)) CycleTrainingFocus();
             if (Input.GetKeyDown(KeyCode.I)) ToggleTrainingMode();
             if (Input.GetKeyDown(KeyCode.D)) coachDiscussion = !coachDiscussion;
@@ -160,8 +163,8 @@ namespace FootballRpg.Presentation
             float textHeight = Mathf.Max(235, calendarText.CalcHeight(new GUIContent(explanation), 520));
             impactScroll = GUI.BeginScrollView(new Rect(830, 520, 565, 240), impactScroll, new Rect(0, 0, 535, textHeight));
             GUI.Label(new Rect(0, 0, 520, textHeight), explanation, calendarText); GUI.EndScrollView();
-            if (GUI.Button(new Rect(50, 830, 300, 45), "BACK  [ESC]", button)) { calendarOpen = false; calendarChoice = null; }
-            GUI.enabled = calendarChoice != null;
+            if (GUI.Button(new Rect(50, 830, 300, 45), (returnToClub ? "BACK TO CLUB" : "BACK") + "  [ESC]", button)) CloseCalendar();
+            GUI.enabled = calendarChoice != null && Time.frameCount > calendarReadyFrame;
             if (GUI.Button(new Rect(990, 800, 380, 60), "CONFIRM CHOICE  [ENTER]", button)) ConfirmCalendar();
             GUI.enabled = true;
         }
