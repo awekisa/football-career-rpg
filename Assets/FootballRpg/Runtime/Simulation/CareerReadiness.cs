@@ -46,7 +46,7 @@ namespace FootballRpg.Simulation
         internal ReadinessChange(string player, string cause, string reason, double fatigue, double confidence, double morale, int injury = 0)
         { PlayerId = player; CauseId = cause; Reason = reason; FatigueDelta = fatigue; ConfidenceDelta = confidence; MoraleDelta = morale; InjuryDaysDelta = injury; }
     }
-    /// <summary>Readiness-weighted participation, consumed by the future training XP system.</summary>
+    /// <summary>Readiness-weighted participation, consumed by the training XP system.</summary>
     public sealed class TrainingReadiness
     {
         public string AttendanceId { get; }

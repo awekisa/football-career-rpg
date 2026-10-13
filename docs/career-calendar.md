@@ -22,10 +22,12 @@ The prototype Party choice has a known 60-minute oversleep delay. Choosing it on
 
 A preview is bound to one calendar revision. Confirming that same preview again returns its original decision without spending time or publishing attendance twice. A different stale preview or another calendar's preview is rejected. Sequential time intervals prevent overlapping activity participation. Attendance facts have stable event IDs, player/activity/slot references, commitment ID, required status, lateness and participation duration. Skipped records are consequences, not reward eligibility.
 
-The calendar retains its history when closed and reopened, and newly created characters receive their own fresh week. The readiness system consumes confirmed decisions now; later training XP and relationship systems consume the attendance facts; they must use event IDs for idempotent effect application and respect actual participation duration. This ticket does not award training XP, apply coach penalties, launch the calendar's fixture, create exploration venues or save to disk. Existing launch-screen match demos remain separate from the schedule until the integrated-week ticket.
+The calendar retains its history when closed and reopened, and newly created characters receive their own fresh week. The readiness and scheduled-training systems now consume confirmed decisions and attendance facts with exactly-once effects and actual participation duration. Relationship/coach penalties, calendar fixture launch, exploration venues and disk saving remain future components. Existing launch-screen match demos remain separate from the schedule until the integrated-week ticket.
 
 ## Verification
 
 Tests cover preview/navigation inertia, independent match time, required and optional attendance, explicit replacement conflicts, multi-slot durations, late partial attendance, extra-practice availability/consumption, stale/foreign/duplicate confirmations, week boundaries, configuration validation and copied JSON configuration. Character creation tests verify a fresh calendar for all fourteen positions. Packaged smoke uses the real launch-screen preview/confirm adapter for training, extra practice, skip, party delay and late attendance.
 
 Readiness now changes on confirmation: see [fatigue, confidence and recovery](readiness.md). The calendar displays current condition, readiness-adjusted training yield and recent reasons.
+
+Use **F** to cycle between the scheduled training focus and an explicit broad focus. Changing focus discards the current preview without consuming time. **T** opens the training results, **R** returns to readiness history. See [scheduled training](training.md) for the XP breakdown.

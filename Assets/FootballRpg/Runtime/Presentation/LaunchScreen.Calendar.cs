@@ -7,7 +7,9 @@ namespace FootballRpg.Presentation
 {
     public sealed partial class LaunchScreen
     {
-        private bool calendarOpen;
+        private bool calendarOpen, showTrainingResults;
+        private string trainingFocus;
+        private Vector2 trainingScroll;
         private string calendarSelection, calendarError;
         private CalendarChoice calendarChoice;
         private Vector2 calendarScroll, impactScroll, activityScroll, readinessScroll;
@@ -20,20 +22,37 @@ namespace FootballRpg.Presentation
         }
         private void PreviewCalendar(CalendarChoiceKind kind, string id = null)
         {
-            try { calendarChoice = Career.Calendar.Preview(kind, id); calendarError = null; }
+            try
+            {
+                calendarChoice = Career.Calendar.Preview(kind, id);
+                if (calendarChoice.Focus != null && trainingFocus != null) calendarChoice = Career.Calendar.Preview(kind, id, trainingFocus);
+                calendarError = null;
+            }
             catch (Exception e) when (e is ArgumentException || e is InvalidOperationException)
             { calendarChoice = null; calendarError = e.Message; }
         }
         private void ConfirmCalendar()
         {
             if (calendarChoice == null) return;
+            int before = Career.Training.Results.Count;
             Career.Calendar.Commit(calendarChoice); calendarChoice = null;
+            if (Career.Training.Results.Count > before) { showTrainingResults = true; trainingScroll = Vector2.zero; }
             calendarSelection = Career.Calendar.CurrentCommitments.FirstOrDefault()?.Id;
+        }
+        private void CycleTrainingFocus()
+        {
+            var focuses = Career.Calendar.TrainingFocuses;
+            int current = Array.FindIndex(focuses.ToArray(), f => f.Id == trainingFocus);
+            trainingFocus = current + 1 < focuses.Count ? focuses[current + 1].Id : null;
+            calendarChoice = null; calendarError = null;
         }
         private void UpdateCalendar()
         {
             var previouslyShown = calendarChoice;
             if (Input.GetKeyDown(KeyCode.Escape)) { calendarOpen = false; calendarChoice = null; return; }
+            if (Input.GetKeyDown(KeyCode.F)) CycleTrainingFocus();
+            if (Input.GetKeyDown(KeyCode.T)) showTrainingResults = true;
+            if (Input.GetKeyDown(KeyCode.R)) showTrainingResults = false;
             if (Input.GetKeyDown(KeyCode.Tab))
             {
                 var current = Career.Calendar.CurrentCommitments;
@@ -57,7 +76,7 @@ namespace FootballRpg.Presentation
             GUI.Label(new Rect(50, 35, 900, 40), "YOUR WEEK  ·  " + calendar.TimeLabel(calendar.Minute), body);
             var player = Career.UserPlayer;
             GUI.Label(new Rect(50, 85, 1300, 30), $"Fatigue {player.Fatigue:P0}  ·  Confidence {player.Confidence:P0}  ·  Morale {player.Morale:P0}  ·  Injury: {player.InjuryDaysRemaining} day(s)  ·  Training yield {Career.Readiness.TrainingMultiplier(player.Id):P0}", calendarText);
-            GUI.Label(new Rect(50, 120, 1300, 25), "Inspect freely; confirm to spend time. Training XP and scheduled match play are not available in this prototype yet.", small);
+            GUI.Label(new Rect(50, 120, 1300, 25), "Inspect freely; confirm to spend time. Training now develops football skills. Scheduled match play is not connected yet.", small);
             GUI.Label(new Rect(50, 155, 720, 30), "COMMITMENTS  ·  Select a row, or Tab between current commitments", eyebrow);
             calendarScroll = GUI.BeginScrollView(new Rect(50, 200, 725, 330), calendarScroll, new Rect(0, 0, 700, calendar.Commitments.Count * 78));
             for (int i = 0; i < calendar.Commitments.Count; i++)
@@ -69,13 +88,24 @@ namespace FootballRpg.Presentation
                 { calendarSelection = c.Id; calendarChoice = null; calendarError = null; }
             }
             GUI.EndScrollView();
-            GUI.Label(new Rect(50, 550, 700, 30), "WHY YOUR READINESS CHANGED", eyebrow);
-            var recent = Career.Readiness.Changes.Where(c => c.PlayerId == player.Id).Reverse().Take(100).ToArray();
-            readinessScroll = GUI.BeginScrollView(new Rect(50, 590, 725, 220), readinessScroll, new Rect(0, 0, 700, Math.Max(50, recent.Length * 60)));
-            if (recent.Length == 0) GUI.Label(new Rect(0, 0, 690, 50), "No changes yet. Inspecting the schedule never changes readiness.", calendarText);
-            for (int i = 0; i < recent.Length; i++)
-                GUI.Label(new Rect(0, i * 60, 690, 58), ReadinessExplanation(recent[i]), calendarText);
-            GUI.EndScrollView();
+            if (GUI.Button(new Rect(50, 550, 340, 35), "READINESS CHANGES  [R]", button)) showTrainingResults = false;
+            if (GUI.Button(new Rect(410, 550, 340, 35), "TRAINING RESULTS  [T]", button)) showTrainingResults = true;
+            if (showTrainingResults)
+            {
+                string reports = Career.Training.Results.Count == 0 ? "No training completed yet." : string.Join("\n\n", Career.Training.Results.Reverse().Take(20).Select(TrainingExplanation));
+                float height = Mathf.Max(210, calendarText.CalcHeight(new GUIContent(reports), 680));
+                trainingScroll = GUI.BeginScrollView(new Rect(50, 600, 725, 210), trainingScroll, new Rect(0, 0, 700, height));
+                GUI.Label(new Rect(0, 0, 680, height), reports, calendarText); GUI.EndScrollView();
+            }
+            else
+            {
+                var recent = Career.Readiness.Changes.Where(c => c.PlayerId == player.Id).Reverse().Take(100).ToArray();
+                readinessScroll = GUI.BeginScrollView(new Rect(50, 600, 725, 210), readinessScroll, new Rect(0, 0, 700, Math.Max(50, recent.Length * 60)));
+                if (recent.Length == 0) GUI.Label(new Rect(0, 0, 690, 50), "No changes yet. Inspecting the schedule never changes readiness.", calendarText);
+                for (int i = 0; i < recent.Length; i++)
+                    GUI.Label(new Rect(0, i * 60, 690, 58), ReadinessExplanation(recent[i]), calendarText);
+                GUI.EndScrollView();
+            }
             var alternatives = calendar.Activities.Where(a => a.Selectable).ToArray();
             activityScroll = GUI.BeginScrollView(new Rect(830, 155, 565, 260), activityScroll, new Rect(0, 0, 540, (3 + alternatives.Length) * 44));
             GUI.enabled = !calendar.Finished;
@@ -89,7 +119,9 @@ namespace FootballRpg.Presentation
                     PreviewCalendar(activity.ExtraPractice ? CalendarChoiceKind.ExtraPractice : CalendarChoiceKind.Replace, activity.Id);
             }
             GUI.enabled = true; GUI.EndScrollView();
-            GUI.Label(new Rect(830, 440, 550, 30), "BEFORE YOU COMMIT", eyebrow);
+            string focusName = Career.Calendar.TrainingFocuses.SingleOrDefault(f => f.Id == trainingFocus)?.Name ?? "Scheduled focus";
+            if (GUI.Button(new Rect(830, 425, 530, 38), "FOCUS: " + focusName + "  [F]", button)) CycleTrainingFocus();
+            GUI.Label(new Rect(830, 480, 550, 30), "BEFORE YOU COMMIT", eyebrow);
             string explanation = calendarError ?? (calendar.Finished ? "Week complete. All attendance decisions are recorded." : "Choose an activity to inspect its time cost and attendance consequences.");
             if (calendarChoice != null)
             {
@@ -108,14 +140,22 @@ namespace FootballRpg.Presentation
                 if (a != null && !(a.Training && player.InjuryDaysRemaining > 0)) explanation += $"\nActivity morale: {a.MoralePerSlot * slots * 100:+0.#;-0.#;0} points.";
                 explanation += "\nMissed required commitments reduce morale; late attendance reduces it less. Injury recovery follows elapsed career days.";
             }
-            float textHeight = Mathf.Max(260, calendarText.CalcHeight(new GUIContent(explanation), 520));
-            impactScroll = GUI.BeginScrollView(new Rect(830, 480, 565, 280), impactScroll, new Rect(0, 0, 535, textHeight));
+            if (calendarChoice?.Focus != null)
+                explanation += "\n\nTRAINING PREVIEW\n" + TrainingExplanation(Career.Training.Preview(calendarChoice));
+            float textHeight = Mathf.Max(235, calendarText.CalcHeight(new GUIContent(explanation), 520));
+            impactScroll = GUI.BeginScrollView(new Rect(830, 520, 565, 240), impactScroll, new Rect(0, 0, 535, textHeight));
             GUI.Label(new Rect(0, 0, 520, textHeight), explanation, calendarText); GUI.EndScrollView();
             if (GUI.Button(new Rect(50, 830, 300, 45), "BACK  [ESC]", button)) { calendarOpen = false; calendarChoice = null; }
             GUI.enabled = calendarChoice != null;
             if (GUI.Button(new Rect(990, 800, 380, 60), "CONFIRM CHOICE  [ENTER]", button)) ConfirmCalendar();
             GUI.enabled = true;
         }
+        private static string TrainingExplanation(TrainingReport report) =>
+            report.FocusName + $" — {report.TotalXp:0.0} XP" +
+            $"\nBase {report.BaseXp:0.#} XP × {report.ParticipatedSlots:0.##} slot(s) × readiness {report.ReadinessMultiplier:0.###}" +
+            $"\nCoach ×{report.CoachMultiplier:0.##} · Staff ×{report.StaffMultiplier:0.##} · Facilities ×{report.FacilityMultiplier:0.##}" +
+            "\n" + string.Join("\n", report.Gains.Select(g => g.SkillId.Replace('-', ' ') + $": +{g.Xp:0.0} XP · share {g.Share:P0} · level ×{g.LevelMultiplier:0.##}" +
+                (g.PreviousLevel == g.NewLevel ? $" · level {g.NewLevel}" : $" · {g.PreviousLevel} → {g.NewLevel}")));
         private static string ReadinessExplanation(ReadinessChange c) => c.Reason + $"\nFatigue {c.FatigueDelta * 100:+0.#;-0.#;0} · Confidence {c.ConfidenceDelta * 100:+0.#;-0.#;0} · Morale {c.MoraleDelta * 100:+0.#;-0.#;0}" + (c.InjuryDaysDelta == 0 ? "" : $" · Injury days {c.InjuryDaysDelta:+0;-0}");
         private void VerifyCalendar()
         {
@@ -127,9 +167,14 @@ namespace FootballRpg.Presentation
                 if (Career.Calendar.Minute != 0) throw new InvalidOperationException("Calendar navigation advanced time.");
                 PreviewCalendar(CalendarChoiceKind.Attend, "mon-training");
                 if (calendarChoice?.CostMinutes != 360 || Career.Calendar.Minute != 0) throw new InvalidOperationException("Calendar preview failed.");
+                trainingFocus = "passing"; PreviewCalendar(CalendarChoiceKind.Attend, "mon-training");
+                var trainingPreview = Career.Training.Preview(calendarChoice);
                 float initialFatigue = Career.UserPlayer.Fatigue;
                 ConfirmCalendar(); ConfirmCalendar();
                 if (Career.UserPlayer.Fatigue <= initialFatigue || Career.Readiness.Training.Count != 1) throw new InvalidOperationException("Training readiness not connected.");
+                if (Career.Training.Results.Count != 1 || Career.Training.Results[0].FocusName != "Passing and possession" ||
+                    Math.Abs(Career.Training.Results[0].TotalXp - trainingPreview.TotalXp) > .00001)
+                    throw new InvalidOperationException("Training focus/preview/award mismatch.");
                 PreviewCalendar(CalendarChoiceKind.ExtraPractice, "extra-practice"); ConfirmCalendar();
                 if (Career.Calendar.Minute != 720 || Career.Calendar.Attendance.Count != 2) throw new InvalidOperationException("Extra practice timing failed.");
                 PreviewCalendar(CalendarChoiceKind.Skip, "mon-media"); ConfirmCalendar();
@@ -143,10 +188,12 @@ namespace FootballRpg.Presentation
                 PreviewCalendar(CalendarChoiceKind.Replace, "rest"); ConfirmCalendar();
                 if (Career.UserPlayer.Fatigue >= tired || Career.Readiness.Changes.Count == 0 || Career.Readiness.Training.Count != 3)
                     throw new InvalidOperationException("Recovery/readiness recording failed.");
+                if (Career.Training.Results.Count != 3 || Career.Training.Results.Any(t => t.TotalXp <= 0)) throw new InvalidOperationException("Training attendance rewards failed.");
+                Debug.Log("FOOTBALL_RPG_TRAINING_PASSED");
                 Debug.Log("FOOTBALL_RPG_READINESS_PASSED");
                 Debug.Log("FOOTBALL_RPG_CALENDAR_PASSED");
             }
-            finally { Career = original; calendarOpen = false; calendarChoice = null; }
+            finally { Career = original; calendarOpen = false; calendarChoice = null; trainingFocus = null; showTrainingResults = false; }
         }
     }
 }

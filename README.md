@@ -83,3 +83,5 @@ Match actions now award or remove football skill XP, with level changes, special
 Open the **Career Calendar [K]** from launch to preview and confirm attendance, skips, replacements, waiting and extra practice. See [career calendar](docs/career-calendar.md) for timing and current integration limits.
 
 Training workloads, rest, match performance and injuries now update shared temporary readiness. Calendar inspection shows the reasons and training-yield multiplier. See [readiness](docs/readiness.md).
+
+Scheduled training now awards broad football XP. In the calendar, **F** cycles focus, **T** shows the training breakdown and **R** shows readiness changes. See [scheduled training](docs/training.md).

@@ -12,6 +12,9 @@ namespace FootballRpg.Simulation
             Require(data.schemaVersion == 1, "Unsupported content schemaVersion.");
             if (data.calendar != null) CareerCalendar.Validate(data.calendar);
             var attributes = Index(data.footballAttributes, v => v.id, "football attributes");
+            if (data.calendar?.trainingFocuses != null)
+                foreach (var focus in data.calendar.trainingFocuses.Where(f => !f.usePosition))
+                    References(focus.attributeIds, attributes, focus.id + ": training attributes");
             var traits = Index(data.personalityTraits, v => v.id, "personality traits");
             var positions = Index(data.positions, p => p.id, "positions");
             var actions = Index(data.actions, a => a.id, "actions");
