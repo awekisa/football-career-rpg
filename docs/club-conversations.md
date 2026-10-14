@@ -30,7 +30,7 @@ The agent records one of **PlayingTime**, **Development** or **Challenge**. That
 
 Authored dialogue and attendance/branch effects live in `GameDefinitions.meetings` in `PrototypeFixture.json`. Definitions reference non-overlapping calendar appointments, supported social roles, trait IDs and training focuses; invalid references, duplicate choices, invalid effects and overlapping appointments fail validation. Runtime meetings copy the content and resolve the appropriate coach, teammate and agent for the current player.
 
-`CareerMeetings` owns pending/resolved conversation state and the separate seeded stream (default 7132, injectable through career creation). `CareerCalendar` owns paid time and the preferred training focus. `CareerSocial` remains the single relationship owner; authored outcomes add causal before/after records there. A completed meeting remains readable on reopening. Persistence is in memory for this ticket; disk save/restore remains SME-135. The integrated week and final fixture routing remain SME-133.
+`CareerMeetings` owns pending/resolved conversation state and the separate seeded stream (default 7132, injectable through career creation). `CareerCalendar` owns paid time and the preferred training focus. `CareerSocial` remains the single relationship owner; authored outcomes add causal before/after records there. A completed meeting remains readable on reopening. Meeting state and preferences are included in manual career saves. These appointments form part of the integrated week leading to Sunday’s fixture.
 
 ## Verification
 

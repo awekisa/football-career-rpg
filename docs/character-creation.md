@@ -6,7 +6,7 @@ Football and personality have independent point budgets. Each attribute starts a
 
 `Assets/FootballRpg/Runtime/Content/Resources/CharacterCreation.json` configures the starting budgets (1200 football, 300 personality) and age range (16–21). Attribute bounds remain content-defined. Physical bounds follow existing player validation: 120–230 cm and 35–160 kg. These are tuning defaults, not promised balance. Personality remains distinct from temporary confidence, morale and fatigue.
 
-Joining creates an in-memory career at Harbour Vale FC and returns to launch. **Play Match / Enter** then uses the created player. The existing goalkeeper and bench shortcuts remain sample-match demos and use their own sample careers. The authored week and disk save/load remain later tickets.
+Joining creates a career at Harbour Vale FC and opens the authored week calendar. Sunday attendance leads to the fixture with that player. F5/F9 save and load the career. The goalkeeper and bench shortcuts on the original launch screen remain independent sample-match demos.
 
 The creator replaces a home starter with the chosen role where one exists; otherwise it uses an outfield starter. This preserves squad IDs and set-piece references, provides immediate playing time, keeps a goalkeeper in the XI, and supports unconventional formations. No youth assessment is run. The draft serializes explicit stable IDs and values, and career construction copies them into owned runtime state without mutating the prototype definitions. Serializable drafts are persistence-ready data, not a save system.
 
